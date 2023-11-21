@@ -17,10 +17,10 @@ jobs:
           distribution: oracle
           cache: gradle
 
-      - name: grant execute permission for gradlew
+      - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: cache gradle packages
+      - name: Cache gradle packages
         uses: actions/cache@v3
         id: cache
         with:
@@ -31,14 +31,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: download dependencies
+      - name: Download dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: ./gradlew androidDependencies
 
-      - name: checkstyle
+      - name: Checkstyle
         run: ./gradlew detekt
 
-      - name: upload artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v3.1.0
         if: failure()
         with:
