@@ -24,4 +24,9 @@ dependencies {
     api(libs.coil)
     api(libs.coil.svg)
     api(libs.coil.compose)
+
+    testImplementation(libs.junit)
+
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }

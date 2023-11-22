@@ -1,4 +1,4 @@
-name: detekt
+name: Unit Tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  dependencies_detekt:
+  unit-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,9 +24,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Cache gradle packages
+      - name: Cache gradle and wrapper
         uses: actions/cache@v3
-        id: cache
         with:
           path: |
             ~/.gradle/caches
@@ -39,12 +38,5 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: ./gradlew androidDependencies
 
-      - name: Checkstyle
-        run: ./gradlew detekt
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3.1.0
-        if: failure()
-        with:
-          name: detekt.html
-          path: build/reports/detekt/detekt.html
+      - name: Run Unit Tests
+        run: ./gradlew test
