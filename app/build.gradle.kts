@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.googleService)
+    alias(libs.plugins.googleAppDistribution)
 }
 
 android {
@@ -54,6 +56,8 @@ android {
 dependencies {
 
     implementation(project(":core:designsystem"))
+
+    implementation(platform(libs.google.service))
 
     implementation(libs.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -39,7 +39,10 @@ ksp = "1.9.10-1.0.13"
 timber = "5.0.1"
 
 detekt = "1.23.3"
+
 google-service = "4.4.0"
+google-service-bom = "32.6.0"
+google-app-distribution = "4.0.1"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -93,6 +96,8 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 
+google-service = { group = "com.google.firebase", name = "firebase-bom", version.ref = "google-service-bom" }
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
@@ -103,4 +108,6 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+
 googleService = { id = "com.google.gms.google-services", version.ref = "google-service" }
+googleAppDistribution = { id = "com.google.firebase.appdistribution", version.ref = "google-app-distribution" }
