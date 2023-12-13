@@ -16,9 +16,29 @@ android {
     kotlinOptions {
         jvmTarget = libs.versions.jvm.target.get()
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.compose.kotlin.compiler.get()
+    }
 }
 
 dependencies {
+
+    implementation(project(":feature:favorites:api"))
+
+    implementation(project(":core:widget"))
+    implementation(project(":core:db"))
+    implementation(project(":core:utils"))
+    implementation(project(":core:navigation"))
+    implementation(project(":core:presentation"))
+    implementation(project(":core:network"))
+
+    implementation(libs.koin)
+    implementation(libs.koin.compose)
+
+    implementation(libs.voyager.tab)
 
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)

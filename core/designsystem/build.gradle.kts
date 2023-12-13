@@ -35,6 +35,8 @@ android {
 
 dependencies {
 
+    implementation(libs.system.ui.controller)
+
     api(libs.core.ktx)
     api(libs.androidx.appcompat)
     api(libs.material3)

@@ -16,11 +16,19 @@ android {
     kotlinOptions {
         jvmTarget = libs.versions.jvm.target.get()
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.compose.kotlin.compiler.get()
+    }
 }
 
 dependencies {
 
+    implementation(project(":feature:home:api"))
     api(project(":core:designsystem"))
+
     api(libs.coil)
     api(libs.coil.svg)
     api(libs.coil.compose)

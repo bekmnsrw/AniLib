@@ -20,6 +20,11 @@ android {
 
 dependencies {
 
+    api(libs.datastore.preferences)
+
+    implementation(libs.koin)
+    implementation(libs.koin.compose)
+
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

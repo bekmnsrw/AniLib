@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 android {
@@ -16,13 +17,29 @@ android {
     kotlinOptions {
         jvmTarget = libs.versions.jvm.target.get()
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.compose.kotlin.compiler.get()
+    }
 }
 
 dependencies {
 
-    implementation(libs.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+    implementation(project(":feature:auth:api"))
+    implementation(project(":core:network"))
+    implementation(project(":core:navigation"))
+
+    implementation(libs.compose)
+    implementation(libs.material3)
+
+    implementation(libs.androidx.lifecycle.compose)
+
+    implementation(libs.koin)
+    implementation(libs.koin.compose)
+
+    implementation(libs.androidx.browser)
 
     testImplementation(libs.junit)
 

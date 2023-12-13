@@ -16,9 +16,27 @@ android {
     kotlinOptions {
         jvmTarget = libs.versions.jvm.target.get()
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.compose.kotlin.compiler.get()
+    }
 }
 
 dependencies {
+
+    implementation(project(":core:designsystem"))
+
+    api(libs.voyager.navigator)
+    api(libs.voyager.tab)
+    api(libs.voyager.koin)
+    api(libs.voyager.transitions)
+
+    implementation(libs.androidx.core.splashscreen)
+
+    implementation(libs.compose)
+    implementation(libs.androidx.compose.material)
 
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)

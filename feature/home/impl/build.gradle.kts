@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 android {
@@ -16,6 +17,12 @@ android {
     kotlinOptions {
         jvmTarget = libs.versions.jvm.target.get()
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.compose.kotlin.compiler.get()
+    }
 }
 
 dependencies {
@@ -28,6 +35,23 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:presentation"))
     implementation(project(":core:network"))
+    implementation(project(":core:designsystem")) // TODO: Add widgets and remove this
+
+    implementation(project(":feature:auth:impl"))
+
+    implementation(libs.koin)
+    implementation(libs.koin.compose)
+
+    implementation(libs.voyager.tab)
+    implementation(libs.voyager.transitions)
+    implementation(libs.voyager.koin)
+
+    implementation(libs.paging.core)
+    implementation(libs.paging.compose)
+
+    implementation(libs.kotlinx.collections.immutable)
+
+    implementation(libs.androidx.lifecycle.compose)
 
     testImplementation(libs.junit)
 

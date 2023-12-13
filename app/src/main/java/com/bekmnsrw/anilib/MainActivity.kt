@@ -1,46 +1,48 @@
 package com.bekmnsrw.anilib
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.bekmnsrw.core.designsystem.AniLibTheme
+import androidx.compose.runtime.getValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.bekmnsrw.anilib.splashscreen.SplashScreenModel
+import com.bekmnsrw.core.designsystem.theme.AniLibTheme
+import com.bekmnsrw.feature.auth.api.AuthConstant
+import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
+
+    private val splashScreenModel by inject<SplashScreenModel>()
+    private val authScreenModel by inject<AuthScreenModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen().setKeepOnScreenCondition { !splashScreenModel.isLoading.value }
+
         setContent {
             AniLibTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
+                val isFirstAppLaunch by splashScreenModel.isFirstAppLaunch
+
+                println("MainActivity (isFirstAppLaunch): $isFirstAppLaunch")
+
+                NavHost()
+//                if (isFirstAppLaunch == true) {
+//                    AuthScreen(isFirstAppLaunch = true)
+//                } else {
+//                    NavHost()
+//                }
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AniLibTheme {
-        Greeting("Android")
+        val authCode = intent?.data?.getQueryParameter(AuthConstant.RESPONSE_TYPE)
+        if (authCode != null) authScreenModel.getAccessToken(authCode = authCode)
+
+        println("MainActivity (authCode): $authCode")
     }
 }

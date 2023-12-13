@@ -1,0 +1,15 @@
+package com.bekmnsrw.core.network.qualifier
+
+enum class Qualifiers {
+
+    LOGGING_INTERCEPTOR,
+    API_RETROFIT,
+    API_OKHTTP_CLIENT,
+    AUTH_RETROFIT,
+    AUTH_OKHTTP_CLIENT,
+    BEARER_INTERCEPTOR,
+    API_ENDPOINT,
+    AUTH_ENDPOINT,
+    SHARED_PREFERENCES_NAME,
+    SHARED_PREFERENCES_MODE
+}

@@ -18,6 +18,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.bekmnsrw.oauth"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -56,12 +58,31 @@ android {
 dependencies {
 
     implementation(project(":core:designsystem"))
+    implementation(project(":core:navigation"))
+    implementation(project(":core:network"))
+
+    implementation(project(":feature:auth:api"))
+    implementation(project(":feature:auth:impl"))
+
+    implementation(project(":feature:home:impl"))
+    implementation(project(":feature:favorites:impl"))
+    implementation(project(":feature:profile:impl"))
 
     implementation(platform(libs.google.service))
+
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
+
+    implementation(libs.androidx.core.splashscreen)
+
+    implementation(libs.androidx.compose.material)
+
+    implementation(libs.koin)
 
     testImplementation(libs.junit)
 
