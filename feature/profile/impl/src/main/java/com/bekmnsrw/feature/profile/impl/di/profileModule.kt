@@ -2,6 +2,7 @@ package com.bekmnsrw.feature.profile.impl.di
 
 import com.bekmnsrw.core.network.qualifier.Qualifiers
 import com.bekmnsrw.feature.auth.api.usecase.local.IsAuthenticatedUseCase
+import com.bekmnsrw.feature.auth.api.usecase.local.SaveUserIdUseCase
 import com.bekmnsrw.feature.profile.api.repository.ProfileRepository
 import com.bekmnsrw.feature.profile.api.usecase.remote.GetProfileUseCase
 import com.bekmnsrw.feature.profile.impl.data.ProfileRepositoryImpl
@@ -16,7 +17,8 @@ val profileModule = module {
     factory<ProfileScreenModel> {
         provideProfileScreenModel(
             isAuthenticatedUseCase = get(),
-            getProfileUseCase = get()
+            getProfileUseCase = get(),
+            saveUserIdUseCase = get()
         )
     }
 
@@ -37,10 +39,12 @@ val profileModule = module {
 
 private fun provideProfileScreenModel(
     isAuthenticatedUseCase: IsAuthenticatedUseCase,
-    getProfileUseCase: GetProfileUseCase
+    getProfileUseCase: GetProfileUseCase,
+    saveUserIdUseCase: SaveUserIdUseCase
 ): ProfileScreenModel = ProfileScreenModel(
     isAuthenticatedUseCase = isAuthenticatedUseCase,
-    getProfileUseCase = getProfileUseCase
+    getProfileUseCase = getProfileUseCase,
+    saveUserIdUseCase = saveUserIdUseCase
 )
 
 private fun provideGetProfileUseCase(

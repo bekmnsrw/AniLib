@@ -5,17 +5,18 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
 import cafe.adriel.voyager.core.annotation.ExperimentalVoyagerApi
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabDisposable
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import com.bekmnsrw.core.designsystem.theme.BackgroundTheme
+import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.designsystem.theme.LocalBackgroundTheme
-import com.bekmnsrw.core.designsystem.theme.LocalTintTheme
 import com.bekmnsrw.feature.auth.impl.presentation.AuthTab
 import com.bekmnsrw.feature.favorites.impl.presentation.FavoritesTab
 import com.bekmnsrw.feature.home.impl.presentation.HomeTab
@@ -42,13 +43,22 @@ fun NavHost() {
         Scaffold(
             content = { CurrentTab() },
             bottomBar = {
-                BottomNavigation(
-                    backgroundColor = LocalBackgroundTheme.current.color,
-                    contentColor = LocalTintTheme.current.iconTint!!
-                ) {
-                    TabNavigationItem(HomeTab)
-                    TabNavigationItem(FavoritesTab)
-                    TabNavigationItem(ProfileTab)
+                BottomNavigation(backgroundColor = LocalBackgroundTheme.current.color) {
+                    TabNavigationItem(
+                        tab = HomeTab,
+                        filledIcon = AniLibIcons.HomeFilled,
+                        outlinedIcon = AniLibIcons.HomeOutlined
+                    )
+                    TabNavigationItem(
+                        tab = FavoritesTab,
+                        filledIcon = AniLibIcons.FavoritesFilled,
+                        outlinedIcon = AniLibIcons.FavoritesOutlined
+                    )
+                    TabNavigationItem(
+                        tab = ProfileTab,
+                        filledIcon = AniLibIcons.ProfileFilled,
+                        outlinedIcon = AniLibIcons.ProfileOutlined
+                    )
                 }
             }
         )
@@ -56,12 +66,27 @@ fun NavHost() {
 }
 
 @Composable
-fun RowScope.TabNavigationItem(tab: Tab) {
+fun RowScope.TabNavigationItem(
+    tab: Tab,
+    filledIcon: ImageVector,
+    outlinedIcon: ImageVector
+) {
     val tabNavigator = LocalTabNavigator.current
+    val isSelected = tabNavigator.current == tab
 
     BottomNavigationItem(
-        selected = tabNavigator.current == tab,
+        selected = isSelected,
         onClick = { tabNavigator.current = tab },
-        icon = { Icon(painter = tab.options.icon!!, contentDescription = tab.options.title) }
+        icon = {
+            Icon(
+                imageVector = when (isSelected) {
+                    true -> filledIcon
+                    false -> outlinedIcon
+                },
+                contentDescription = tab.options.title
+            )
+        },
+        selectedContentColor = MaterialTheme.colorScheme.primary,
+        unselectedContentColor = MaterialTheme.colorScheme.onBackground
     )
 }

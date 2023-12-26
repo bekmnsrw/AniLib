@@ -42,7 +42,5 @@ class MainActivity : ComponentActivity() {
 
         val authCode = intent?.data?.getQueryParameter(AuthConstant.RESPONSE_TYPE)
         if (authCode != null) authScreenModel.getAccessToken(authCode = authCode)
-
-        println("MainActivity (authCode): $authCode")
     }
 }

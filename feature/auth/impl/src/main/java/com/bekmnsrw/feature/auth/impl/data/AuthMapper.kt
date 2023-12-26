@@ -5,11 +5,11 @@ import com.bekmnsrw.feature.auth.api.model.AuthCode
 import com.bekmnsrw.feature.auth.impl.data.datasource.remote.response.AccessTokenResponse
 import com.bekmnsrw.feature.auth.impl.data.datasource.remote.response.AuthCodeResponse
 
-fun AuthCodeResponse.toAuthCode(): AuthCode = AuthCode(
+internal fun AuthCodeResponse.toAuthCode(): AuthCode = AuthCode(
     authCode = authCode
 )
 
-fun AccessTokenResponse.toAccessToken(): AccessToken = AccessToken(
+internal fun AccessTokenResponse.toAccessToken(): AccessToken = AccessToken(
     accessToken = accessToken,
     tokenType = tokenType,
     expiresIn = expiresIn,

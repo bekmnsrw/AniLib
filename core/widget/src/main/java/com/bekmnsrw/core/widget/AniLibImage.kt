@@ -8,21 +8,23 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 
+private const val IMAGE_BASE_URL = "https://shikimori.one/"
+
 @Composable
 fun AniLibImage(
+    modifier: Modifier,
     imageUrl: String,
-    alpha: Float,
-    modifier: Modifier
+    alpha: Float = 1.0f
 ) {
     AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(data = "https://shikimori.one/$imageUrl")
-            .crossfade(enable = true)
-            .diskCachePolicy(policy = CachePolicy.ENABLED)
-            .build(),
+        modifier = modifier,
         contentDescription = null,
         contentScale = ContentScale.Crop,
         alpha = alpha,
-        modifier = modifier
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(data = "$IMAGE_BASE_URL$imageUrl")
+            .crossfade(enable = true)
+            .diskCachePolicy(policy = CachePolicy.ENABLED)
+            .build()
     )
 }

@@ -80,4 +80,8 @@ internal class AuthRepositoryImpl(
     override suspend fun isAuthenticated(): Flow<Boolean?> = authDataStore.isAuthenticated()
 
     override suspend fun onAuthentication(): Preferences = authDataStore.onAuthentication()
+
+    override suspend fun getUserId(): Flow<Int?> = authDataStore.getUserId()
+
+    override suspend fun saveUserId(id: Int): Preferences = authDataStore.saveUserId(id = id)
 }

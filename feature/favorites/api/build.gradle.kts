@@ -20,6 +20,10 @@ android {
 
 dependencies {
 
+    implementation(project(":core:network"))
+    implementation(project(":feature:home:api"))
+    implementation(project(":core:navigation"))
+
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

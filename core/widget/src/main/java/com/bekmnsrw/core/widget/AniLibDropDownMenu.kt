@@ -31,7 +31,7 @@ fun AniLibDropDownMenu(
     ) {
         DropdownMenu(
             expanded = isDropDownMenuExpanded,
-            onDismissRequest = { onDismissRequest() },
+            onDismissRequest = onDismissRequest,
             offset = offset
         ) {
             Divider()

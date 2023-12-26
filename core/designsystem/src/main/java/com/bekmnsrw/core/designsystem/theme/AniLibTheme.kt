@@ -3,6 +3,7 @@ package com.bekmnsrw.core.designsystem.theme
 import android.os.Build
 import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -15,6 +16,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.systemuicontroller.SystemUiController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 val LightDefaultColorScheme = lightColorScheme(
@@ -144,29 +146,17 @@ fun AniLibTheme(
     disableDynamicTheming: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicTheming -> if (darkTheme) DarkAndroidColorScheme else LightAndroidColorScheme
+    val colorScheme = selectColorScheme(
+        dynamicTheming = dynamicTheming,
+        disableDynamicTheming = disableDynamicTheming,
+        darkTheme = darkTheme
+    )
 
-        !disableDynamicTheming && supportsDynamicTheming() -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context = context) else dynamicLightColorScheme(context = context)
-        }
-
-        else -> if (darkTheme) DarkDefaultColorScheme else LightDefaultColorScheme
-    }
-
-    val systemUiController = rememberSystemUiController()
-
-    SideEffect {
-        systemUiController.setStatusBarColor(
-            color = colorScheme.background,
-            darkIcons = !darkTheme
-        )
-        systemUiController.setNavigationBarColor(
-            color = colorScheme.background,
-            darkIcons = !darkTheme
-        )
-    }
+    SystemUiColors(
+        systemUiController = rememberSystemUiController(),
+        colorScheme = colorScheme,
+        darkTheme = darkTheme
+    )
 
     val emptyGradientColors = GradientColors(container = colorScheme.surfaceColorAtElevation(2.dp))
 
@@ -176,27 +166,30 @@ fun AniLibTheme(
         container = colorScheme.surface,
     )
 
-    val gradientColors = when {
-        dynamicTheming -> if (darkTheme) DarkAndroidGradientColors else LightAndroidGradientColors
-        !disableDynamicTheming && supportsDynamicTheming() -> emptyGradientColors
-        else -> defaultGradientColors
-    }
+    val gradientColors = selectGradientColors(
+        dynamicTheming = dynamicTheming,
+        darkTheme = darkTheme,
+        disableDynamicTheming = disableDynamicTheming,
+        emptyGradientColors = emptyGradientColors,
+        defaultGradientColors = defaultGradientColors
+    )
 
     val defaultBackgroundTheme = BackgroundTheme(
         color = colorScheme.surface,
-        tonalElevation = 2.dp,
+        tonalElevation = 2.dp
     )
 
-    val backgroundTheme = when {
-        dynamicTheming -> if (darkTheme) DarkAndroidBackgroundTheme else LightAndroidBackgroundTheme
-        else -> defaultBackgroundTheme
-    }
+    val backgroundTheme = selectBackgroundTheme(
+        dynamicTheming = dynamicTheming,
+        darkTheme = darkTheme,
+        defaultBackgroundTheme = defaultBackgroundTheme
+    )
 
-    val tintTheme = when {
-        dynamicTheming -> TintTheme()
-        !disableDynamicTheming && supportsDynamicTheming() -> TintTheme(colorScheme.primary)
-        else -> TintTheme()
-    }
+    val tintTheme = selectTintTheme(
+        dynamicTheming = dynamicTheming,
+        disableDynamicTheming = disableDynamicTheming,
+        colorScheme = colorScheme
+    )
 
     CompositionLocalProvider(
         LocalGradientColors provides gradientColors,
@@ -212,4 +205,72 @@ fun AniLibTheme(
 }
 
 @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)
-fun supportsDynamicTheming() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+private fun supportsDynamicTheming() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
+@Composable
+private fun selectColorScheme(
+    dynamicTheming: Boolean,
+    disableDynamicTheming: Boolean,
+    darkTheme: Boolean
+): ColorScheme = when {
+    dynamicTheming -> if (darkTheme) DarkAndroidColorScheme else LightAndroidColorScheme
+
+    !disableDynamicTheming && supportsDynamicTheming() -> {
+        val context = LocalContext.current
+        if (darkTheme) dynamicDarkColorScheme(context = context) else dynamicLightColorScheme(context = context)
+    }
+
+    else -> if (darkTheme) DarkDefaultColorScheme else LightDefaultColorScheme
+}
+
+@Composable
+private fun selectGradientColors(
+    dynamicTheming: Boolean,
+    darkTheme: Boolean,
+    disableDynamicTheming: Boolean,
+    emptyGradientColors: GradientColors,
+    defaultGradientColors: GradientColors
+): GradientColors = when {
+    dynamicTheming -> if (darkTheme) DarkAndroidGradientColors else LightAndroidGradientColors
+    !disableDynamicTheming && supportsDynamicTheming() -> emptyGradientColors
+    else -> defaultGradientColors
+}
+
+@Composable
+private fun selectBackgroundTheme(
+    dynamicTheming: Boolean,
+    darkTheme: Boolean,
+    defaultBackgroundTheme: BackgroundTheme
+): BackgroundTheme = when {
+    dynamicTheming -> if (darkTheme) DarkAndroidBackgroundTheme else LightAndroidBackgroundTheme
+    else -> defaultBackgroundTheme
+}
+
+@Composable
+private fun selectTintTheme(
+    dynamicTheming: Boolean,
+    disableDynamicTheming: Boolean,
+    colorScheme: ColorScheme
+): TintTheme = when {
+    dynamicTheming -> TintTheme()
+    !disableDynamicTheming && supportsDynamicTheming() -> TintTheme(colorScheme.primary)
+    else -> TintTheme()
+}
+
+@Composable
+private fun SystemUiColors(
+    systemUiController: SystemUiController,
+    colorScheme: ColorScheme,
+    darkTheme: Boolean
+) {
+    SideEffect {
+        systemUiController.setStatusBarColor(
+            color = colorScheme.background,
+            darkIcons = !darkTheme
+        )
+        systemUiController.setNavigationBarColor(
+            color = colorScheme.background,
+            darkIcons = !darkTheme
+        )
+    }
+}

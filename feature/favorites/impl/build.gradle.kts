@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 android {
@@ -27,6 +28,8 @@ android {
 dependencies {
 
     implementation(project(":feature:favorites:api"))
+    implementation(project(":feature:home:api"))
+    implementation(project(":feature:auth:api"))
 
     implementation(project(":core:widget"))
     implementation(project(":core:db"))
@@ -35,14 +38,24 @@ dependencies {
     implementation(project(":core:presentation"))
     implementation(project(":core:network"))
 
+    implementation(libs.kotlinx.collections.immutable)
+
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    implementation(libs.pager)
+    implementation(libs.pager.indicators)
+
     implementation(libs.koin)
     implementation(libs.koin.compose)
 
     implementation(libs.voyager.tab)
+    implementation(libs.voyager.transitions)
+    implementation(libs.voyager.koin)
 
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.androidx.lifecycle.compose)
 
     testImplementation(libs.junit)
 

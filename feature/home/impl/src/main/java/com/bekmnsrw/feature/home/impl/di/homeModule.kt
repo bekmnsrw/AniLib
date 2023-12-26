@@ -2,16 +2,23 @@ package com.bekmnsrw.feature.home.impl.di
 
 import com.bekmnsrw.core.network.qualifier.Qualifiers
 import com.bekmnsrw.feature.home.api.repository.HomeRepository
+import com.bekmnsrw.feature.home.api.usecase.AddToFavoritesUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetAnimeListUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetAnimeUseCase
-import com.bekmnsrw.feature.home.impl.data.AnimePagingSource
+import com.bekmnsrw.feature.home.api.usecase.GetSimilarAnimeListUseCase
+import com.bekmnsrw.feature.home.api.usecase.RemoveFromFavoritesUseCase
+import com.bekmnsrw.feature.home.impl.HomeConstants.ANIME_ID_KOIN_PROPERTY
+import com.bekmnsrw.feature.home.impl.HomeConstants.STATUS_KOIN_PROPERTY
 import com.bekmnsrw.feature.home.impl.data.HomeRepositoryImpl
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.HomeApi
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel
 import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel
 import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel
+import com.bekmnsrw.feature.home.impl.usecase.AddToFavoritesUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.GetAnimeListUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.GetAnimeUseCaseImpl
+import com.bekmnsrw.feature.home.impl.usecase.GetSimilarAnimeListUseCaseImpl
+import com.bekmnsrw.feature.home.impl.usecase.RemoveFromFavoritesUseCaseImpl
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -19,34 +26,34 @@ import retrofit2.Retrofit
 val homeModule = module {
     factory<HomeApi> {
         provideHomeApi(
-            retrofit = get(qualifier = named(Qualifiers.API_RETROFIT))
+            retrofit = get(
+                qualifier = named(Qualifiers.API_RETROFIT)
+            )
         )
     }
 
     factory<HomeRepository> {
-        provideHomeRepository(
-            homeApi = get()
-        )
-    }
-
-    factory<AnimePagingSource> {
-        provideAnimePagingSource(
-            homeApi = get(),
-            status = getProperty("status"),
-            order = getProperty("order")
-        )
+        provideHomeRepository(homeApi = get())
     }
 
     factory<GetAnimeListUseCase> {
-        provideGetAnimeListUseCase(
-            homeRepository = get()
-        )
+        provideGetAnimeListUseCase(homeRepository = get())
     }
 
     factory<GetAnimeUseCase> {
-        provideGetAnimeUseCase(
-            homeRepository = get()
-        )
+        provideGetAnimeUseCase(homeRepository = get())
+    }
+
+    factory<AddToFavoritesUseCase> {
+        provideAddToFavoritesUseCase(homeRepository = get())
+    }
+
+    factory<RemoveFromFavoritesUseCase> {
+        provideRemoveFromFavoritesUseCase(homeRepository = get())
+    }
+
+    factory<GetSimilarAnimeListUseCase> {
+        provideGetSimilarAnimeListUseCase(homeRepository = get())
     }
 
     factory<HomeScreenModel> {
@@ -58,14 +65,17 @@ val homeModule = module {
     factory<MoreAnimeListScreenModel> {
         provideAnimeListScreenModel(
             homeRepository = get(),
-            status = getProperty("status")
+            status = getProperty(STATUS_KOIN_PROPERTY)
         )
     }
 
     factory<DetailsScreenModel> {
         provideDetailsScreenModel(
             getAnimeUseCase = get(),
-            animeId = getProperty("animeId")
+            animeId = getProperty(ANIME_ID_KOIN_PROPERTY),
+            addToFavoritesUseCase = get(),
+            removeFromFavoritesUseCase = get(),
+            getSimilarAnimeListUseCase = get()
         )
     }
 }
@@ -84,16 +94,6 @@ private fun provideHomeScreenModel(
     getAnimeListUseCase: GetAnimeListUseCase
 ): HomeScreenModel = HomeScreenModel(
     getAnimeListUseCase = getAnimeListUseCase
-)
-
-private fun provideAnimePagingSource(
-    homeApi: HomeApi,
-    status: String,
-    order: String
-): AnimePagingSource = AnimePagingSource(
-    homeApi = homeApi,
-    status = status,
-    order = order
 )
 
 private fun provideGetAnimeListUseCase(
@@ -118,8 +118,32 @@ private fun provideGetAnimeUseCase(
 
 private fun provideDetailsScreenModel(
     getAnimeUseCase: GetAnimeUseCase,
-    animeId: Int
+    animeId: Int,
+    addToFavoritesUseCase: AddToFavoritesUseCase,
+    removeFromFavoritesUseCase: RemoveFromFavoritesUseCase,
+    getSimilarAnimeListUseCase: GetSimilarAnimeListUseCase
 ): DetailsScreenModel = DetailsScreenModel(
     getAnimeUseCase = getAnimeUseCase,
-    animeId = animeId
+    animeId = animeId,
+    addToFavoritesUseCase = addToFavoritesUseCase,
+    removeFromFavoritesUseCase = removeFromFavoritesUseCase,
+    getSimilarAnimeListUseCase = getSimilarAnimeListUseCase
+)
+
+private fun provideAddToFavoritesUseCase(
+    homeRepository: HomeRepository
+): AddToFavoritesUseCase = AddToFavoritesUseCaseImpl(
+    homeRepository = homeRepository
+)
+
+private fun provideRemoveFromFavoritesUseCase(
+    homeRepository: HomeRepository
+): RemoveFromFavoritesUseCase = RemoveFromFavoritesUseCaseImpl(
+    homeRepository = homeRepository
+)
+
+private fun provideGetSimilarAnimeListUseCase(
+    homeRepository: HomeRepository
+): GetSimilarAnimeListUseCase = GetSimilarAnimeListUseCaseImpl(
+    homeRepository = homeRepository
 )

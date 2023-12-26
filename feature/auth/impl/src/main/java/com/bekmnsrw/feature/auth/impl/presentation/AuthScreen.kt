@@ -37,7 +37,7 @@ class AuthScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = getScreenModel<AuthScreenModel>()
-        val screenState by screenModel.screenState.collectAsStateWithLifecycle()
+//        val screenState by screenModel.screenState.collectAsStateWithLifecycle()
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
 
         AuthScreenContent(
@@ -80,7 +80,7 @@ private fun AuthScreenContent(
             }
 
 //            if (isFirstAppLaunch == true) {
-//                Button(onClick = { /*TODO: Go to HomeScreen*/ }) {
+//                Button(onClick = { /* Go to HomeScreen */ }) {
 //                    Text(text = "Skip")
 //                }
 //            }
@@ -112,7 +112,7 @@ private fun AuthScreenActions(
     }
 }
 
-// TODO: Move to utils???
+// Move to utils???
 @Composable
 private fun HandleScreenLifecycle(
     onResume: () -> Unit,

@@ -5,6 +5,10 @@ import androidx.paging.cachedIn
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.bekmnsrw.feature.home.api.repository.HomeRepository
+import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_NAME
+import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_POPULARITY
+import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_RANDOM
+import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_RANK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,17 +26,17 @@ internal class MoreAnimeListScreenModel(
 
     internal companion object {
         val dropDownMenuItems: Map<String, String> = mutableMapOf(
-            "Rank" to "ranked",
-            "Popularity" to "popularity",
-            "Name" to "name",
-            "Random" to "random"
+            BY_RANK.key to BY_RANK.value,
+            BY_POPULARITY.key to BY_POPULARITY.value,
+            BY_NAME.key to BY_NAME.value,
+            BY_RANDOM.key to BY_RANDOM.value
         )
     }
 
     @Immutable
     internal data class MoreAnimeListScreenState(
         val isDropDownMenuExpanded: Boolean = false,
-        val filteredBy: String = "ranked"
+        val filteredBy: String = BY_RANK.value
     )
 
     @Immutable
@@ -50,7 +54,7 @@ internal class MoreAnimeListScreenModel(
         data class NavigateDetailsScreen(val id: Int) : MoreAnimeListScreenAction
     }
 
-    private val animeParams = MutableStateFlow(Pair(status, "ranked"))
+    private val animeParams = MutableStateFlow(Pair(status, BY_RANK.value))
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val animePaged = animeParams.flatMapLatest { (status, filter) ->

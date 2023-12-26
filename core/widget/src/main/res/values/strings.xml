@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="all_ages_rating">0+</string>
+    <string name="tween_rating">12+</string>
+    <string name="teens_rating">16+</string>
+    <string name="adult_rating">18+</string>
+
+    <string name="hide">Hide</string>
+    <string name="show_more">Show more</string>
+
+    <string name="rating">Rating</string>
+    <string name="number_of_rates">%1$d rates</string>
+
+    <string name="in_lists_of_users">In lists of users</string>
+    <string name="status_legend_name">%1$s:</string>
+</resources>

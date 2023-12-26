@@ -1,8 +1,9 @@
 package com.bekmnsrw.feature.home.api.repository
 
 import androidx.paging.PagingData
-import com.bekmnsrw.feature.home.api.model.details.AnimeDetails
-import com.bekmnsrw.feature.home.api.model.list.Anime
+import com.bekmnsrw.feature.home.api.model.FavoritesActionResult
+import com.bekmnsrw.feature.home.api.model.Anime
+import com.bekmnsrw.feature.home.api.model.AnimeDetails
 import kotlinx.coroutines.flow.Flow
 
 interface HomeRepository {
@@ -18,7 +19,20 @@ interface HomeRepository {
         order: String
     ): List<Anime>
 
-    suspend fun getAnime(
+    suspend fun getAnime(id: Int): Flow<AnimeDetails>
+
+    suspend fun addToFavorites(
+        type: String,
         id: Int
-    ): Flow<AnimeDetails>
+    ): Flow<FavoritesActionResult>
+
+    suspend fun removeFromFavorites(
+        type: String,
+        id: Int
+    ): Flow<FavoritesActionResult>
+
+    suspend fun getSimilarAnimeList(
+        id: Int,
+        limit: Int
+    ): Flow<List<Anime>>
 }

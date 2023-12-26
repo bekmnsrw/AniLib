@@ -19,10 +19,8 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.*
 import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenAction
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenEvent
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenEvent.*
+import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenEvent.OnButtonClicked
 
 internal class ProfileScreen : Screen {
 

@@ -22,15 +22,18 @@ dependencies {
 
     implementation(project(":feature:auth:api"))
 
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging)
-
-    implementation(libs.koin)
+    api(libs.paging.core)
+    api(libs.paging.compose)
 
     api(libs.retrofit.core)
     api(libs.retrofit.kotlin.serialization)
 
     api(libs.kotlinx.serialization.json)
+
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+
+    implementation(libs.koin)
 
     implementation(libs.kotlinx.coroutines.core)
 

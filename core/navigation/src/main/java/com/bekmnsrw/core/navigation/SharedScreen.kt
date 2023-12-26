@@ -8,4 +8,5 @@ sealed class SharedScreen : ScreenProvider {
     data object FavoritesScreen : SharedScreen()
     data object ProfileScreen : SharedScreen()
     data object AuthScreen : SharedScreen()
+    data class DetailsScreen(val id: Int) : SharedScreen()
 }

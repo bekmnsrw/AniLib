@@ -33,6 +33,12 @@ dependencies {
     api(libs.coil.svg)
     api(libs.coil.compose)
 
+    implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.kotlinx.datetime)
+
+    implementation(libs.paging.core)
+    implementation(libs.paging.compose)
+
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.test.ext.junit)

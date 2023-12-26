@@ -1,5 +1,9 @@
 package com.bekmnsrw.core.network.interceptor
 
+import com.bekmnsrw.core.network.NetworkConstants.AUTHORIZATION_HEADER_NAME
+import com.bekmnsrw.core.network.NetworkConstants.AUTHORIZATION_HEADER_VALUE
+import com.bekmnsrw.core.network.NetworkConstants.USER_AGENT_HEADER_NAME
+import com.bekmnsrw.core.network.NetworkConstants.USER_AGENT_HEADER_VALUE
 import com.bekmnsrw.feature.auth.api.usecase.local.GetLocalAccessTokenUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -12,13 +16,6 @@ class BearerInterceptor(
     private val getLocalAccessTokenUseCase: GetLocalAccessTokenUseCase
 ) : Interceptor {
 
-    companion object {
-        const val USER_AGENT_HEADER_NAME = "User-Agent"
-        const val USER_AGENT_HEADER_VALUE = "AniLib"
-        const val AUTHORIZATION_HEADER_NAME = "Authorization"
-        const val AUTHORIZATION_HEADER_VALUE = "Bearer"
-    }
-
     override fun intercept(chain: Interceptor.Chain): Response {
         val accessToken = runBlocking {
             getLocalAccessTokenUseCase()
@@ -26,17 +23,22 @@ class BearerInterceptor(
                 .first()
         }
 
-        return chain.proceed(
-            chain.request().newBuilder()
-                .header(
-                    name = USER_AGENT_HEADER_NAME,
-                    value = USER_AGENT_HEADER_VALUE
-                )
-                .header(
+        val request = chain.request().newBuilder()
+            .header(
+                name = USER_AGENT_HEADER_NAME,
+                value = USER_AGENT_HEADER_VALUE
+            )
+
+        return if (accessToken != null) {
+            chain.proceed(
+                request.header(
                     name = AUTHORIZATION_HEADER_NAME,
                     value = "$AUTHORIZATION_HEADER_VALUE $accessToken"
                 )
-                .build()
-        )
+                    .build()
+            )
+        } else {
+            chain.proceed(request.build())
+        }
     }
 }

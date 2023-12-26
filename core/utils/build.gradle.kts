@@ -20,6 +20,8 @@ android {
 
 dependencies {
 
+    implementation(project(":core:navigation"))
+
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

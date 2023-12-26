@@ -12,8 +12,8 @@ import retrofit2.http.POST
 
 internal interface AuthApi {
 
-    companion object {
-        private const val USER_AGENT_HEADER = "User-Agent: AniLib"
+    private companion object {
+        const val USER_AGENT_HEADER = "User-Agent: AniLib"
     }
 
     @GET(value = "authorize")

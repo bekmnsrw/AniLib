@@ -4,6 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AuthCodeResponse internal constructor(
+internal data class AuthCodeResponse(
     @SerialName("auth_code") val authCode: String
 )

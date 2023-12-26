@@ -5,31 +5,32 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class AuthDataStore(
+internal class AuthDataStore(
     private val context: Context
 ) {
 
-    companion object {
-        private const val DATASTORE_NAME = "AUTH_DATASTORE"
+    private companion object {
+        const val DATASTORE_NAME = "AUTH_DATASTORE"
 
-        private const val IS_FIRST_APP_LAUNCH_KEY_NAME = "IS_FIRST_APP_LAUNCH"
-        private const val IS_AUTHENTICATED_KEY_NAME = "IS_AUTHENTICATED"
-        private const val ACCESS_TOKEN_KEY_NAME = "AUTH_TOKEN"
-        private const val REFRESH_TOKEN_KEY_NAME = "REFRESH_TOKEN"
+        val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = DATASTORE_NAME)
 
-        private val IS_FIRST_APP_LAUNCH_KEY = booleanPreferencesKey(name = IS_FIRST_APP_LAUNCH_KEY_NAME)
-        private val IS_AUTHENTICATED_KEY = booleanPreferencesKey(name = IS_AUTHENTICATED_KEY_NAME)
-        private val ACCESS_TOKEN_KEY = stringPreferencesKey(name = ACCESS_TOKEN_KEY_NAME)
-        private val REFRESH_TOKEN_KEY = stringPreferencesKey(name = REFRESH_TOKEN_KEY_NAME)
+        const val IS_FIRST_APP_LAUNCH_KEY_NAME = "IS_FIRST_APP_LAUNCH"
+        const val IS_AUTHENTICATED_KEY_NAME = "IS_AUTHENTICATED"
+        const val ACCESS_TOKEN_KEY_NAME = "AUTH_TOKEN"
+        const val REFRESH_TOKEN_KEY_NAME = "REFRESH_TOKEN"
+        const val USER_ID_KEY_NAME = "USER_ID"
 
-        private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
-            name = DATASTORE_NAME
-        )
+        val IS_FIRST_APP_LAUNCH_KEY = booleanPreferencesKey(name = IS_FIRST_APP_LAUNCH_KEY_NAME)
+        val IS_AUTHENTICATED_KEY = booleanPreferencesKey(name = IS_AUTHENTICATED_KEY_NAME)
+        val ACCESS_TOKEN_KEY = stringPreferencesKey(name = ACCESS_TOKEN_KEY_NAME)
+        val REFRESH_TOKEN_KEY = stringPreferencesKey(name = REFRESH_TOKEN_KEY_NAME)
+        val USER_ID_KEY = intPreferencesKey(name = USER_ID_KEY_NAME)
     }
 
     fun isFirstAppLaunch(): Flow<Boolean?> = context.dataStore.data.map {
@@ -62,5 +63,13 @@ class AuthDataStore(
 
     suspend fun saveRefreshToken(refreshToken: String): Preferences = context.dataStore.edit {
         it[REFRESH_TOKEN_KEY] = refreshToken
+    }
+
+    fun getUserId(): Flow<Int?> = context.dataStore.data.map {
+        it.get(key = USER_ID_KEY)
+    }
+
+    suspend fun saveUserId(id: Int): Preferences = context.dataStore.edit {
+        it[USER_ID_KEY] = id
     }
 }

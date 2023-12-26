@@ -34,8 +34,8 @@ class AuthScreenModel(
     private val saveLocalRefreshTokenUseCase: SaveLocalRefreshTokenUseCase
 ) : ScreenModel {
 
-    companion object {
-        private const val AUTH_URI = "https://shikimori.one/oauth/authorize?" +
+    private companion object {
+        const val AUTH_URI = "https://shikimori.one/oauth/authorize?" +
                 "client_id=${AuthConstant.CLIENT_ID}&" +
                 "redirect_uri=${AuthConstant.REDIRECT_URI}&" +
                 "response_type=${AuthConstant.RESPONSE_TYPE}&" +
@@ -135,7 +135,6 @@ class AuthScreenModel(
 ////                _screenAction.emit(NavigateProfileScreen)
 //                onAuthenticationUseCase()
 
-        // TODO: Save access & refresh tokens
         println("AuthSM (accessToken): ${accessToken.accessToken}")
         println("AuthSM (refreshToken): ${accessToken.refreshToken}")
 

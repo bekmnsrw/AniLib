@@ -36,4 +36,8 @@ interface AuthRepository {
     suspend fun isAuthenticated(): Flow<Boolean?>
 
     suspend fun onAuthentication(): Preferences
+
+    suspend fun getUserId(): Flow<Int?>
+
+    suspend fun saveUserId(id: Int): Preferences
 }

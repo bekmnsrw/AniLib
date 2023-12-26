@@ -1,6 +1,6 @@
 package com.bekmnsrw.feature.home.api.usecase
 
-import com.bekmnsrw.feature.home.api.model.list.Anime
+import com.bekmnsrw.feature.home.api.model.Anime
 
 interface GetAnimeListUseCase {
 

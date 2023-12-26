@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="empty_list_placeholder">Oops, there\'s nothing here!</string>
+    <string name="planned">Add anime that you plan to watch to \'%1$s\' category</string>
+    <string name="watching">Add anime that you\'re watching to \'%1$s\' category</string>
+    <string name="completed">Add anime that you\'ve finished watching to \'%1$s\' category</string>
+    <string name="on_hold">Add anime that you paused watching to \'%1$s\' category</string>
+    <string name="dropped">Add anime that you dropped watching to \'%1$s\' category</string>
+</resources>

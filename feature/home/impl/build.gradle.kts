@@ -35,7 +35,7 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:presentation"))
     implementation(project(":core:network"))
-    implementation(project(":core:designsystem")) // TODO: Add widgets and remove this
+    implementation(project(":core:designsystem"))
 
     implementation(project(":feature:auth:impl"))
 
@@ -46,8 +46,8 @@ dependencies {
     implementation(libs.voyager.transitions)
     implementation(libs.voyager.koin)
 
-    implementation(libs.paging.core)
-    implementation(libs.paging.compose)
+//    implementation(libs.paging.core)
+//    implementation(libs.paging.compose)
 
     implementation(libs.kotlinx.collections.immutable)
 

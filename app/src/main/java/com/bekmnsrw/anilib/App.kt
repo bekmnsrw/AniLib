@@ -2,10 +2,11 @@ package com.bekmnsrw.anilib
 
 import android.app.Application
 import cafe.adriel.voyager.core.registry.ScreenRegistry
-import com.bekmnsrw.core.network.networkModule
+import com.bekmnsrw.core.network.di.networkModule
 import com.bekmnsrw.feature.auth.impl.di.authModule
 import com.bekmnsrw.feature.auth.impl.di.authScreenModule
-import com.bekmnsrw.feature.favorites.impl.favoritesScreenModule
+import com.bekmnsrw.feature.favorites.impl.di.favoritesModule
+import com.bekmnsrw.feature.favorites.impl.di.favoritesScreenModule
 import com.bekmnsrw.feature.home.impl.di.homeModule
 import com.bekmnsrw.feature.home.impl.di.homeScreenModule
 import com.bekmnsrw.feature.profile.impl.di.profileModule
@@ -27,15 +28,16 @@ class App : Application() {
                 networkModule,
                 authModule,
                 homeModule,
+                favoritesModule,
                 profileModule
             )
         }
 
         ScreenRegistry {
-            favoritesScreenModule()
-            homeScreenModule()
-            profileScreenModule()
             authScreenModule()
+            homeScreenModule()
+            favoritesScreenModule()
+            profileScreenModule()
         }
     }
 }

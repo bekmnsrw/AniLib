@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun AniLibSnackbar(
-    snackbarHostState: SnackbarHostState,
     modifier: Modifier,
+    snackbarHostState: SnackbarHostState,
     onDismiss: () -> Unit = {}
 ) {
     SnackbarHost(
@@ -28,17 +28,11 @@ fun AniLibSnackbar(
                     start = 16.dp,
                     end = 16.dp
                 ),
-                content = {
-                    Text(
-                        text = snackbarData.visuals.message
-                    )
-                },
+                content = { Text(text = snackbarData.visuals.message) },
                 action = {
                     snackbarData.visuals.actionLabel?.let { actionLabel ->
                         TextButton(onClick = onDismiss) {
-                            Text(
-                                text = actionLabel
-                            )
+                            Text(text = actionLabel)
                         }
                     }
                 }
