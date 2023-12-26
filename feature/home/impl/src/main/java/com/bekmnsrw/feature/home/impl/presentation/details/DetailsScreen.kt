@@ -286,13 +286,7 @@ private fun StickyHeader(
                 true -> AniLibIcons.FavoritesFilled
                 false -> AniLibIcons.FavoritesOutlined
             },
-            onClick = {
-                eventHandler(
-                    OnFavouredClicked(
-                        animeId = animeId
-                    )
-                )
-            }
+            onClick = { eventHandler(OnFavouredClicked(animeId = animeId)) }
         )
     }
 }
@@ -524,7 +518,8 @@ private fun AnimeInfoItem(
     style: TextStyle = AniLibTypography.bodyLarge
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         if (key.isNotEmpty()) {
             Text(
