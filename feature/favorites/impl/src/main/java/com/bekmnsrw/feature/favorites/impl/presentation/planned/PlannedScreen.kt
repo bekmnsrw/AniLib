@@ -13,12 +13,11 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.feature.favorites.api.model.UserRate
 import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
 import com.bekmnsrw.feature.favorites.impl.presentation.container.TabAnimeList
-import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.*
-import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.*
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenAction
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.OnItemClicked
 
 internal class PlannedScreen : Screen {
 
@@ -28,20 +27,10 @@ internal class PlannedScreen : Screen {
         val plannedAnimePaged = screenModel.planned.collectAsLazyPagingItems()
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
 
-        if (plannedAnimePaged.loadState.refresh == LoadState.Loading) {
-            AniLibCircularProgressBar(shouldShow = true)
-        } else {
-            PlannedToWatchScreenContent(
-                plannedAnimePaged = plannedAnimePaged,
-                onItemClicked = {
-                    screenModel.eventHandler(
-                        OnItemClicked(
-                            id = it
-                        )
-                    )
-                }
-            )
-        }
+        PlannedToWatchScreenContent(
+            plannedAnimePaged = plannedAnimePaged,
+            onItemClicked = { screenModel.eventHandler(OnItemClicked(id = it)) }
+        )
 
         PlannedScreenActions(screenAction = screenAction)
     }
@@ -75,6 +64,7 @@ private fun PlannedToWatchScreenContent(
     TabAnimeList(
         userRatePaged = plannedAnimePaged,
         status = UserRatesEnum.PLANNED.status,
-        onItemClicked = onItemClicked
+        onItemClicked = onItemClicked,
+        isLoading = plannedAnimePaged.loadState.refresh == LoadState.Loading
     )
 }

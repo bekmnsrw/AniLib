@@ -13,7 +13,6 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.feature.favorites.api.model.UserRate
 import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
 import com.bekmnsrw.feature.favorites.impl.presentation.container.TabAnimeList
@@ -28,20 +27,10 @@ internal class WatchingScreen : Screen {
         val watchingAnimePaged = screenModel.watching.collectAsLazyPagingItems()
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
 
-        if (watchingAnimePaged.loadState.refresh == LoadState.Loading) {
-            AniLibCircularProgressBar(shouldShow = true)
-        } else {
-            WatchingScreenContent(
-                watchingAnimePaged = watchingAnimePaged,
-                onItemClicked = {
-                    screenModel.eventHandler(
-                        OnItemClicked(
-                            id = it
-                        )
-                    )
-                }
-            )
-        }
+        WatchingScreenContent(
+            watchingAnimePaged = watchingAnimePaged,
+            onItemClicked = { screenModel.eventHandler(OnItemClicked(id = it)) }
+        )
 
         WatchingScreenActions(screenAction = screenAction)
     }
@@ -75,6 +64,7 @@ private fun WatchingScreenContent(
     TabAnimeList(
         userRatePaged = watchingAnimePaged,
         status = UserRatesEnum.WATCHING.status,
-        onItemClicked = onItemClicked
+        onItemClicked = onItemClicked,
+        isLoading = watchingAnimePaged.loadState.refresh == LoadState.Loading
     )
 }

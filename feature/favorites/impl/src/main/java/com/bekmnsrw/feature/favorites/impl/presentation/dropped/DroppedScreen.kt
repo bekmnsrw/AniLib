@@ -13,7 +13,6 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.feature.favorites.api.model.UserRate
 import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
 import com.bekmnsrw.feature.favorites.impl.presentation.container.TabAnimeList
@@ -28,20 +27,10 @@ internal class DroppedScreen : Screen {
         val droppedAnimePaged = screenModel.dropped.collectAsLazyPagingItems()
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
 
-        if (droppedAnimePaged.loadState.refresh == LoadState.Loading) {
-            AniLibCircularProgressBar(shouldShow = true)
-        } else {
-            DroppedScreenContent(
-                droppedAnimePaged = droppedAnimePaged,
-                onItemClicked = {
-                    screenModel.eventHandler(
-                        OnItemClicked(
-                            id = it
-                        )
-                    )
-                }
-            )
-        }
+        DroppedScreenContent(
+            droppedAnimePaged = droppedAnimePaged,
+            onItemClicked = { screenModel.eventHandler(OnItemClicked(id = it)) }
+        )
 
         DroppedScreenActions(screenAction = screenAction)
     }
@@ -75,6 +64,7 @@ private fun DroppedScreenContent(
     TabAnimeList(
         userRatePaged = droppedAnimePaged,
         status = UserRatesEnum.DROPPED.status,
-        onItemClicked = onItemClicked
+        onItemClicked = onItemClicked,
+        isLoading = droppedAnimePaged.loadState.refresh == LoadState.Loading
     )
 }

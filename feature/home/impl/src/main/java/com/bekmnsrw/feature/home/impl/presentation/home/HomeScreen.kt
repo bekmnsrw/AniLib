@@ -126,7 +126,7 @@ private fun AnimeList(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .padding(bottom = 72.dp)
+            .padding(bottom = 56.dp)
     ) {
         item {
             AniLibHorizontalList(

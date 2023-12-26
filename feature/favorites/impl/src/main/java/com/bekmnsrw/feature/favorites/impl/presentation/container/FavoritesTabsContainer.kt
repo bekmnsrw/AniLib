@@ -37,6 +37,7 @@ import androidx.paging.compose.itemKey
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
+import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.feature.favorites.api.model.UserRate
 import com.bekmnsrw.feature.favorites.impl.R
@@ -132,28 +133,32 @@ private fun TabsContent(
 fun TabAnimeList(
     userRatePaged: LazyPagingItems<UserRate>,
     status: String,
+    isLoading: Boolean,
     onItemClicked: (Int) -> Unit
 ) {
-    if (userRatePaged.itemCount == 0) {
-        EmptyListText(status = status)
+    if (isLoading) {
+        AniLibCircularProgressBar(shouldShow = true)
     } else {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(16.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 72.dp)
-        ) {
-            // add null as third state
-            items(
-                count = userRatePaged.itemCount,
-                key = userRatePaged.itemKey { it.anime.id },
-                contentType = userRatePaged.itemContentType { "AnimePaged" }
-            ) { index ->
-                ListItem(
-                    userRate = userRatePaged[index],
-                    onItemClicked = onItemClicked
-                )
+        if (userRatePaged.itemCount == 0) {
+            EmptyListText(status = status)
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(16.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 56.dp)
+            ) {
+                items(
+                    count = userRatePaged.itemCount,
+                    key = userRatePaged.itemKey { it.anime.id },
+                    contentType = userRatePaged.itemContentType { "AnimePaged" }
+                ) { index ->
+                    ListItem(
+                        userRate = userRatePaged[index],
+                        onItemClicked = onItemClicked
+                    )
+                }
             }
         }
     }
