@@ -11,11 +11,7 @@ import com.bekmnsrw.feature.home.api.usecase.GetSimilarAnimeListUseCase
 import com.bekmnsrw.feature.home.api.usecase.RemoveFromFavoritesUseCase
 import com.bekmnsrw.feature.home.impl.HomeConstants.REQUEST_LIMIT
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.*
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnArrowBackClicked
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnDescriptionClicked
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnFavouredClicked
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnInfoIconClicked
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnModalBottomSheetDismiss
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.*
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -56,6 +52,8 @@ internal class DetailsScreenModel(
 
     @Immutable
     internal sealed interface DetailsScreenEvent {
+        data object OnInit : DetailsScreenEvent
+        data object OnStart : DetailsScreenEvent
         data object OnArrowBackClicked : DetailsScreenEvent
         data class OnFavouredClicked(val animeId: Int) : DetailsScreenEvent
         data object OnInfoIconClicked : DetailsScreenEvent
@@ -83,6 +81,10 @@ internal class DetailsScreenModel(
 
     fun eventHandler(detailsScreenEvent: DetailsScreenEvent) {
         when (detailsScreenEvent) {
+            OnInit -> onInit()
+
+            OnStart -> checkIfAnimeIsNotFavoured()
+
             OnArrowBackClicked -> onArrowBacClicked()
 
             is OnFavouredClicked -> onFavouredClicked()
@@ -93,16 +95,16 @@ internal class DetailsScreenModel(
 
             OnDescriptionClicked -> onDescriptionClicked()
 
-            is DetailsScreenEvent.OnSimilarAnimeCardClicked -> onSimilarAnimeCardClicked(
-                id = detailsScreenEvent.id
-            )
+            is OnSimilarAnimeCardClicked -> onSimilarAnimeCardClicked(id = detailsScreenEvent.id)
         }
     }
 
-    init { loadAnime(id = animeId) }
+    init {
+        eventHandler(OnInit)
+    }
 
-    private fun loadAnime(id: Int) = screenModelScope.launch {
-        getAnimeUseCase(id = id)
+    private fun onInit() = screenModelScope.launch {
+        getAnimeUseCase(id = animeId)
             .flowOn(Dispatchers.IO)
             .onStart {
                 _screenState.emit(
@@ -128,7 +130,7 @@ internal class DetailsScreenModel(
             }
 
         getSimilarAnimeListUseCase(
-            id = id,
+            id = animeId,
             limit = REQUEST_LIMIT
         )
             .flowOn(Dispatchers.IO)
@@ -136,6 +138,18 @@ internal class DetailsScreenModel(
                 _screenState.emit(
                     _screenState.value.copy(
                         similarAnimeList = it.toPersistentList()
+                    )
+                )
+            }
+    }
+
+    private fun checkIfAnimeIsNotFavoured() = screenModelScope.launch {
+        getAnimeUseCase(id = animeId)
+            .flowOn(Dispatchers.IO)
+            .collect {
+                _screenState.emit(
+                    _screenState.value.copy(
+                        isFavoured = it.favoured
                     )
                 )
             }

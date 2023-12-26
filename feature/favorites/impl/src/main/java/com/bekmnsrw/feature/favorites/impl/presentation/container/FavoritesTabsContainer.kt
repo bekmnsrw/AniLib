@@ -128,7 +128,6 @@ private fun TabsContent(
     }
 }
 
-/* 'TabAnimeList' is reused on all pager's tabs */
 @Composable
 fun TabAnimeList(
     userRatePaged: LazyPagingItems<UserRate>,
@@ -176,26 +175,11 @@ private fun EmptyListText(status: String) {
             )
             Text(
                 text = when (status) {
-                    UserRatesEnum.PLANNED.status -> stringResource(
-                        id = R.string.planned,
-                        status.replaceFirstChar { it.uppercase() }
-                    )
-                    UserRatesEnum.WATCHING.status ->  stringResource(
-                        id = R.string.watching,
-                        status.replaceFirstChar { it.uppercase() }
-                    )
-                    UserRatesEnum.COMPLETED.status ->  stringResource(
-                        id = R.string.completed,
-                        status.replaceFirstChar { it.uppercase() }
-                    )
-                    UserRatesEnum.ON_HOLD.status ->  stringResource(
-                        id = R.string.on_hold,
-                        status.replaceFirstChar { it.uppercase() }
-                    )
-                    UserRatesEnum.DROPPED.status ->  stringResource(
-                        id = R.string.dropped,
-                        status.replaceFirstChar { it.uppercase() }
-                    )
+                    UserRatesEnum.PLANNED.status -> stringResource(id = R.string.planned)
+                    UserRatesEnum.WATCHING.status ->  stringResource(id = R.string.watching)
+                    UserRatesEnum.COMPLETED.status ->  stringResource(id = R.string.completed)
+                    UserRatesEnum.ON_HOLD.status ->  stringResource(id = R.string.on_hold)
+                    UserRatesEnum.DROPPED.status ->  stringResource(id = R.string.dropped)
                     else -> ""
                 }
             )

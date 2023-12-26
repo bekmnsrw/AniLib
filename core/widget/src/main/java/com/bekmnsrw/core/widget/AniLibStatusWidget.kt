@@ -149,7 +149,6 @@ private fun AniLibStatusBarItem(
                     false -> LightAndroidColorScheme.tertiary
                 }
 
-                // No elements that match this condition
                 else -> when (isSystemInDarkTheme()) {
                     true -> DarkAndroidColorScheme.tertiary
                     false -> LightAndroidColorScheme.tertiary

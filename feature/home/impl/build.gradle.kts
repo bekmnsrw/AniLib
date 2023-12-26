@@ -35,7 +35,6 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:network"))
     implementation(project(":core:designsystem"))
-
     implementation(project(":feature:auth:impl"))
 
     implementation(libs.koin)

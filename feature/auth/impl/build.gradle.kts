@@ -30,6 +30,7 @@ dependencies {
     implementation(project(":feature:auth:api"))
     implementation(project(":core:network"))
     implementation(project(":core:navigation"))
+    implementation(project(":core:utils"))
 
     implementation(libs.compose)
     implementation(libs.material3)

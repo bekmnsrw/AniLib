@@ -16,11 +16,16 @@ android {
     kotlinOptions {
         jvmTarget = libs.versions.jvm.target.get()
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.compose.kotlin.compiler.get()
+    }
 }
 
 dependencies {
-
-    implementation(project(":core:navigation"))
+    implementation(libs.androidx.compose.material)
 
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)

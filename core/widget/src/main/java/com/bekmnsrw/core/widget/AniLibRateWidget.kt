@@ -88,18 +88,16 @@ private fun AniLibRateBar(
                     .height(12.dp)
                     .onGloballyPositioned { coordinates ->
                         cardWidthDp = with(localDensity) { coordinates.size.width.toDp() }
-                    },
-                content = {}
-            )
+                    }
+            ) {}
         }
         Row {
             Card(
                 modifier = Modifier
                     .width(cardWidthDp * currentRateStat / totalRateStats + 8.dp)
                     .height(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
-                content = {}
-            )
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {}
         }
     }
 }

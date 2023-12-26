@@ -14,6 +14,7 @@ import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScree
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel
 import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel
 import com.bekmnsrw.feature.favorites.impl.usecase.GetUserFavoritesUseCaseImpl
+import com.bekmnsrw.feature.home.api.usecase.RemoveFromFavoritesUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -75,7 +76,10 @@ val favoritesModule = module {
     }
 
     factory<FavoritesScreenModel> {
-        provideFavoritesScreenModel(getUserFavoritesUseCase = get())
+        provideFavoritesScreenModel(
+            getUserFavoritesUseCase = get(),
+            removeFromFavoritesUseCase = get()
+        )
     }
 }
 
@@ -139,7 +143,9 @@ private fun provideOnHoldScreenModel(
 )
 
 private fun provideFavoritesScreenModel(
-    getUserFavoritesUseCase: GetUserFavoritesUseCase
+    getUserFavoritesUseCase: GetUserFavoritesUseCase,
+    removeFromFavoritesUseCase: RemoveFromFavoritesUseCase
 ) : FavoritesScreenModel = FavoritesScreenModel(
-    getUserFavoritesUseCase = getUserFavoritesUseCase
+    getUserFavoritesUseCase = getUserFavoritesUseCase,
+    removeFromFavoritesUseCase = removeFromFavoritesUseCase
 )

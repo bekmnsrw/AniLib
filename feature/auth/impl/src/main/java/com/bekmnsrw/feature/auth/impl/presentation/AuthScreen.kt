@@ -8,17 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
@@ -27,9 +21,14 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.*
-import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.*
-import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent.*
+import com.bekmnsrw.core.utils.HandleScreenLifecycle
+import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction
+import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.NavigateProfileScreen
+import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.OpenChromeCustomTabs
+import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent
+import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent.OnAuthenticateButtonClicked
+import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent.OnResume
+import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent.OnStart
 
 class AuthScreen : Screen {
 
@@ -109,37 +108,5 @@ private fun AuthScreenActions(
                 .build()
                 .launchUrl(context, Uri.parse(screenAction.authUri))
         }
-    }
-}
-
-// Move to utils???
-@Composable
-private fun HandleScreenLifecycle(
-    onResume: () -> Unit,
-    onStart: () -> Unit
-) {
-    val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
-    val currentOnResume by rememberUpdatedState(newValue = onResume)
-    val currentOnStart by rememberUpdatedState(newValue = onStart)
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> {
-                    currentOnResume()
-                    println(event)
-                }
-
-                Lifecycle.Event.ON_START -> {
-                    currentOnStart()
-                    println(event)
-                }
-
-                else -> println(event)
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 }

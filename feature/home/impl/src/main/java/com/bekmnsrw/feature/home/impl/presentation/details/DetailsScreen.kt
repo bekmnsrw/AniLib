@@ -58,6 +58,7 @@ import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.designsystem.theme.LocalBackgroundTheme
 import com.bekmnsrw.core.navigation.SharedScreen
+import com.bekmnsrw.core.utils.HandleScreenLifecycle
 import com.bekmnsrw.core.widget.AniLibAgeRatingBadge
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.AniLibExpandableTextWithTextButton
@@ -80,12 +81,7 @@ import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.De
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.ShowErrorSnackBar
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.ShowIsFavouredSnackbar
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnArrowBackClicked
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnDescriptionClicked
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnFavouredClicked
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnInfoIconClicked
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnModalBottomSheetDismiss
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnSimilarAnimeCardClicked
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.*
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenState
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.launch
@@ -125,6 +121,8 @@ internal data class DetailsScreen(val id: Int) : Screen {
             screenAction = screenAction,
             snackbarHostState = snackbarHostState
         )
+
+        HandleScreenLifecycle(onStart = { screenModel.eventHandler(OnStart) })
     }
 }
 
