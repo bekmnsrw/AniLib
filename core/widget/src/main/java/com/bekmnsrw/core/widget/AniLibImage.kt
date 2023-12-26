@@ -7,6 +7,7 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import coil.size.Scale
 
 private const val IMAGE_BASE_URL = "https://shikimori.one/"
 
@@ -23,7 +24,11 @@ fun AniLibImage(
         alpha = alpha,
         model = ImageRequest.Builder(LocalContext.current)
             .data(data = "$IMAGE_BASE_URL$imageUrl")
+            .error(R.drawable.ic_broken_image)
+            .fallback(R.drawable.ic_broken_image)
+            .placeholder(R.drawable.loading_animation)
             .crossfade(enable = true)
+            .scale(Scale.FILL)
             .diskCachePolicy(policy = CachePolicy.ENABLED)
             .build()
     )

@@ -30,7 +30,6 @@ include(":core:designsystem")
 include(":core:utils")
 include(":core:widget")
 include(":core:network")
-include(":core:presentation")
 include(":core:db")
 include(":core:navigation")
 

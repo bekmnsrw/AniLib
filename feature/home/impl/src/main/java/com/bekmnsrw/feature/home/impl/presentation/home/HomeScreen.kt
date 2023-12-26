@@ -97,7 +97,7 @@ private fun HomeScreenContent(
         topBar = {
             AniLibTopBarWithSearch(
                 scrollBehavior = scrollBehavior,
-                title = "AniLib",
+                title = stringResource(id = R.string.app_name),
                 onSearchIconClicked = { /* EventHandler invocation */ }
             )
         }

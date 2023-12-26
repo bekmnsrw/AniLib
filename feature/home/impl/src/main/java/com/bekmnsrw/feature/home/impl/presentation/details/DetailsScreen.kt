@@ -1,6 +1,5 @@
 package com.bekmnsrw.feature.home.impl.presentation.details
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -165,7 +164,7 @@ private fun DetailsScreenContent(
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
 
-            AnimatedVisibility(visible = screenState.shouldShowModalBottomSheet) {
+            if (screenState.shouldShowModalBottomSheet) {
                 AniLibModalBottomSheet(
                     sheetState = modalBottomSheetState,
                     onDismissRequest = { eventHandler(OnModalBottomSheetDismiss) }
@@ -374,9 +373,7 @@ private fun AnimeDetails(
 }
 
 @Composable
-private fun AnimeImage(
-    imageUrl: String
-) {
+private fun AnimeImage(imageUrl: String) {
     val backgroundColor = LocalBackgroundTheme.current.color
 
     Box(

@@ -16,4 +16,6 @@
     <string name="ongoing">Ongoing anime</string>
     <string name="released">Released anime</string>
     <string name="anons">Anons anime</string>
+
+    <string name="app_name">AniLib</string>
 </resources>
