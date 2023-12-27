@@ -3,27 +3,24 @@ package com.bekmnsrw.feature.favorites.impl.di
 import com.bekmnsrw.core.network.qualifier.Qualifiers
 import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
 import com.bekmnsrw.feature.favorites.api.repository.FavoritesRepository
+import com.bekmnsrw.feature.favorites.api.usecase.GetUserFavoritesUseCase
+import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.favorites.impl.data.FavoritesApi
 import com.bekmnsrw.feature.favorites.impl.data.FavoritesRepositoryImpl
-import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabsContainerScreenModel
-import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel
-import com.bekmnsrw.feature.favorites.api.usecase.GetUserFavoritesUseCase
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel
 import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel
 import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel
 import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel
 import com.bekmnsrw.feature.favorites.impl.usecase.GetUserFavoritesUseCaseImpl
+import com.bekmnsrw.feature.favorites.impl.usecase.UpdateAnimeStatusUseCaseImpl
 import com.bekmnsrw.feature.home.api.usecase.RemoveFromFavoritesUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 
 val favoritesModule = module {
-    factory<FavoritesTabsContainerScreenModel> {
-        provideFavoritesTabsContainerScreenModel()
-    }
-
     factory<FavoritesApi> {
         provideFavoritesApi(
             retrofit = get(
@@ -38,6 +35,10 @@ val favoritesModule = module {
 
     factory<GetUserFavoritesUseCase> {
         provideGetUserFavoritesUseCase(favoritesRepository = get())
+    }
+
+    factory<UpdateAnimeStatusUseCase> {
+        provideUpdateAnimeStatusUseCase(favoritesRepository = get())
     }
 
     factory<PlannedScreenModel> {
@@ -71,7 +72,8 @@ val favoritesModule = module {
     factory<CompletedScreenModel> {
         provideCompletedScreenModel(
             favoritesRepository = get(),
-            getUserIdUseCase = get()
+            getUserIdUseCase = get(),
+            updateAnimeStatusUseCase = get()
         )
     }
 
@@ -82,9 +84,6 @@ val favoritesModule = module {
         )
     }
 }
-
-private fun provideFavoritesTabsContainerScreenModel(): FavoritesTabsContainerScreenModel =
-    FavoritesTabsContainerScreenModel()
 
 private fun provideFavoritesApi(
     retrofit: Retrofit
@@ -128,10 +127,12 @@ private fun provideDroppedScreenModel(
 
 private fun provideCompletedScreenModel(
     favoritesRepository: FavoritesRepository,
-    getUserIdUseCase: GetUserIdUseCase
+    getUserIdUseCase: GetUserIdUseCase,
+    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
 ) : CompletedScreenModel = CompletedScreenModel(
     favoritesRepository = favoritesRepository,
-    getUserIdUseCase = getUserIdUseCase
+    getUserIdUseCase = getUserIdUseCase,
+    updateAnimeStatusUseCase = updateAnimeStatusUseCase
 )
 
 private fun provideOnHoldScreenModel(
@@ -148,4 +149,10 @@ private fun provideFavoritesScreenModel(
 ) : FavoritesScreenModel = FavoritesScreenModel(
     getUserFavoritesUseCase = getUserFavoritesUseCase,
     removeFromFavoritesUseCase = removeFromFavoritesUseCase
+)
+
+private fun provideUpdateAnimeStatusUseCase(
+    favoritesRepository: FavoritesRepository
+): UpdateAnimeStatusUseCase = UpdateAnimeStatusUseCaseImpl(
+    favoritesRepository = favoritesRepository
 )

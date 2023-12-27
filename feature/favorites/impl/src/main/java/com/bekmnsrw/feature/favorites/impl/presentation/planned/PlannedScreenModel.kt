@@ -6,12 +6,11 @@ import androidx.paging.cachedIn
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
-import com.bekmnsrw.feature.favorites.api.model.UserRate
+import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.api.repository.FavoritesRepository
 import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
 import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenAction.NavigateDetails
-import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.OnInit
-import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.OnItemClicked
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,20 +42,31 @@ internal class PlannedScreenModel(
 //        return id ?: 0
 //    }
 
-    private val _planned: MutableStateFlow<PagingData<UserRate>> = MutableStateFlow(PagingData.empty())
-    val planned: StateFlow<PagingData<UserRate>> = _planned.asStateFlow()
+    private val _screenState = MutableStateFlow(PlannedScreenState())
+    val screenState: StateFlow<PlannedScreenState> = _screenState.asStateFlow()
 
     private val _screenAction = MutableSharedFlow<PlannedScreenAction?>()
     val screenAction: SharedFlow<PlannedScreenAction?> = _screenAction.asSharedFlow()
+
+    private val _planned: MutableStateFlow<PagingData<UserRates>> = MutableStateFlow(PagingData.empty())
+    val planned: StateFlow<PagingData<UserRates>> = _planned.asStateFlow()
 
     init {
         eventHandler(OnInit)
     }
 
     @Immutable
+    internal data class PlannedScreenState(
+        val shouldShowModalBottomSheet: Boolean = false,
+        val selectedItemIndex: Int = 0
+    )
+
+    @Immutable
     internal sealed interface PlannedScreenEvent {
         data object OnInit : PlannedScreenEvent
         data class OnItemClicked(val id: Int) : PlannedScreenEvent
+        data object OnModalBottomSheetDismissRequest : PlannedScreenEvent
+        data class OnLongPress(val index: Int) : PlannedScreenEvent
     }
 
     @Immutable
@@ -67,13 +77,18 @@ internal class PlannedScreenModel(
     fun eventHandler(event: PlannedScreenEvent) {
         when (event) {
             OnInit -> onInit()
+
             is OnItemClicked -> onItemClicked(event.id)
+
+            is OnLongPress -> onLongPress(event.index)
+
+            OnModalBottomSheetDismissRequest -> onModalBottomSheetDismissRequest()
         }
     }
 
     private fun onInit() = screenModelScope.launch {
 //        userId?.let {
-            favoritesRepository.getPlannedPaged(1_379_176, UserRatesEnum.PLANNED.status)
+            favoritesRepository.getPlannedPaged(1_379_176, UserRatesEnum.PLANNED.key)
                 .flowOn(Dispatchers.IO)
                 .cachedIn(screenModelScope)
                 .collect { data -> _planned.value = data }
@@ -81,9 +96,22 @@ internal class PlannedScreenModel(
     }
 
     private fun onItemClicked(id: Int) = screenModelScope.launch {
-        _screenAction.emit(
-            NavigateDetails(
-                id = id
+        _screenAction.emit(NavigateDetails(id = id))
+    }
+
+    private fun onModalBottomSheetDismissRequest() = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowModalBottomSheet = false
+            )
+        )
+    }
+
+    private fun onLongPress(index: Int) = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowModalBottomSheet = true,
+                selectedItemIndex = index
             )
         )
     }

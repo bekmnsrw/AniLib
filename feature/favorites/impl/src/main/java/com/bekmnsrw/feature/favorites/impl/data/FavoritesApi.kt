@@ -1,8 +1,12 @@
 package com.bekmnsrw.feature.favorites.impl.data
 
+import com.bekmnsrw.feature.favorites.impl.data.request.UserRatesRequest
 import com.bekmnsrw.feature.favorites.impl.data.response.FavoritesResponse
+import com.bekmnsrw.feature.favorites.impl.data.response.UpdatedUserRatesResponse
 import com.bekmnsrw.feature.favorites.impl.data.response.UserRatesResponse
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -22,4 +26,10 @@ internal interface FavoritesApi {
     suspend fun getUserFavorites(
         @Path("id") id: Int
     ): FavoritesResponse
+
+    @PATCH(value = "v2/user_rates/{id}")
+    suspend fun updateAnimeStatus(
+        @Path("id") id: Int,
+        @Body userRates: UserRatesRequest
+    ): UpdatedUserRatesResponse
 }

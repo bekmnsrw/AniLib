@@ -1,19 +1,18 @@
 package com.bekmnsrw.core.designsystem.icon
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.rounded.ArrowBackIos
-import androidx.compose.material.icons.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.FilterAlt
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PersonOutline
+import androidx.compose.material.icons.rounded.PlaylistAdd
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.StarRate
 
@@ -29,7 +28,8 @@ object AniLibIcons {
     val ArrowBack = Icons.Rounded.ArrowBackIos
     val Search = Icons.Rounded.Search
     val Filter = Icons.Rounded.FilterAlt
-    val ArrowForward = Icons.Rounded.ArrowForwardIos
     val CheckMark = Icons.Rounded.Check
     val Info = Icons.Outlined.Info
+    val AddToList = Icons.Rounded.PlaylistAdd
+    val MoreVert = Icons.Rounded.MoreVert
 }

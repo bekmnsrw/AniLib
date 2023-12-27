@@ -119,11 +119,7 @@ internal class FavoritesScreenModel(
     }
 
     private fun onItemClicked(id: Int) = screenModelScope.launch {
-        _screenAction.emit(
-            NavigateDetails(
-                id = id
-            )
-        )
+        _screenAction.emit(NavigateDetails(id = id))
     }
 
     private fun onCardPressed(id: Int) = screenModelScope.launch {}

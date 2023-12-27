@@ -1,5 +1,8 @@
 package com.bekmnsrw.feature.favorites.impl.presentation.dropped
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -13,23 +16,34 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.feature.favorites.api.model.UserRate
+import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
+import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeBottomSheet
 import com.bekmnsrw.feature.favorites.impl.presentation.container.TabAnimeList
 import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenAction
-import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenEvent.OnItemClicked
+import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenEvent.*
 
 internal class DroppedScreen : Screen {
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<DroppedScreenModel>()
-        val droppedAnimePaged = screenModel.dropped.collectAsLazyPagingItems()
+        val screenState by screenModel.screenState.collectAsStateWithLifecycle()
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
+        val droppedAnimePaged = screenModel.dropped.collectAsLazyPagingItems()
+
+        val modalBottomSheetState = rememberModalBottomSheetState()
 
         DroppedScreenContent(
             droppedAnimePaged = droppedAnimePaged,
-            onItemClicked = { screenModel.eventHandler(OnItemClicked(id = it)) }
+            modalBottomSheetState = modalBottomSheetState,
+            shouldShowModalBottomSheet = screenState.shouldShowModalBottomSheet,
+            selectedItemIndex = screenState.selectedItemIndex,
+            onItemClicked = { screenModel.eventHandler(OnItemClicked(id = it)) },
+            onLongClick = { screenModel.eventHandler(OnLongPress(index = it)) },
+            onDismissRequest = { screenModel.eventHandler(OnModalBottomSheetDismissRequest) },
+            onChangeCategoryClick = {}
         )
 
         DroppedScreenActions(screenAction = screenAction)
@@ -56,15 +70,35 @@ private fun DroppedScreenActions(screenAction: DroppedScreenAction?) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DroppedScreenContent(
-    droppedAnimePaged: LazyPagingItems<UserRate>,
-    onItemClicked: (Int) -> Unit
+    droppedAnimePaged: LazyPagingItems<UserRates>,
+    modalBottomSheetState: SheetState,
+    shouldShowModalBottomSheet: Boolean,
+    selectedItemIndex: Int,
+    onDismissRequest: () -> Unit,
+    onItemClicked: (Int) -> Unit,
+    onLongClick: (Int) -> Unit,
+    onChangeCategoryClick: () -> Unit
 ) {
     TabAnimeList(
-        userRatePaged = droppedAnimePaged,
-        status = UserRatesEnum.DROPPED.status,
-        onItemClicked = onItemClicked,
-        isLoading = droppedAnimePaged.loadState.refresh == LoadState.Loading
+        userRatesPaged = droppedAnimePaged,
+        status = UserRatesEnum.DROPPED.key,
+        isLoading = droppedAnimePaged.loadState.refresh == LoadState.Loading,
+        onItemClick = onItemClicked,
+        onLongClick = onLongClick
     )
+
+    if (shouldShowModalBottomSheet) {
+        droppedAnimePaged[selectedItemIndex]?.let { userRate ->
+            AnimeBottomSheet(
+                sheetState = modalBottomSheetState,
+                category = userRate.userStatus,
+                name = userRate.anime.name,
+                onChangeCategoryClick = onChangeCategoryClick,
+                onDismissRequest = onDismissRequest
+            )
+        }
+    }
 }

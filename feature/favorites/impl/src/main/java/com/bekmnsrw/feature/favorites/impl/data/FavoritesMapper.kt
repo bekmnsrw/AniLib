@@ -1,7 +1,7 @@
 package com.bekmnsrw.feature.favorites.impl.data
 
 import com.bekmnsrw.feature.favorites.api.model.FavoriteAnime
-import com.bekmnsrw.feature.favorites.api.model.UserRate
+import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.impl.data.response.AnimeImageResponse
 import com.bekmnsrw.feature.favorites.impl.data.response.AnimeResponse
 import com.bekmnsrw.feature.favorites.impl.data.response.FavoriteAnimeResponse
@@ -9,7 +9,8 @@ import com.bekmnsrw.feature.favorites.impl.data.response.UserRatesResponse
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeImage
 
-internal fun UserRatesResponse.toUserRate(): UserRate = UserRate(
+internal fun UserRatesResponse.toUserRate(): UserRates = UserRates(
+    id = id,
     anime = animeResponse.toAnime(),
     userScore = score,
     userStatus = status,
@@ -26,7 +27,7 @@ internal fun FavoriteAnimeResponse.toFavoriteAnime(): FavoriteAnime = FavoriteAn
 
 internal fun List<FavoriteAnimeResponse>.toFavoriteAnimeList(): List<FavoriteAnime> = this.map { it.toFavoriteAnime() }
 
-internal fun List<UserRatesResponse>.toUserRateList(): List<UserRate> = this.map {
+internal fun List<UserRatesResponse>.toUserRateList(): List<UserRates> = this.map {
     it.toUserRate()
 }
 

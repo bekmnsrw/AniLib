@@ -2,7 +2,8 @@ package com.bekmnsrw.feature.favorites.api.model
 
 import com.bekmnsrw.feature.home.api.model.Anime
 
-data class UserRate(
+data class UserRates(
+    val id: Int,
     val anime: Anime,
     val userScore: Int,
     val userStatus: String,

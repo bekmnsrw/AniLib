@@ -1,10 +1,14 @@
 package com.bekmnsrw.feature.favorites.impl.presentation.container
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,34 +16,39 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.RadioButton
 import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRowDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getScreenModel
+import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.AniLibImage
-import com.bekmnsrw.feature.favorites.api.model.UserRate
+import com.bekmnsrw.core.widget.AniLibModalBottomSheet
+import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.impl.R
 import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
 import com.bekmnsrw.feature.favorites.impl.presentation.TabItem
@@ -49,19 +58,29 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 internal class FavoritesTabsContainer : Screen {
 
+    private companion object {
+        val tabs = persistentListOf(
+            TabItem.Favorites,
+            TabItem.PlannedToWatch,
+            TabItem.Completed,
+            TabItem.Watching,
+            TabItem.Dropped,
+            TabItem.OnHold
+        )
+    }
+
     @OptIn(ExperimentalPagerApi::class)
     @Composable
     override fun Content() {
-        val screenModel = getScreenModel<FavoritesTabsContainerScreenModel>()
-        val screenState by screenModel.screenState.collectAsStateWithLifecycle()
         val pagerState = rememberPagerState()
 
         FavoritesScreenContent(
-            tabs = screenState.tabs,
+            tabs = tabs,
             pagerState = pagerState
         )
     }
@@ -128,17 +147,19 @@ private fun TabsContent(
     }
 }
 
+// Move to widget module
 @Composable
 fun TabAnimeList(
-    userRatePaged: LazyPagingItems<UserRate>,
+    userRatesPaged: LazyPagingItems<UserRates>,
     status: String,
     isLoading: Boolean,
-    onItemClicked: (Int) -> Unit
+    onItemClick: (Int) -> Unit,
+    onLongClick: (Int) -> Unit
 ) {
     if (isLoading) {
         AniLibCircularProgressBar(shouldShow = true)
     } else {
-        if (userRatePaged.itemCount == 0) {
+        if (userRatesPaged.itemCount == 0) {
             EmptyListText(status = status)
         } else {
             LazyColumn(
@@ -149,13 +170,15 @@ fun TabAnimeList(
                     .padding(bottom = 56.dp)
             ) {
                 items(
-                    count = userRatePaged.itemCount,
-                    key = userRatePaged.itemKey { it.anime.id },
-                    contentType = userRatePaged.itemContentType { "AnimePaged" }
+                    count = userRatesPaged.itemCount,
+                    key = userRatesPaged.itemKey { it.anime.id },
+                    contentType = userRatesPaged.itemContentType { "AnimePaged" }
                 ) { index ->
                     ListItem(
-                        userRate = userRatePaged[index],
-                        onItemClicked = onItemClicked
+                        index = index,
+                        userRates = userRatesPaged[index],
+                        onItemClick = onItemClick,
+                        onLongClick = onLongClick
                     )
                 }
             }
@@ -163,47 +186,28 @@ fun TabAnimeList(
     }
 }
 
-@Composable
-private fun EmptyListText(status: String) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.align(Alignment.Center)
-        ) {
-            Text(
-                text = stringResource(id = R.string.empty_list_placeholder)
-            )
-            Text(
-                text = when (status) {
-                    UserRatesEnum.PLANNED.status -> stringResource(id = R.string.planned)
-                    UserRatesEnum.WATCHING.status ->  stringResource(id = R.string.watching)
-                    UserRatesEnum.COMPLETED.status ->  stringResource(id = R.string.completed)
-                    UserRatesEnum.ON_HOLD.status ->  stringResource(id = R.string.on_hold)
-                    UserRatesEnum.DROPPED.status ->  stringResource(id = R.string.dropped)
-                    else -> ""
-                }
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ListItem(
-    userRate: UserRate?,
-    onItemClicked: (Int) -> Unit
+    index: Int,
+    userRates: UserRates?,
+    onItemClick: (Int) -> Unit,
+    onLongClick: (Int) -> Unit
 ) {
-    userRate?.let {
+    userRates?.let {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight(),
-            shape = RoundedCornerShape(8.dp),
-            onClick = { onItemClicked(userRate.anime.id) }
+                .wrapContentHeight()
+                .combinedClickable(
+                    onClick = { onItemClick(userRates.anime.id) },
+                    onLongClick = { onLongClick(index) }
+                ),
+            shape = RoundedCornerShape(8.dp)
         ) {
             Row {
                 AniLibImage(
-                    imageUrl = userRate.anime.image.original,
+                    imageUrl = userRates.anime.image.original,
                     modifier = Modifier
                         .width(120.dp)
                         .height(160.dp)
@@ -214,54 +218,65 @@ private fun ListItem(
                             )
                         )
                 )
-                ListItemDescription(userRate = userRate)
+                ListItemDescription(
+                    userRates = userRates,
+                    onClick = { onLongClick(index) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ListItemDescription(userRate: UserRate) {
+private fun ListItemDescription(
+    userRates: UserRates,
+    onClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        with(userRate) {
-            DescriptionItem(
-                value = anime.name,
-                style = AniLibTypography.titleMedium,
-                maxLines = 2
-            )
-            DescriptionItem(
-                key = "Status: ",
-                value = anime.status
-            )
-            DescriptionItem(
-                key = "Kind: ",
-                value = anime.kind
-            )
-            when (anime.status) {
-                "ongoing", "released" -> {
-                    DescriptionItem(
-                        key = "Rating: ",
-                        value = anime.score
+        with(userRates) {
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = anime.name,
+                    style = AniLibTypography.titleMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = AniLibIcons.MoreVert,
+                    contentDescription = null,
+                    modifier = Modifier.clickable { onClick() }
+                )
+            }
+            Spacer(modifier = Modifier.padding(vertical = 2.dp))
+            Text(text = anime.status.replaceFirstChar { it.uppercase() })
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (anime.kind != "movie" && anime.status != "anons") {
+                    Text(
+                        text = when (anime.status) {
+                            "released" -> "${anime.numberOfEpisodes} ep"
+                            "ongoing" -> "${anime.episodesAired}/${anime.numberOfEpisodes} ep"
+                            else -> ""
+                        }
                     )
-                    DescriptionItem(
-                        key = "Your rating: ",
-                        value = if (userScore == 0) "No rating" else "$userScore"
-                    )
-                    if (anime.kind != "movie") {
-                        DescriptionItem(
-                            key = "Episodes: ",
-                            value = when (anime.status) {
-                                "ongoing" -> "${anime.episodesAired}/${anime.numberOfEpisodes} ep"
-                                else -> "${anime.numberOfEpisodes} ep"
-                            }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = anime.score
                         )
-                        DescriptionItem(
-                            key = "Watched: ",
-                            value = "$episodesWatched ep"
+                        Icon(
+                            imageVector = AniLibIcons.StarRate,
+                            contentDescription = null
                         )
                     }
                 }
@@ -270,25 +285,116 @@ private fun ListItemDescription(userRate: UserRate) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DescriptionItem(
-    key: String = "",
-    value: String,
-    style: TextStyle = AniLibTypography.bodyMedium,
-    maxLines: Int = 1
+fun AnimeBottomSheet(
+    sheetState: SheetState,
+    category: String,
+    name: String,
+    onChangeCategoryClick: () -> Unit,
+    onDismissRequest: () -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        if (key.isNotEmpty()) {
+    AniLibModalBottomSheet(
+        sheetState = sheetState,
+        onDismissRequest = onDismissRequest
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(
-                text = key,
-                style = AniLibTypography.titleSmall
+                text = name,
+                style = AniLibTypography.titleMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Divider()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onChangeCategoryClick() },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = AniLibIcons.AddToList,
+                    contentDescription = null
+                )
+                Text(text = "In category: $category")
+            }
+        }
+    }
+}
+
+@Composable
+fun AnimeStatusDialog(
+    id: Int,
+    currentStatus: String,
+    onDismissRequest: () -> Unit,
+    onRadioButtonClick: (String, Int) -> Unit
+) {
+    val statuses = persistentListOf(
+        UserRatesEnum.COMPLETED,
+        UserRatesEnum.DROPPED,
+        UserRatesEnum.ON_HOLD,
+        UserRatesEnum.PLANNED,
+        UserRatesEnum.WATCHING
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {},
+        title = { Text(text = "Choose anime status") },
+        text = {
+            Column {
+                LazyColumn {
+                    items(items = statuses) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onRadioButtonClick(it.key, id) }
+                        ) {
+                            RadioButton(
+                                selected = currentStatus == it.key,
+                                onClick = { onRadioButtonClick(it.key, id) }
+                            )
+                            Text(
+                                text = it.value,
+                                style = AniLibTypography.titleMedium
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun EmptyListText(status: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.align(Alignment.Center),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.empty_list_placeholder),
+                style = AniLibTypography.titleMedium
+            )
+            Text(
+                text = when (status) {
+                    UserRatesEnum.PLANNED.key -> stringResource(id = R.string.planned)
+                    UserRatesEnum.WATCHING.key -> stringResource(id = R.string.watching)
+                    UserRatesEnum.COMPLETED.key -> stringResource(id = R.string.completed)
+                    UserRatesEnum.ON_HOLD.key -> stringResource(id = R.string.on_hold)
+                    UserRatesEnum.DROPPED.key -> stringResource(id = R.string.dropped)
+                    else -> ""
+                },
+               textAlign = TextAlign.Center
             )
         }
-        Text(
-            text = value,
-            style = style,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = maxLines,
-        )
     }
 }
