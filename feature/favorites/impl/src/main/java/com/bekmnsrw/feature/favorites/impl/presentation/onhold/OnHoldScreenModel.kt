@@ -8,6 +8,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
 import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.api.repository.FavoritesRepository
+import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenAction.*
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenEvent.*
@@ -23,7 +24,8 @@ import kotlinx.coroutines.launch
 
 internal class OnHoldScreenModel(
     private val favoritesRepository: FavoritesRepository,
-    private val getUserIdUseCase: GetUserIdUseCase
+    private val getUserIdUseCase: GetUserIdUseCase,
+    private val updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
 ) : ScreenModel {
 
     private val _screenState = MutableStateFlow(OnHoldScreenState())
@@ -32,7 +34,8 @@ internal class OnHoldScreenModel(
     private val _screenAction = MutableSharedFlow<OnHoldScreenAction?>()
     val screenAction: SharedFlow<OnHoldScreenAction?> = _screenAction.asSharedFlow()
 
-    private val _onHold: MutableStateFlow<PagingData<UserRates>> = MutableStateFlow(PagingData.empty())
+    private val _onHold: MutableStateFlow<PagingData<UserRates>> =
+        MutableStateFlow(PagingData.empty())
     val onHold: StateFlow<PagingData<UserRates>> = _onHold.asStateFlow()
 
     init {
@@ -41,32 +44,37 @@ internal class OnHoldScreenModel(
 
     @Immutable
     internal data class OnHoldScreenState(
-        val shouldShowModalBottomSheet: Boolean = false,
-        val selectedItemIndex: Int = 0
+        val shouldShowBottomSheet: Boolean = false,
+        val selectedItemIndex: Int = 0,
+        val shouldShowDialog: Boolean = false
     )
 
     @Immutable
     internal sealed interface OnHoldScreenEvent {
         data object OnInit : OnHoldScreenEvent
-        data class OnItemClicked(val id: Int) : OnHoldScreenEvent
-        data object OnModalBottomSheetDismissRequest : OnHoldScreenEvent
+        data class OnItemClick(val id: Int) : OnHoldScreenEvent
+        data object OnBottomSheetDismissRequest : OnHoldScreenEvent
         data class OnLongPress(val index: Int) : OnHoldScreenEvent
+        data object OnChangeCategoryClick : OnHoldScreenEvent
+        data object OnDialogDismissRequest : OnHoldScreenEvent
+        data class OnRadioButtonClick(val status: String, val id: Int) : OnHoldScreenEvent
     }
 
     @Immutable
     internal sealed interface OnHoldScreenAction {
         data class NavigateDetails(val id: Int) : OnHoldScreenAction
+        data class ShowSnackbar(val message: String) : OnHoldScreenAction
     }
 
     fun eventHandler(event: OnHoldScreenEvent) {
         when (event) {
-             OnInit -> onInit()
-
-            is OnItemClicked -> onItemScreen(event.id)
-
+            OnInit -> onInit()
+            is OnItemClick -> onItemClick(event.id)
             is OnLongPress -> onLongPress(event.index)
-
-            OnModalBottomSheetDismissRequest -> onModalBottomSheetDismissRequest()
+            OnBottomSheetDismissRequest -> onBottomSheetDismissRequest()
+            OnChangeCategoryClick -> onChangeCategoryClick()
+            OnDialogDismissRequest -> onDialogDismissRequest()
+            is OnRadioButtonClick -> onRadioButtonClick(event.status, event.id)
         }
     }
 
@@ -77,7 +85,7 @@ internal class OnHoldScreenModel(
             .collect { data -> _onHold.value = data }
     }
 
-    private fun onItemScreen(id: Int) = screenModelScope.launch {
+    private fun onItemClick(id: Int) = screenModelScope.launch {
         _screenAction.emit(
             NavigateDetails(
                 id = id
@@ -85,10 +93,10 @@ internal class OnHoldScreenModel(
         )
     }
 
-    private fun onModalBottomSheetDismissRequest() = screenModelScope.launch {
+    private fun onBottomSheetDismissRequest() = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
-                shouldShowModalBottomSheet = false
+                shouldShowBottomSheet = false
             )
         )
     }
@@ -96,8 +104,47 @@ internal class OnHoldScreenModel(
     private fun onLongPress(index: Int) = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
-                shouldShowModalBottomSheet = true,
+                shouldShowBottomSheet = true,
                 selectedItemIndex = index
+            )
+        )
+    }
+
+    private fun onChangeCategoryClick() = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = true,
+                shouldShowBottomSheet = false
+            )
+        )
+    }
+
+    private fun onDialogDismissRequest() = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = false
+            )
+        )
+    }
+
+    private fun onRadioButtonClick(status: String, id: Int) = screenModelScope.launch {
+        updateAnimeStatusUseCase(id = id, status = status)
+            .flowOn(Dispatchers.IO)
+            .collect { response ->
+                val updatedStatus = response
+                    .replace(oldValue = "_", newValue = " ")
+                    .replaceFirstChar { it.uppercase() }
+
+                _screenAction.emit(
+                    ShowSnackbar(
+                        message = "Successfully added to '$updatedStatus' category"
+                    )
+                )
+            }
+
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = false
             )
         )
     }

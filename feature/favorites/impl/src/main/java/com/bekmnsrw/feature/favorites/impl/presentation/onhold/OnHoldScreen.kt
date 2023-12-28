@@ -1,11 +1,19 @@
 package com.bekmnsrw.feature.favorites.impl.presentation.onhold
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -16,14 +24,20 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
+import com.bekmnsrw.core.widget.AniLibSnackbar
 import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
 import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeBottomSheet
+import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeStatusDialog
 import com.bekmnsrw.feature.favorites.impl.presentation.container.TabAnimeList
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenAction
-import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenEvent.OnItemClicked
+import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenEvent.OnBottomSheetDismissRequest
+import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenEvent.OnChangeCategoryClick
+import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenEvent.OnDialogDismissRequest
+import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenEvent.OnItemClick
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenEvent.OnLongPress
-import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenEvent.OnModalBottomSheetDismissRequest
+import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenEvent.OnRadioButtonClick
+import kotlinx.coroutines.launch
 
 internal class OnHoldScreen : Screen {
 
@@ -36,29 +50,46 @@ internal class OnHoldScreen : Screen {
         val onHoldAnimePaged = screenModel.onHold.collectAsLazyPagingItems()
 
         val modalBottomSheetState = rememberModalBottomSheetState()
+        val snackbarHostState = remember { SnackbarHostState() }
 
-        OnHoldScreenContent(
-            onHoldAnimePaged = onHoldAnimePaged,
-            modalBottomSheetState = modalBottomSheetState,
-            shouldShowModalBottomSheet = screenState.shouldShowModalBottomSheet,
-            selectedItemIndex = screenState.selectedItemIndex,
-            onItemClicked = { screenModel.eventHandler(OnItemClicked(id = it)) },
-            onLongClick = { screenModel.eventHandler(OnLongPress(index = it)) },
-            onDismissRequest = { screenModel.eventHandler(OnModalBottomSheetDismissRequest) },
-            onChangeCategoryClick = {}
+        with(screenModel) {
+            OnHoldScreenContent(
+                onHoldAnimePaged = onHoldAnimePaged,
+                snackbarHostState = snackbarHostState,
+                modalBottomSheetState = modalBottomSheetState,
+                shouldShowModalBottomSheet = screenState.shouldShowBottomSheet,
+                shouldShowDialog = screenState.shouldShowDialog,
+                selectedItemIndex = screenState.selectedItemIndex,
+                onItemClick = { eventHandler(OnItemClick(id = it)) },
+                onLongClick = { eventHandler(OnLongPress(index = it)) },
+                onDialogDismissRequest = { eventHandler(OnDialogDismissRequest) },
+                onBottomSheetDismissRequest = { eventHandler(OnBottomSheetDismissRequest) },
+                onChangeCategoryClick = { eventHandler(OnChangeCategoryClick) },
+                onRadioButtonClick = { status, id ->
+                    eventHandler(OnRadioButtonClick(status = status, id = id))
+                }
+            )
+        }
+
+        OnHoldScreenActions(
+            screenAction = screenAction,
+            snackbarHostState = snackbarHostState
         )
-
-        OnHoldScreenActions(screenAction = screenAction)
     }
 }
 
 @Composable
-private fun OnHoldScreenActions(screenAction: OnHoldScreenAction?) {
+private fun OnHoldScreenActions(
+    screenAction: OnHoldScreenAction?,
+    snackbarHostState: SnackbarHostState
+) {
     val navigator = LocalNavigator.currentOrThrow
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(screenAction) {
         when (screenAction) {
             null -> Unit
+
             is OnHoldScreenAction.NavigateDetails -> {
                 val detailsScreen = ScreenRegistry.get(
                     provider = SharedScreen.DetailsScreen(
@@ -66,6 +97,13 @@ private fun OnHoldScreenActions(screenAction: OnHoldScreenAction?) {
                     )
                 )
                 navigator.push(item = detailsScreen)
+            }
+
+            is OnHoldScreenAction.ShowSnackbar -> coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = screenAction.message,
+                    duration = SnackbarDuration.Short
+                )
             }
         }
     }
@@ -75,18 +113,22 @@ private fun OnHoldScreenActions(screenAction: OnHoldScreenAction?) {
 @Composable
 private fun OnHoldScreenContent(
     onHoldAnimePaged: LazyPagingItems<UserRates>,
+    snackbarHostState: SnackbarHostState,
     modalBottomSheetState: SheetState,
     shouldShowModalBottomSheet: Boolean,
+    shouldShowDialog: Boolean,
     selectedItemIndex: Int,
-    onDismissRequest: () -> Unit,
-    onItemClicked: (Int) -> Unit,
+    onBottomSheetDismissRequest: () -> Unit,
+    onDialogDismissRequest: () -> Unit,
+    onItemClick: (Int) -> Unit,
     onLongClick: (Int) -> Unit,
-    onChangeCategoryClick: () -> Unit
+    onChangeCategoryClick: () -> Unit,
+    onRadioButtonClick: (String, Int) -> Unit
 ) {
     TabAnimeList(
         userRatesPaged = onHoldAnimePaged,
         status = UserRatesEnum.PLANNED.key,
-        onItemClick = onItemClicked,
+        onItemClick = onItemClick,
         isLoading = onHoldAnimePaged.loadState.refresh == LoadState.Loading,
         onLongClick = onLongClick
     )
@@ -98,8 +140,26 @@ private fun OnHoldScreenContent(
                 category = userRate.userStatus,
                 name = userRate.anime.name,
                 onChangeCategoryClick = onChangeCategoryClick,
-                onDismissRequest = onDismissRequest
+                onDismissRequest = onBottomSheetDismissRequest
             )
         }
+    }
+
+    if (shouldShowDialog) {
+        onHoldAnimePaged[selectedItemIndex]?.let { userRate ->
+            AnimeStatusDialog(
+                id = userRate.id,
+                currentStatus = userRate.userStatus,
+                onDismissRequest = onDialogDismissRequest,
+                onRadioButtonClick = onRadioButtonClick
+            )
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        AniLibSnackbar(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            snackbarHostState = snackbarHostState
+        )
     }
 }

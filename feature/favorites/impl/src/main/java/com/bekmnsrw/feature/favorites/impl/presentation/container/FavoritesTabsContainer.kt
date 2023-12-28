@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.RadioButton
+import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRowDefaults
@@ -27,10 +28,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -109,9 +113,14 @@ private fun Tabs(
     val coroutineScope = rememberCoroutineScope()
 
     ScrollableTabRow(
+        divider = {},
+        edgePadding = 16.dp,
         selectedTabIndex = pagerState.currentPage,
+        backgroundColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.pagerTabIndicatorOffset(
                     pagerState = pagerState,
                     tabPositions = tabPositions
@@ -125,7 +134,7 @@ private fun Tabs(
                 text = { Text(tabItem.title) },
                 onClick = {
                     coroutineScope.launch {
-                        pagerState.animateScrollToPage(index)
+                        pagerState.scrollToPage(index)
                     }
                 }
             )
@@ -147,7 +156,6 @@ private fun TabsContent(
     }
 }
 
-// Move to widget module
 @Composable
 fun TabAnimeList(
     userRatesPaged: LazyPagingItems<UserRates>,
@@ -317,7 +325,7 @@ fun AnimeBottomSheet(
                     imageVector = AniLibIcons.AddToList,
                     contentDescription = null
                 )
-                Text(text = "In category: $category")
+                Text(text = stringResource(id = R.string.in_category, category))
             }
         }
     }
@@ -331,17 +339,19 @@ fun AnimeStatusDialog(
     onRadioButtonClick: (String, Int) -> Unit
 ) {
     val statuses = persistentListOf(
-        UserRatesEnum.COMPLETED,
-        UserRatesEnum.DROPPED,
-        UserRatesEnum.ON_HOLD,
         UserRatesEnum.PLANNED,
-        UserRatesEnum.WATCHING
+        UserRatesEnum.COMPLETED,
+        UserRatesEnum.WATCHING,
+        UserRatesEnum.DROPPED,
+        UserRatesEnum.ON_HOLD
     )
+
+    val state = remember { mutableStateOf(currentStatus) }
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {},
-        title = { Text(text = "Choose anime status") },
+        title = { Text(text = stringResource(id = R.string.choose_anime_status)) },
         text = {
             Column {
                 LazyColumn {
@@ -353,12 +363,19 @@ fun AnimeStatusDialog(
                                 .clickable { onRadioButtonClick(it.key, id) }
                         ) {
                             RadioButton(
-                                selected = currentStatus == it.key,
-                                onClick = { onRadioButtonClick(it.key, id) }
+                                selected = state.value == it.key,
+                                onClick = {
+                                    onRadioButtonClick(it.key, id)
+                                    state.value = it.key
+                                },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = MaterialTheme.colorScheme.primary,
+                                    unselectedColor = MaterialTheme.colorScheme.onSurface
+                                )
                             )
                             Text(
                                 text = it.value,
-                                style = AniLibTypography.titleMedium
+                                style = AniLibTypography.bodyLarge
                             )
                         }
                     }

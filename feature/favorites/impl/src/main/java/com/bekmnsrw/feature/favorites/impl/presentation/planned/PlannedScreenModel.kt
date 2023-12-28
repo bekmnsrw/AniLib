@@ -8,8 +8,9 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
 import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.api.repository.FavoritesRepository
+import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
-import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenAction.NavigateDetails
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenAction.*
 import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,7 +24,8 @@ import kotlinx.coroutines.launch
 
 internal class PlannedScreenModel(
     private val favoritesRepository: FavoritesRepository,
-    private val getUserIdUseCase: GetUserIdUseCase
+    private val getUserIdUseCase: GetUserIdUseCase,
+    private val updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
 ) : ScreenModel {
 
 //    private val userId by lazy { getId() }
@@ -57,32 +59,37 @@ internal class PlannedScreenModel(
 
     @Immutable
     internal data class PlannedScreenState(
-        val shouldShowModalBottomSheet: Boolean = false,
-        val selectedItemIndex: Int = 0
+        val shouldShowBottomSheet: Boolean = false,
+        val selectedItemIndex: Int = 0,
+        val shouldShowDialog: Boolean = false
     )
 
     @Immutable
     internal sealed interface PlannedScreenEvent {
         data object OnInit : PlannedScreenEvent
-        data class OnItemClicked(val id: Int) : PlannedScreenEvent
-        data object OnModalBottomSheetDismissRequest : PlannedScreenEvent
+        data class OnItemClick(val id: Int) : PlannedScreenEvent
+        data object OnBottomSheetDismissRequest : PlannedScreenEvent
         data class OnLongPress(val index: Int) : PlannedScreenEvent
+        data object OnChangeCategoryClick : PlannedScreenEvent
+        data object OnDialogDismissRequest : PlannedScreenEvent
+        data class OnRadioButtonClick(val status: String, val id: Int) : PlannedScreenEvent
     }
 
     @Immutable
     internal sealed interface PlannedScreenAction {
         data class NavigateDetails(val id: Int) : PlannedScreenAction
+        data class ShowSnackbar(val message: String) : PlannedScreenAction
     }
 
     fun eventHandler(event: PlannedScreenEvent) {
         when (event) {
             OnInit -> onInit()
-
-            is OnItemClicked -> onItemClicked(event.id)
-
+            is OnItemClick -> onItemClick(event.id)
             is OnLongPress -> onLongPress(event.index)
-
-            OnModalBottomSheetDismissRequest -> onModalBottomSheetDismissRequest()
+            OnBottomSheetDismissRequest -> onBottomSheetDismissRequest()
+            OnChangeCategoryClick -> onChangeCategoryClick()
+            OnDialogDismissRequest -> onDialogDismissRequest()
+            is OnRadioButtonClick -> onRadioButtonClick(event.status, event.id)
         }
     }
 
@@ -95,14 +102,14 @@ internal class PlannedScreenModel(
 //        }
     }
 
-    private fun onItemClicked(id: Int) = screenModelScope.launch {
+    private fun onItemClick(id: Int) = screenModelScope.launch {
         _screenAction.emit(NavigateDetails(id = id))
     }
 
-    private fun onModalBottomSheetDismissRequest() = screenModelScope.launch {
+    private fun onBottomSheetDismissRequest() = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
-                shouldShowModalBottomSheet = false
+                shouldShowBottomSheet = false
             )
         )
     }
@@ -110,8 +117,47 @@ internal class PlannedScreenModel(
     private fun onLongPress(index: Int) = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
-                shouldShowModalBottomSheet = true,
+                shouldShowBottomSheet = true,
                 selectedItemIndex = index
+            )
+        )
+    }
+
+    private fun onChangeCategoryClick() = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = true,
+                shouldShowBottomSheet = false
+            )
+        )
+    }
+
+    private fun onDialogDismissRequest() = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = false
+            )
+        )
+    }
+
+    private fun onRadioButtonClick(status: String, id: Int) = screenModelScope.launch {
+        updateAnimeStatusUseCase(id = id, status = status)
+            .flowOn(Dispatchers.IO)
+            .collect { response ->
+                val updatedStatus = response
+                    .replace(oldValue = "_", newValue = " ")
+                    .replaceFirstChar { it.uppercase() }
+
+                _screenAction.emit(
+                    ShowSnackbar(
+                        message = "Successfully added to '$updatedStatus' category"
+                    )
+                )
+            }
+
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = false
             )
         )
     }

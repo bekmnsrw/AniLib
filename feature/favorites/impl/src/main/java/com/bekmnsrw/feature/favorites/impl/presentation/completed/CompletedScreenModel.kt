@@ -34,7 +34,8 @@ internal class CompletedScreenModel(
     private val _screenAction = MutableSharedFlow<CompletedScreenAction?>()
     val screenAction: SharedFlow<CompletedScreenAction?> = _screenAction.asSharedFlow()
 
-    private val _completed: MutableStateFlow<PagingData<UserRates>> = MutableStateFlow(PagingData.empty())
+    private val _completed: MutableStateFlow<PagingData<UserRates>> =
+        MutableStateFlow(PagingData.empty())
     val completed: StateFlow<PagingData<UserRates>> = _completed.asStateFlow()
 
     init {
@@ -43,7 +44,7 @@ internal class CompletedScreenModel(
 
     @Immutable
     internal data class CompletedScreenState(
-        val shouldShowModalBottomSheet: Boolean = false,
+        val shouldShowBottomSheet: Boolean = false,
         val selectedItemIndex: Int = 0,
         val shouldShowDialog: Boolean = false
     )
@@ -52,11 +53,11 @@ internal class CompletedScreenModel(
     internal sealed interface CompletedScreenEvent {
         data object OnInit : CompletedScreenEvent
         data class OnItemClick(val id: Int) : CompletedScreenEvent
-        data object OnModalBottomSheetDismissRequest : CompletedScreenEvent
+        data object OnBottomSheetDismissRequest : CompletedScreenEvent
         data class OnLongPress(val index: Int) : CompletedScreenEvent
         data object OnChangeCategoryClick : CompletedScreenEvent
         data object OnDialogDismissRequest : CompletedScreenEvent
-        data class OnRadioButtonClick(val key: String, val id: Int) : CompletedScreenEvent
+        data class OnRadioButtonClick(val status: String, val id: Int) : CompletedScreenEvent
     }
 
     @Immutable
@@ -68,18 +69,12 @@ internal class CompletedScreenModel(
     fun eventHandler(event: CompletedScreenEvent) {
         when (event) {
             OnInit -> onInit()
-
             is OnItemClick -> onItemClick(event.id)
-
-            OnModalBottomSheetDismissRequest -> onModalBottomSheetDismissRequest()
-
+            OnBottomSheetDismissRequest -> onBottomSheetDismissRequest()
             is OnLongPress -> onLongPress(event.index)
-
             OnChangeCategoryClick -> onChangeCategoryClick()
-
             OnDialogDismissRequest -> onDialogDismissRequest()
-
-            is OnRadioButtonClick -> onRadioButtonClick(event.key, event.id)
+            is OnRadioButtonClick -> onRadioButtonClick(event.status, event.id)
         }
     }
 
@@ -94,10 +89,10 @@ internal class CompletedScreenModel(
         _screenAction.emit(NavigateDetails(id = id))
     }
 
-    private fun onModalBottomSheetDismissRequest() = screenModelScope.launch {
+    private fun onBottomSheetDismissRequest() = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
-                shouldShowModalBottomSheet = false
+                shouldShowBottomSheet = false
             )
         )
     }
@@ -105,7 +100,7 @@ internal class CompletedScreenModel(
     private fun onLongPress(index: Int) = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
-                shouldShowModalBottomSheet = true,
+                shouldShowBottomSheet = true,
                 selectedItemIndex = index
             )
         )
@@ -115,7 +110,7 @@ internal class CompletedScreenModel(
         _screenState.emit(
             _screenState.value.copy(
                 shouldShowDialog = true,
-                shouldShowModalBottomSheet = false
+                shouldShowBottomSheet = false
             )
         )
     }
@@ -128,17 +123,18 @@ internal class CompletedScreenModel(
         )
     }
 
-    private fun onRadioButtonClick(key: String, id: Int) = screenModelScope.launch {
-        updateAnimeStatusUseCase(id = id, status = key)
+    private fun onRadioButtonClick(status: String, id: Int) = screenModelScope.launch {
+        updateAnimeStatusUseCase(id = id, status = status)
             .flowOn(Dispatchers.IO)
             .collect { response ->
-                val status = response
+                val updatedStatus = response
                     .replace(oldValue = "_", newValue = " ")
                     .replaceFirstChar { it.uppercase() }
 
                 _screenAction.emit(
                     ShowSnackbar(
-                        message = "Successfully added to '$status' category")
+                        message = "Successfully added to '$updatedStatus' category"
+                    )
                 )
             }
 

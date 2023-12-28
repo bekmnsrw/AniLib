@@ -34,7 +34,7 @@ import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScree
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnDialogDismissRequest
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnItemClick
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnLongPress
-import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnModalBottomSheetDismissRequest
+import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnBottomSheetDismissRequest
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnRadioButtonClick
 import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeBottomSheet
 import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeStatusDialog
@@ -54,37 +54,28 @@ internal class CompletedScreen : Screen {
         val modalBottomSheetState = rememberModalBottomSheetState()
         val snackbarHostState = remember { SnackbarHostState() }
 
-        CompletedScreenContent(
-            snackbarHostState = snackbarHostState,
-            completedAnimePaged = completedAnimePaged,
-            modalBottomSheetState = modalBottomSheetState,
-            shouldShowModalBottomSheet = screenState.shouldShowModalBottomSheet,
-            shouldShowDialog = screenState.shouldShowDialog,
-            selectedItemIndex = screenState.selectedItemIndex,
-            onItemClicked = {
-                screenModel.eventHandler(OnItemClick(id = it))
-            },
-            onLongClick = {
-                screenModel.eventHandler(OnLongPress(index = it))
-            },
-            onDialogDismissRequest = {
-                screenModel.eventHandler(OnDialogDismissRequest)
-            },
-            onBottomSheetDismissRequest = {
-                screenModel.eventHandler(OnModalBottomSheetDismissRequest)
-            },
-            onChangeCategoryClick = {
-                screenModel.eventHandler(OnChangeCategoryClick)
-            },
-            onRadioButtonClick = { key, id ->
-                screenModel.eventHandler(OnRadioButtonClick(key = key, id = id))
-            }
-        )
+        with(screenModel) {
+            CompletedScreenContent(
+                completedAnimePaged = completedAnimePaged,
+                snackbarHostState = snackbarHostState,
+                modalBottomSheetState = modalBottomSheetState,
+                shouldShowModalBottomSheet = screenState.shouldShowBottomSheet,
+                shouldShowDialog = screenState.shouldShowDialog,
+                selectedItemIndex = screenState.selectedItemIndex,
+                onItemClick = { eventHandler(OnItemClick(id = it)) },
+                onLongClick = { eventHandler(OnLongPress(index = it)) },
+                onDialogDismissRequest = { eventHandler(OnDialogDismissRequest) },
+                onBottomSheetDismissRequest = { eventHandler(OnBottomSheetDismissRequest) },
+                onChangeCategoryClick = { eventHandler(OnChangeCategoryClick) },
+                onRadioButtonClick = { status, id ->
+                    eventHandler(OnRadioButtonClick(status = status, id = id))
+                }
+            )
+        }
 
         CompletedScreenActions(
             screenAction = screenAction,
-            snackbarHostState = snackbarHostState,
-            completedAnimePaged = completedAnimePaged
+            snackbarHostState = snackbarHostState
         )
     }
 }
@@ -92,8 +83,7 @@ internal class CompletedScreen : Screen {
 @Composable
 private fun CompletedScreenActions(
     screenAction: CompletedScreenAction?,
-    snackbarHostState: SnackbarHostState,
-    completedAnimePaged: LazyPagingItems<UserRates>
+    snackbarHostState: SnackbarHostState
 ) {
     val navigator = LocalNavigator.currentOrThrow
     val coroutineScope = rememberCoroutineScope()
@@ -124,15 +114,15 @@ private fun CompletedScreenActions(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CompletedScreenContent(
-    snackbarHostState: SnackbarHostState,
     completedAnimePaged: LazyPagingItems<UserRates>,
+    snackbarHostState: SnackbarHostState,
     modalBottomSheetState: SheetState,
     shouldShowModalBottomSheet: Boolean,
     shouldShowDialog: Boolean,
     selectedItemIndex: Int,
     onBottomSheetDismissRequest: () -> Unit,
     onDialogDismissRequest: () -> Unit,
-    onItemClicked: (Int) -> Unit,
+    onItemClick: (Int) -> Unit,
     onLongClick: (Int) -> Unit,
     onChangeCategoryClick: () -> Unit,
     onRadioButtonClick: (String, Int) -> Unit
@@ -141,7 +131,7 @@ private fun CompletedScreenContent(
         userRatesPaged = completedAnimePaged,
         status = UserRatesEnum.COMPLETED.key,
         isLoading = completedAnimePaged.loadState.refresh == LoadState.Loading,
-        onItemClick = onItemClicked,
+        onItemClick = onItemClick,
         onLongClick = onLongClick
     )
 

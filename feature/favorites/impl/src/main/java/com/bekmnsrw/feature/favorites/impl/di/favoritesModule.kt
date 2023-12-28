@@ -44,28 +44,32 @@ val favoritesModule = module {
     factory<PlannedScreenModel> {
         providePlannedScreenModel(
             favoritesRepository = get(),
-            getUserIdUseCase = get()
+            getUserIdUseCase = get(),
+            updateAnimeStatusUseCase = get()
         )
     }
 
     factory<WatchingScreenModel> {
         provideWatchingScreenModel(
             favoritesRepository = get(),
-            getUserIdUseCase = get()
+            getUserIdUseCase = get(),
+            updateAnimeStatusUseCase = get()
         )
     }
 
     factory<DroppedScreenModel> {
         provideDroppedScreenModel(
             favoritesRepository = get(),
-            getUserIdUseCase = get()
+            getUserIdUseCase = get(),
+            updateAnimeStatusUseCase = get()
         )
     }
 
     factory<OnHoldScreenModel> {
         provideOnHoldScreenModel(
             favoritesRepository = get(),
-            getUserIdUseCase = get()
+            getUserIdUseCase = get(),
+            updateAnimeStatusUseCase = get()
         )
     }
 
@@ -103,26 +107,32 @@ private fun provideGetUserFavoritesUseCase(
 
 private fun providePlannedScreenModel(
     favoritesRepository: FavoritesRepository,
-    getUserIdUseCase: GetUserIdUseCase
+    getUserIdUseCase: GetUserIdUseCase,
+    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
 ): PlannedScreenModel = PlannedScreenModel(
     favoritesRepository = favoritesRepository,
-    getUserIdUseCase = getUserIdUseCase
+    getUserIdUseCase = getUserIdUseCase,
+    updateAnimeStatusUseCase = updateAnimeStatusUseCase
 )
 
 private fun provideWatchingScreenModel(
     favoritesRepository: FavoritesRepository,
-    getUserIdUseCase: GetUserIdUseCase
+    getUserIdUseCase: GetUserIdUseCase,
+    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
 ) : WatchingScreenModel = WatchingScreenModel(
     favoritesRepository = favoritesRepository,
-    getUserIdUseCase = getUserIdUseCase
+    getUserIdUseCase = getUserIdUseCase,
+    updateAnimeStatusUseCase = updateAnimeStatusUseCase
 )
 
 private fun provideDroppedScreenModel(
     favoritesRepository: FavoritesRepository,
-    getUserIdUseCase: GetUserIdUseCase
+    getUserIdUseCase: GetUserIdUseCase,
+    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
 ) : DroppedScreenModel = DroppedScreenModel(
     favoritesRepository = favoritesRepository,
-    getUserIdUseCase = getUserIdUseCase
+    getUserIdUseCase = getUserIdUseCase,
+    updateAnimeStatusUseCase = updateAnimeStatusUseCase
 )
 
 private fun provideCompletedScreenModel(
@@ -137,10 +147,12 @@ private fun provideCompletedScreenModel(
 
 private fun provideOnHoldScreenModel(
     favoritesRepository: FavoritesRepository,
-    getUserIdUseCase: GetUserIdUseCase
+    getUserIdUseCase: GetUserIdUseCase,
+    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
 ) : OnHoldScreenModel = OnHoldScreenModel(
     favoritesRepository = favoritesRepository,
-    getUserIdUseCase = getUserIdUseCase
+    getUserIdUseCase = getUserIdUseCase,
+    updateAnimeStatusUseCase = updateAnimeStatusUseCase
 )
 
 private fun provideFavoritesScreenModel(
