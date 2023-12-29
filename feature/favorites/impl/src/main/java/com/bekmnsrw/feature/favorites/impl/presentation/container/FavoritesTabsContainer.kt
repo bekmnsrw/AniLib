@@ -52,9 +52,9 @@ import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.core.widget.AniLibModalBottomSheet
+import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.impl.R
-import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
 import com.bekmnsrw.feature.favorites.impl.presentation.TabItem
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -329,60 +329,6 @@ fun AnimeBottomSheet(
             }
         }
     }
-}
-
-@Composable
-fun AnimeStatusDialog(
-    id: Int,
-    currentStatus: String,
-    onDismissRequest: () -> Unit,
-    onRadioButtonClick: (String, Int) -> Unit
-) {
-    val statuses = persistentListOf(
-        UserRatesEnum.PLANNED,
-        UserRatesEnum.COMPLETED,
-        UserRatesEnum.WATCHING,
-        UserRatesEnum.DROPPED,
-        UserRatesEnum.ON_HOLD
-    )
-
-    val state = remember { mutableStateOf(currentStatus) }
-
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        confirmButton = {},
-        title = { Text(text = stringResource(id = R.string.choose_anime_status)) },
-        text = {
-            Column {
-                LazyColumn {
-                    items(items = statuses) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onRadioButtonClick(it.key, id) }
-                        ) {
-                            RadioButton(
-                                selected = state.value == it.key,
-                                onClick = {
-                                    onRadioButtonClick(it.key, id)
-                                    state.value = it.key
-                                },
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = MaterialTheme.colorScheme.primary,
-                                    unselectedColor = MaterialTheme.colorScheme.onSurface
-                                )
-                            )
-                            Text(
-                                text = it.value,
-                                style = AniLibTypography.bodyLarge
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    )
 }
 
 @Composable

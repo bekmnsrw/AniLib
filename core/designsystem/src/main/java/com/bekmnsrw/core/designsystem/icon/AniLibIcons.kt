@@ -5,6 +5,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.ArrowBackIos
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.FilterAlt
@@ -13,6 +14,8 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PersonOutline
 import androidx.compose.material.icons.rounded.PlaylistAdd
+import androidx.compose.material.icons.rounded.RadioButtonChecked
+import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.StarRate
 
@@ -32,4 +35,7 @@ object AniLibIcons {
     val Info = Icons.Outlined.Info
     val AddToList = Icons.Rounded.PlaylistAdd
     val MoreVert = Icons.Rounded.MoreVert
+    val ExpandMore = Icons.Rounded.ExpandMore
+    val RadioButtonChecked = Icons.Rounded.RadioButtonChecked
+    val RadioButtonUnchecked = Icons.Rounded.RadioButtonUnchecked
 }

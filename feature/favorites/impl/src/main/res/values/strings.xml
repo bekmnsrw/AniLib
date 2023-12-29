@@ -9,7 +9,5 @@
     <string name="dropped">Add anime that you dropped watching to \'Dropped\' category</string>
     <string name="favorites">Add anime that you liked to \'Favorites\' category</string>
 
-    <string name="choose_anime_status">Choose anime status</string>
-
     <string name="in_category">In category: %1$s</string>
 </resources>

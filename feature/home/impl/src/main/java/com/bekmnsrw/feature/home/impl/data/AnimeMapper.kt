@@ -7,7 +7,7 @@ import com.bekmnsrw.feature.home.api.model.Genre
 import com.bekmnsrw.feature.home.api.model.RatesScoresStat
 import com.bekmnsrw.feature.home.api.model.RatesStatusesStat
 import com.bekmnsrw.feature.home.api.model.Screenshot
-import com.bekmnsrw.feature.home.api.model.UserRate
+import com.bekmnsrw.feature.home.api.model.UserRates
 import com.bekmnsrw.feature.home.api.model.Video
 import com.bekmnsrw.feature.home.api.model.AnimeImage
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.FavoritesActionResultResponse
@@ -16,10 +16,11 @@ import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.GenreRespo
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.RatesScoresStatResponse
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.RatesStatusesStatResponse
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.ScreenshotResponse
-import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.UserRateResponse
+import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.UserRatesResponse
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.VideoResponse
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.AnimeImageResponse
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.AnimeResponse
+import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.CreateUserRatesResponse
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.FavoritesResponse
 
 internal fun AnimeResponse.toAnime(): Anime = Anime(
@@ -67,8 +68,8 @@ internal fun AnimeDetailsResponse.toAnimeDetails(): AnimeDetails = AnimeDetails(
     synonyms = synonyms + english,
     totalScoresStats = getTotalScoresStats(ratesScoresStats),
     totalStatusesStats = getTotalStatusesStats(ratesStatusesStats),
-    rating = rating
-//    userRate = userRate?.toUserRate(),
+    rating = rating,
+    userRates = userRate?.toUserRate(),
 //    videos = videos.toVideoList()
 //    screenshots = screenshots.toScreenshotList(),
 //    threadId = threadId,
@@ -111,7 +112,7 @@ internal fun List<RatesStatusesStatResponse>.toRatesStatusesStatList(): List<Rat
     it.toRatesStatusesStat()
 }
 
-internal fun UserRateResponse.toUserRate(): UserRate = UserRate(
+internal fun UserRatesResponse.toUserRate(): UserRates = UserRates(
     chapters = chapters,
     createdAt = createdAt,
     episodes = episodes,
@@ -150,3 +151,17 @@ internal fun FavoritesActionResultResponse.toFavoritesActionResult(): FavoritesA
 )
 
 internal fun FavoritesResponse.toAnimes(): List<Anime> = this.animes.toAnimeList()
+
+internal fun CreateUserRatesResponse.toUserRates(): UserRates = UserRates(
+    chapters = chapters,
+    createdAt = createdAt,
+    episodes = episodes,
+    id = id,
+    rewatches = rewatches,
+    score = score,
+    status = status,
+    text = text,
+    textHtml = textHtml,
+    updatedAt = updatedAt,
+    volumes = volumes
+)

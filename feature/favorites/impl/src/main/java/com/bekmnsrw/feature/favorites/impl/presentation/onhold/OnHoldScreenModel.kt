@@ -5,13 +5,18 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.bekmnsrw.core.utils.formatStatusString
+import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
 import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.api.repository.FavoritesRepository
 import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
-import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
+import com.bekmnsrw.feature.favorites.impl.FavoritesConstants.ERROR_MESSAGE
+import com.bekmnsrw.feature.favorites.impl.FavoritesConstants.WAS_ADDED_TO_CATEGORY
+import com.bekmnsrw.feature.favorites.impl.FavoritesConstants.WAS_REMOVED_FROM_MY_LIST
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenAction.*
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenEvent.*
+import com.bekmnsrw.feature.home.api.usecase.DeleteUserRatesUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,13 +24,16 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import javax.net.ssl.HttpsURLConnection
 
 internal class OnHoldScreenModel(
     private val favoritesRepository: FavoritesRepository,
     private val getUserIdUseCase: GetUserIdUseCase,
-    private val updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
+    private val updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
+    private val deleteUserRatesUseCase: DeleteUserRatesUseCase
 ) : ScreenModel {
 
     private val _screenState = MutableStateFlow(OnHoldScreenState())
@@ -57,7 +65,7 @@ internal class OnHoldScreenModel(
         data class OnLongPress(val index: Int) : OnHoldScreenEvent
         data object OnChangeCategoryClick : OnHoldScreenEvent
         data object OnDialogDismissRequest : OnHoldScreenEvent
-        data class OnRadioButtonClick(val status: String, val id: Int) : OnHoldScreenEvent
+        data class OnRadioButtonClick(val status: String, val id: Int?) : OnHoldScreenEvent
     }
 
     @Immutable
@@ -127,25 +135,47 @@ internal class OnHoldScreenModel(
         )
     }
 
-    private fun onRadioButtonClick(status: String, id: Int) = screenModelScope.launch {
-        updateAnimeStatusUseCase(id = id, status = status)
-            .flowOn(Dispatchers.IO)
-            .collect { response ->
-                val updatedStatus = response
-                    .replace(oldValue = "_", newValue = " ")
-                    .replaceFirstChar { it.uppercase() }
-
-                _screenAction.emit(
-                    ShowSnackbar(
-                        message = "Successfully added to '$updatedStatus' category"
+    private suspend fun deleteUserRates(id: Int) = deleteUserRatesUseCase(id = id)
+        .flowOn(Dispatchers.IO)
+        .collect { code ->
+            when (code) {
+                HttpsURLConnection.HTTP_NO_CONTENT -> {
+                    _screenAction.emit(
+                        ShowSnackbar(message = WAS_REMOVED_FROM_MY_LIST)
                     )
+                }
+                else -> _screenAction.emit(
+                    ShowSnackbar(message = ERROR_MESSAGE)
                 )
             }
+        }
 
+    private suspend fun updateAnimeStatus(
+        id: Int,
+        status: String
+    ) = updateAnimeStatusUseCase(id = id, status = status)
+        .flowOn(Dispatchers.IO)
+        .catch { _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE)) }
+        .collect { response ->
+            _screenAction.emit(
+                ShowSnackbar(
+                    message = "$WAS_ADDED_TO_CATEGORY '${formatStatusString(response)}'"
+                )
+            )
+        }
+
+    private fun onRadioButtonClick(status: String, id: Int?) = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
                 shouldShowDialog = false
             )
         )
+
+        id?.let {
+            when (status) {
+                UserRatesEnum.NOT_IN_MY_LIST.key -> deleteUserRates(id = id)
+                else -> updateAnimeStatus(id = id, status = status)
+            }
+        }
     }
 }

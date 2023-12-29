@@ -18,4 +18,6 @@
     <string name="anons">Anons anime</string>
 
     <string name="app_name">AniLib</string>
+
+    <string name="add_to_my_list">Add to my list</string>
 </resources>

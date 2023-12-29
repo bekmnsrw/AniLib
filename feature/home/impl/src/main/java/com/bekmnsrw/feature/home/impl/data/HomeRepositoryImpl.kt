@@ -5,14 +5,21 @@ import com.bekmnsrw.core.network.GenericPagingSource
 import com.bekmnsrw.feature.home.api.model.FavoritesActionResult
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
+import com.bekmnsrw.feature.home.api.model.UserRates
 import com.bekmnsrw.feature.home.api.repository.HomeRepository
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.HomeApi
+import com.bekmnsrw.feature.home.impl.data.datasource.remote.request.CreateUserRatesBody
+import com.bekmnsrw.feature.home.impl.data.datasource.remote.request.CreateUserRatesRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 internal class HomeRepositoryImpl(
     private val homeApi: HomeApi
 ) : HomeRepository, GenericPagingSource<Anime>() {
+
+    private companion object {
+        const val TARGET_TYPE = "Anime"
+    }
 
     override suspend fun getAnimePaged(
         status: String,
@@ -85,6 +92,31 @@ internal class HomeRepositoryImpl(
                     id = id,
                     limit = limit
                 ).toAnimeList()
+        )
+    }
+
+    override suspend fun createUserRates(
+        userId: Int,
+        targetId: Int,
+        status: String
+    ): Flow<UserRates> = flow {
+        emit(
+            homeApi.createUserRates(
+                CreateUserRatesRequest(
+                    CreateUserRatesBody(
+                        userId = "$userId",
+                        targetId = "$targetId",
+                        targetType = TARGET_TYPE,
+                        status = status
+                    )
+                )
+            ).toUserRates()
+        )
+    }
+
+    override suspend fun deleteUserRates(id: Int): Flow<Int> = flow {
+        emit(
+            homeApi.deleteUserRates(id = id).code()
         )
     }
 }

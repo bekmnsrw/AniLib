@@ -3,9 +3,14 @@ package com.bekmnsrw.feature.home.impl.presentation.details
 import androidx.compose.runtime.Immutable
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.bekmnsrw.core.utils.formatStatusString
+import com.bekmnsrw.core.widget.UserRatesEnum
+import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
 import com.bekmnsrw.feature.home.api.usecase.AddToFavoritesUseCase
+import com.bekmnsrw.feature.home.api.usecase.CreateUserRatesUseCase
+import com.bekmnsrw.feature.home.api.usecase.DeleteUserRatesUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetAnimeUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetSimilarAnimeListUseCase
 import com.bekmnsrw.feature.home.api.usecase.RemoveFromFavoritesUseCase
@@ -22,22 +27,31 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.net.ssl.HttpsURLConnection
 
 internal class DetailsScreenModel(
     private val animeId: Int,
     private val getAnimeUseCase: GetAnimeUseCase,
     private val addToFavoritesUseCase: AddToFavoritesUseCase,
     private val removeFromFavoritesUseCase: RemoveFromFavoritesUseCase,
-    private val getSimilarAnimeListUseCase: GetSimilarAnimeListUseCase
+    private val getSimilarAnimeListUseCase: GetSimilarAnimeListUseCase,
+    private val createUserRatesUseCase: CreateUserRatesUseCase,
+    private val updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
+    private val deleteUserRatesUseCase: DeleteUserRatesUseCase
 ) : ScreenModel {
 
     private companion object {
+        const val WAS_ADDED_TO_FAVORITES = "was added to favorites"
+        const val WAS_REMOVED_FROM_FAVORITES = "was removed from favorites"
         const val ERROR_MESSAGE = "Oops, something went wrong. Please try again!"
+        const val WAS_ADDED_TO_CATEGORY = "Successfully added to"
         const val TYPE = "Anime"
+        const val WAS_REMOVED_FROM_MY_LIST = "Removed from your list"
     }
 
     @Immutable
@@ -45,31 +59,31 @@ internal class DetailsScreenModel(
         val isLoading: Boolean = false,
         val animeDetails: AnimeDetails? = null,
         val isFavoured: Boolean = false,
-        val shouldShowModalBottomSheet: Boolean = false,
+        val shouldShowBottomSheet: Boolean = false,
         val isDescriptionExpanded: Boolean = false,
-        val similarAnimeList: PersistentList<Anime> = persistentListOf()
+        val similarAnimeList: PersistentList<Anime> = persistentListOf(),
+        val shouldShowDialog: Boolean = false
     )
 
     @Immutable
     internal sealed interface DetailsScreenEvent {
         data object OnInit : DetailsScreenEvent
         data object OnStart : DetailsScreenEvent
-        data object OnArrowBackClicked : DetailsScreenEvent
-        data class OnFavouredClicked(val animeId: Int) : DetailsScreenEvent
-        data object OnInfoIconClicked : DetailsScreenEvent
+        data object OnArrowBackClick : DetailsScreenEvent
+        data class OnFavouredClick(val animeId: Int) : DetailsScreenEvent
+        data object OnInfoIconClick : DetailsScreenEvent
         data object OnModalBottomSheetDismiss : DetailsScreenEvent
-        data object OnDescriptionClicked : DetailsScreenEvent
-        data class OnSimilarAnimeCardClicked(val id: Int) : DetailsScreenEvent
+        data object OnDescriptionClick : DetailsScreenEvent
+        data class OnSimilarAnimeCardClick(val id: Int) : DetailsScreenEvent
+        data object OnAnimeStatusClick : DetailsScreenEvent
+        data object OnDialogDismissRequest : DetailsScreenEvent
+        data class OnRadioButtonClick(val status: String, val id: Int?) : DetailsScreenEvent
     }
 
     @Immutable
     internal sealed interface DetailsScreenAction {
         data object NavigateBack : DetailsScreenAction
-        data class ShowIsFavouredSnackbar(
-            val isFavoured: Boolean,
-            val name: String?
-        ) : DetailsScreenAction
-        data class ShowErrorSnackBar(val message: String) : DetailsScreenAction
+        data class ShowSnackbar(val message: String) : DetailsScreenAction
         data class NavigateDetailsScreen(val id: Int) : DetailsScreenAction
     }
 
@@ -79,23 +93,19 @@ internal class DetailsScreenModel(
     private val _screenAction = MutableSharedFlow<DetailsScreenAction>()
     val screenAction: SharedFlow<DetailsScreenAction?> = _screenAction.asSharedFlow()
 
-    fun eventHandler(detailsScreenEvent: DetailsScreenEvent) {
-        when (detailsScreenEvent) {
+    fun eventHandler(event: DetailsScreenEvent) {
+        when (event) {
             OnInit -> onInit()
-
             OnStart -> checkIfAnimeIsNotFavoured()
-
-            OnArrowBackClicked -> onArrowBacClicked()
-
-            is OnFavouredClicked -> onFavouredClicked()
-
-            OnInfoIconClicked -> onInfoButtonClicked()
-
-            OnModalBottomSheetDismiss -> onModalBottomSheetDismiss()
-
-            OnDescriptionClicked -> onDescriptionClicked()
-
-            is OnSimilarAnimeCardClicked -> onSimilarAnimeCardClicked(id = detailsScreenEvent.id)
+            OnArrowBackClick -> onArrowBacClick()
+            is OnFavouredClick -> onFavouredClick()
+            OnInfoIconClick -> onInfoButtonClick()
+            OnModalBottomSheetDismiss -> onBottomSheetDismiss()
+            OnDescriptionClick -> onDescriptionClick()
+            is OnSimilarAnimeCardClick -> onSimilarAnimeCardClick(id = event.id)
+            is OnAnimeStatusClick -> onAnimeStatusClick()
+            OnDialogDismissRequest -> onDialogDismissRequest()
+            is OnRadioButtonClick -> onRadioButtonClick(event.status, event.id)
         }
     }
 
@@ -129,10 +139,7 @@ internal class DetailsScreenModel(
                 )
             }
 
-        getSimilarAnimeListUseCase(
-            id = animeId,
-            limit = REQUEST_LIMIT
-        )
+        getSimilarAnimeListUseCase(id = animeId, limit = REQUEST_LIMIT)
             .flowOn(Dispatchers.IO)
             .collect {
                 _screenState.emit(
@@ -155,11 +162,11 @@ internal class DetailsScreenModel(
             }
     }
 
-    private fun onArrowBacClicked() = screenModelScope.launch {
+    private fun onArrowBacClick() = screenModelScope.launch {
         _screenAction.emit(NavigateBack)
     }
 
-    private fun onFavouredClicked() = screenModelScope.launch {
+    private fun onFavouredClick() = screenModelScope.launch {
         val isFavoured = _screenState.value.isFavoured
         val name = _screenState.value.animeDetails?.name
 
@@ -175,14 +182,13 @@ internal class DetailsScreenModel(
                                 )
                             )
                             _screenAction.emit(
-                                ShowIsFavouredSnackbar(
-                                    isFavoured = false,
-                                    name = name
+                                ShowSnackbar(
+                                    message = "'$name' $WAS_REMOVED_FROM_FAVORITES"
                                 )
                             )
                         }
 
-                        false -> _screenAction.emit(ShowErrorSnackBar(message = ERROR_MESSAGE))
+                        false -> _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
                     }
                 }
 
@@ -196,37 +202,34 @@ internal class DetailsScreenModel(
                                     isFavoured = true
                                 )
                             )
-                            _screenAction.emit(
-                                ShowIsFavouredSnackbar(
-                                    isFavoured = true,
-                                    name = name
-                                )
+                            ShowSnackbar(
+                                message = "'$name' $WAS_ADDED_TO_FAVORITES"
                             )
                         }
 
-                        false -> _screenAction.emit(ShowErrorSnackBar(message = ERROR_MESSAGE))
+                        false -> _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
                     }
                 }
         }
     }
 
-    private fun onInfoButtonClicked() = screenModelScope.launch {
+    private fun onInfoButtonClick() = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
-                shouldShowModalBottomSheet = true
+                shouldShowBottomSheet = true
             )
         )
     }
 
-    private fun onModalBottomSheetDismiss() = screenModelScope.launch {
+    private fun onBottomSheetDismiss() = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
-                shouldShowModalBottomSheet = false
+                shouldShowBottomSheet = false
             )
         )
     }
 
-    private fun onDescriptionClicked() = screenModelScope.launch {
+    private fun onDescriptionClick() = screenModelScope.launch {
         val isDescriptionExpanded = _screenState.value.isDescriptionExpanded
 
         _screenState.emit(
@@ -236,11 +239,129 @@ internal class DetailsScreenModel(
         )
     }
 
-    private fun onSimilarAnimeCardClicked(id: Int) = screenModelScope.launch {
+    private fun onSimilarAnimeCardClick(id: Int) = screenModelScope.launch {
 //        _screenAction.emit(
 //            NavigateDetailsScreen(
 //                id = id
 //            )
 //        )
+    }
+
+    private fun onAnimeStatusClick() = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = true
+            )
+        )
+    }
+
+    private fun onDialogDismissRequest() = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = false
+            )
+        )
+    }
+
+    private suspend fun createUserRates(
+        userId: Int,
+        targetId: Int,
+        status: String
+    ) {
+        val animeDetails = _screenState.value.animeDetails
+
+        createUserRatesUseCase(
+            userId = userId,
+            targetId = targetId,
+            status = status
+        )
+            .flowOn(Dispatchers.IO)
+            .catch { _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE)) }
+            .collect { response ->
+                _screenAction.emit(
+                    ShowSnackbar(
+                        message = "$WAS_ADDED_TO_CATEGORY '${formatStatusString(response.status)}'"
+                    )
+                )
+                _screenState.emit(
+                    _screenState.value.copy(
+                        animeDetails = animeDetails?.copy(userRates = response)
+                    )
+                )
+            }
+    }
+
+    private suspend fun deleteUserRates(id: Int) {
+        val animeDetails = _screenState.value.animeDetails
+        val userRates = animeDetails?.userRates
+
+        deleteUserRatesUseCase(id = id)
+            .flowOn(Dispatchers.IO)
+            .collect { code ->
+                when (code) {
+                    HttpsURLConnection.HTTP_NO_CONTENT -> {
+                        _screenAction.emit(
+                            ShowSnackbar(message = WAS_REMOVED_FROM_MY_LIST)
+                        )
+                        _screenState.emit(
+                            _screenState.value.copy(
+                                animeDetails = animeDetails?.copy(
+                                    userRates = userRates?.copy(
+                                        status = UserRatesEnum.NOT_IN_MY_LIST.key
+                                    )
+                                )
+                            )
+                        )
+                    }
+                    else -> _screenAction.emit(
+                        ShowSnackbar(message = ERROR_MESSAGE)
+                    )
+                }
+            }
+    }
+
+    private suspend fun updateAnimeStatus(id: Int, status: String) {
+        val animeDetails = _screenState.value.animeDetails
+        val userRates = animeDetails?.userRates
+
+        updateAnimeStatusUseCase(id = id, status = status)
+            .flowOn(Dispatchers.IO)
+            .catch { _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE)) }
+            .collect { response ->
+                _screenAction.emit(
+                    ShowSnackbar(
+                        message = "$WAS_ADDED_TO_CATEGORY '${formatStatusString(response)}'"
+                    )
+                )
+                _screenState.emit(
+                    _screenState.value.copy(
+                        animeDetails = animeDetails?.copy(
+                            userRates = userRates?.copy(
+                                status = response
+                            )
+                        )
+                    )
+                )
+            }
+    }
+
+    private fun onRadioButtonClick(status: String, id: Int?) = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = false
+            )
+        )
+
+        when (id) {
+            null -> createUserRates(
+                userId = 1_379_176,
+                targetId = animeId,
+                status = status
+            )
+            else -> when (status) {
+                UserRatesEnum.NOT_IN_MY_LIST.key -> deleteUserRates(id = id)
+                else -> updateAnimeStatus(id = id, status = status)
+            }
+        }
     }
 }

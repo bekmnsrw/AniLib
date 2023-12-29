@@ -24,11 +24,11 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
+import com.bekmnsrw.core.widget.AniLibDialog
 import com.bekmnsrw.core.widget.AniLibSnackbar
+import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.favorites.api.model.UserRates
-import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
 import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeBottomSheet
-import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeStatusDialog
 import com.bekmnsrw.feature.favorites.impl.presentation.container.TabAnimeList
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenAction
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel.OnHoldScreenEvent.OnBottomSheetDismissRequest
@@ -123,7 +123,7 @@ private fun OnHoldScreenContent(
     onItemClick: (Int) -> Unit,
     onLongClick: (Int) -> Unit,
     onChangeCategoryClick: () -> Unit,
-    onRadioButtonClick: (String, Int) -> Unit
+    onRadioButtonClick: (String, Int?) -> Unit
 ) {
     TabAnimeList(
         userRatesPaged = onHoldAnimePaged,
@@ -147,7 +147,7 @@ private fun OnHoldScreenContent(
 
     if (shouldShowDialog) {
         onHoldAnimePaged[selectedItemIndex]?.let { userRate ->
-            AnimeStatusDialog(
+            AniLibDialog(
                 id = userRate.id,
                 currentStatus = userRate.userStatus,
                 onDismissRequest = onDialogDismissRequest,

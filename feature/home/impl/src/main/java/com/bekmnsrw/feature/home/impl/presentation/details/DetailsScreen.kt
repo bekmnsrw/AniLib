@@ -61,6 +61,7 @@ import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.core.utils.HandleScreenLifecycle
 import com.bekmnsrw.core.widget.AniLibAgeRatingBadge
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
+import com.bekmnsrw.core.widget.AniLibDialog
 import com.bekmnsrw.core.widget.AniLibExpandableTextWithTextButton
 import com.bekmnsrw.core.widget.AniLibHorizontalList
 import com.bekmnsrw.core.widget.AniLibImage
@@ -68,9 +69,11 @@ import com.bekmnsrw.core.widget.AniLibModalBottomSheet
 import com.bekmnsrw.core.widget.AniLibRateWidget
 import com.bekmnsrw.core.widget.AniLibSnackbar
 import com.bekmnsrw.core.widget.AniLibStatusWidget
+import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
 import com.bekmnsrw.feature.home.api.model.Genre
+import com.bekmnsrw.feature.home.api.model.UserRates
 import com.bekmnsrw.feature.home.impl.AnimeStatusEnum.ONGOING
 import com.bekmnsrw.feature.home.impl.AnimeStatusEnum.RELEASED
 import com.bekmnsrw.feature.home.impl.HomeConstants.ANIME_ID_KOIN_PROPERTY
@@ -78,17 +81,23 @@ import com.bekmnsrw.feature.home.impl.R
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.NavigateBack
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.NavigateDetailsScreen
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.ShowErrorSnackBar
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.ShowIsFavouredSnackbar
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.ShowSnackbar
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.*
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnAnimeStatusClick
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnArrowBackClick
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnDescriptionClick
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnDialogDismissRequest
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnFavouredClick
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnInfoIconClick
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnModalBottomSheetDismiss
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnRadioButtonClick
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnSimilarAnimeCardClick
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnStart
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenState
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getKoin
 
-private const val WAS_ADDED_TO_FAVORITES = "was added to favorites"
-private const val WAS_REMOVED_FROM_FAVORITES = "was removed from favorites"
 private const val MOVIE = "movie"
 
 internal data class DetailsScreen(val id: Int) : Screen {
@@ -146,14 +155,17 @@ private fun DetailsScreenContent(
                     )
                 }
                 item {
-                    AnimeDetails(
-                        animeDetails = screenState.animeDetails,
-                        onIconClicked = { eventHandler(OnInfoIconClicked) },
-                        isDescriptionExpanded = screenState.isDescriptionExpanded,
-                        onDescriptionButtonClicked = { eventHandler(OnDescriptionClicked) },
-                        similarAnimeList = screenState.similarAnimeList,
-                        onSimilarAnimeCardClicked = { eventHandler(OnSimilarAnimeCardClicked(id = it)) }
-                    )
+                    with(screenState) {
+                        AnimeDetailsInfo(
+                            animeDetails = animeDetails,
+                            onIconClick = { eventHandler(OnInfoIconClick) },
+                            isDescriptionExpanded = isDescriptionExpanded,
+                            onDescriptionButtonClick = { eventHandler(OnDescriptionClick) },
+                            similarAnimeList = similarAnimeList,
+                            onSimilarAnimeCardClick = { eventHandler(OnSimilarAnimeCardClick(id = it)) },
+                            onAnimeStatusClick = { eventHandler(OnAnimeStatusClick) }
+                        )
+                    }
                 }
             }
 
@@ -162,7 +174,7 @@ private fun DetailsScreenContent(
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
 
-            if (screenState.shouldShowModalBottomSheet) {
+            if (screenState.shouldShowBottomSheet) {
                 AniLibModalBottomSheet(
                     sheetState = modalBottomSheetState,
                     onDismissRequest = { eventHandler(OnModalBottomSheetDismiss) }
@@ -170,6 +182,19 @@ private fun DetailsScreenContent(
                     screenState.animeDetails?.let { animeDetails ->
                         ModalBottomSheetContent(anime = animeDetails)
                     }
+                }
+            }
+
+            if (screenState.shouldShowDialog) {
+                screenState.animeDetails?.let {
+                    AniLibDialog(
+                        id = it.userRates?.id,
+                        currentStatus = it.userRates?.status ?: UserRatesEnum.NOT_IN_MY_LIST.key,
+                        onDismissRequest = { eventHandler(OnDialogDismissRequest) },
+                        onRadioButtonClick = { status, id ->
+                            eventHandler(OnRadioButtonClick(status = status, id = id))
+                        }
+                    )
                 }
             }
         }
@@ -228,17 +253,7 @@ private fun DetailsScreenActions(
 
             NavigateBack -> navigator.pop()
 
-            is ShowIsFavouredSnackbar -> coroutineScope.launch {
-                snackbarHostState.showSnackbar(
-                    message = when (screenAction.isFavoured) {
-                        true -> "'${screenAction.name}' $WAS_ADDED_TO_FAVORITES"
-                        false -> "'${screenAction.name}' $WAS_REMOVED_FROM_FAVORITES"
-                    },
-                    duration = SnackbarDuration.Short
-                )
-            }
-
-            is ShowErrorSnackBar -> coroutineScope.launch {
+            is ShowSnackbar -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(
                     message = screenAction.message,
                     duration = SnackbarDuration.Short
@@ -276,14 +291,14 @@ private fun StickyHeader(
     ) {
         StickyHeaderItem(
             imageVector = AniLibIcons.ArrowBack,
-            onClick = { eventHandler(OnArrowBackClicked) }
+            onClick = { eventHandler(OnArrowBackClick) }
         )
         StickyHeaderItem(
             imageVector = when (isFavoured) {
                 true -> AniLibIcons.FavoritesFilled
                 false -> AniLibIcons.FavoritesOutlined
             },
-            onClick = { eventHandler(OnFavouredClicked(animeId = animeId)) }
+            onClick = { eventHandler(OnFavouredClick(animeId = animeId)) }
         )
     }
 }
@@ -311,13 +326,14 @@ private fun StickyHeaderItem(
 }
 
 @Composable
-private fun AnimeDetails(
+private fun AnimeDetailsInfo(
     animeDetails: AnimeDetails?,
     isDescriptionExpanded: Boolean,
     similarAnimeList: PersistentList<Anime>,
-    onIconClicked: () -> Unit,
-    onDescriptionButtonClicked: () -> Unit,
-    onSimilarAnimeCardClicked: (Int) -> Unit
+    onIconClick: () -> Unit,
+    onAnimeStatusClick: (String) -> Unit,
+    onDescriptionButtonClick: () -> Unit,
+    onSimilarAnimeCardClick: (Int) -> Unit
 ) {
     animeDetails?.let { anime ->
         AnimeImage(imageUrl = anime.image.original)
@@ -329,9 +345,14 @@ private fun AnimeDetails(
                 .offset(y = (-58).dp)
         ) {
             AnimeName(
-                name = anime.name,
+                originalName = anime.name,
+                russianName = anime.russian,
                 ageRating = anime.rating,
-                onIconClicked = onIconClicked
+                onIconClick = onIconClick
+            )
+            AnimeStatus(
+                anime.userRates,
+                onClick = onAnimeStatusClick
             )
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
             AnimeInfo(anime = anime)
@@ -342,7 +363,7 @@ private fun AnimeDetails(
                 AniLibExpandableTextWithTextButton(
                     text = it,
                     isExpanded = isDescriptionExpanded,
-                    onDescriptionButtonClicked = onDescriptionButtonClicked
+                    onDescriptionButtonClicked = onDescriptionButtonClick
                 )
             }
             Divider(modifier = Modifier.padding(vertical = 8.dp))
@@ -361,11 +382,38 @@ private fun AnimeDetails(
                 AniLibHorizontalList(
                     animeList = similarAnimeList,
                     animeListTitle = stringResource(id = R.string.you_also_may_like),
-                    onItemClicked = onSimilarAnimeCardClicked,
+                    onItemClicked = onSimilarAnimeCardClick,
                     isMoreEnable = false
                 )
                 Spacer(modifier = Modifier.padding(vertical = 8.dp))
             }
+
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AnimeStatus(
+    userRates: UserRates?,
+    onClick: (String) -> Unit
+) {
+    Spacer(modifier = Modifier.padding(vertical = 8.dp))
+    Card(onClick = { onClick(userRates?.status ?: UserRatesEnum.NOT_IN_MY_LIST.key) }) {
+        Row(modifier = Modifier.padding(8.dp)) {
+            println(userRates?.status)
+            Text(
+                text = when (userRates) {
+                    null -> stringResource(id = R.string.add_to_my_list)
+                    else -> userRates.status
+                        ?.replace(oldValue = "_", newValue = " ")
+                        ?.replaceFirstChar { it.uppercase() } ?: ""
+                }
+            )
+            Icon(
+                imageVector = AniLibIcons.ExpandMore,
+                contentDescription = null
+            )
         }
     }
 }
@@ -422,21 +470,35 @@ private fun AnimeImage(imageUrl: String) {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AnimeName(
-    name: String,
+    originalName: String,
+    russianName: String,
     ageRating: String,
-    onIconClicked: () -> Unit
+    onIconClick: () -> Unit
 ) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = name,
-            style = AniLibTypography.titleLarge,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .clickable { onIconClicked() }
-        )
+                .weight(1f)
+                .clickable { onIconClick() }
+        ) {
+            Text(
+                text = originalName,
+                style = AniLibTypography.titleLarge,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = russianName,
+                style = AniLibTypography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -448,7 +510,7 @@ private fun AnimeName(
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
-                    .clickable { onIconClicked() }
+                    .clickable { onIconClick() }
             )
         }
     }

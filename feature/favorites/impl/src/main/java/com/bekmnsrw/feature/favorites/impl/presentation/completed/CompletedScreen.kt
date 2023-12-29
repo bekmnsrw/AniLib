@@ -24,20 +24,20 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
+import com.bekmnsrw.core.widget.AniLibDialog
 import com.bekmnsrw.core.widget.AniLibSnackbar
+import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.favorites.api.model.UserRates
-import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenAction
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenAction.NavigateDetails
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenAction.ShowSnackbar
+import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnBottomSheetDismissRequest
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnChangeCategoryClick
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnDialogDismissRequest
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnItemClick
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnLongPress
-import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnBottomSheetDismissRequest
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel.CompletedScreenEvent.OnRadioButtonClick
 import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeBottomSheet
-import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeStatusDialog
 import com.bekmnsrw.feature.favorites.impl.presentation.container.TabAnimeList
 import kotlinx.coroutines.launch
 
@@ -125,7 +125,7 @@ private fun CompletedScreenContent(
     onItemClick: (Int) -> Unit,
     onLongClick: (Int) -> Unit,
     onChangeCategoryClick: () -> Unit,
-    onRadioButtonClick: (String, Int) -> Unit
+    onRadioButtonClick: (String, Int?) -> Unit
 ) {
     TabAnimeList(
         userRatesPaged = completedAnimePaged,
@@ -149,7 +149,7 @@ private fun CompletedScreenContent(
 
     if (shouldShowDialog) {
         completedAnimePaged[selectedItemIndex]?.let { userRate ->
-            AnimeStatusDialog(
+            AniLibDialog(
                 id = userRate.id,
                 currentStatus = userRate.userStatus,
                 onDismissRequest = onDialogDismissRequest,

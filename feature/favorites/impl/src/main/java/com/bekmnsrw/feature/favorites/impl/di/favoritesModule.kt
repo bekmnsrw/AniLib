@@ -15,6 +15,7 @@ import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenMod
 import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel
 import com.bekmnsrw.feature.favorites.impl.usecase.GetUserFavoritesUseCaseImpl
 import com.bekmnsrw.feature.favorites.impl.usecase.UpdateAnimeStatusUseCaseImpl
+import com.bekmnsrw.feature.home.api.usecase.DeleteUserRatesUseCase
 import com.bekmnsrw.feature.home.api.usecase.RemoveFromFavoritesUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -45,7 +46,8 @@ val favoritesModule = module {
         providePlannedScreenModel(
             favoritesRepository = get(),
             getUserIdUseCase = get(),
-            updateAnimeStatusUseCase = get()
+            updateAnimeStatusUseCase = get(),
+            deleteUserRatesUseCase = get()
         )
     }
 
@@ -53,7 +55,8 @@ val favoritesModule = module {
         provideWatchingScreenModel(
             favoritesRepository = get(),
             getUserIdUseCase = get(),
-            updateAnimeStatusUseCase = get()
+            updateAnimeStatusUseCase = get(),
+            deleteUserRatesUseCase = get()
         )
     }
 
@@ -61,7 +64,8 @@ val favoritesModule = module {
         provideDroppedScreenModel(
             favoritesRepository = get(),
             getUserIdUseCase = get(),
-            updateAnimeStatusUseCase = get()
+            updateAnimeStatusUseCase = get(),
+            deleteUserRatesUseCase = get()
         )
     }
 
@@ -69,7 +73,8 @@ val favoritesModule = module {
         provideOnHoldScreenModel(
             favoritesRepository = get(),
             getUserIdUseCase = get(),
-            updateAnimeStatusUseCase = get()
+            updateAnimeStatusUseCase = get(),
+            deleteUserRatesUseCase = get()
         )
     }
 
@@ -77,7 +82,8 @@ val favoritesModule = module {
         provideCompletedScreenModel(
             favoritesRepository = get(),
             getUserIdUseCase = get(),
-            updateAnimeStatusUseCase = get()
+            updateAnimeStatusUseCase = get(),
+            deleteUserRatesUseCase = get()
         )
     }
 
@@ -108,51 +114,61 @@ private fun provideGetUserFavoritesUseCase(
 private fun providePlannedScreenModel(
     favoritesRepository: FavoritesRepository,
     getUserIdUseCase: GetUserIdUseCase,
-    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
+    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
+    deleteUserRatesUseCase: DeleteUserRatesUseCase
 ): PlannedScreenModel = PlannedScreenModel(
     favoritesRepository = favoritesRepository,
     getUserIdUseCase = getUserIdUseCase,
-    updateAnimeStatusUseCase = updateAnimeStatusUseCase
+    updateAnimeStatusUseCase = updateAnimeStatusUseCase,
+    deleteUserRatesUseCase = deleteUserRatesUseCase
 )
 
 private fun provideWatchingScreenModel(
     favoritesRepository: FavoritesRepository,
     getUserIdUseCase: GetUserIdUseCase,
-    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
+    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
+    deleteUserRatesUseCase: DeleteUserRatesUseCase
 ) : WatchingScreenModel = WatchingScreenModel(
     favoritesRepository = favoritesRepository,
     getUserIdUseCase = getUserIdUseCase,
-    updateAnimeStatusUseCase = updateAnimeStatusUseCase
+    updateAnimeStatusUseCase = updateAnimeStatusUseCase,
+    deleteUserRatesUseCase = deleteUserRatesUseCase
 )
 
 private fun provideDroppedScreenModel(
     favoritesRepository: FavoritesRepository,
     getUserIdUseCase: GetUserIdUseCase,
-    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
+    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
+    deleteUserRatesUseCase: DeleteUserRatesUseCase
 ) : DroppedScreenModel = DroppedScreenModel(
     favoritesRepository = favoritesRepository,
     getUserIdUseCase = getUserIdUseCase,
-    updateAnimeStatusUseCase = updateAnimeStatusUseCase
+    updateAnimeStatusUseCase = updateAnimeStatusUseCase,
+    deleteUserRatesUseCase = deleteUserRatesUseCase
 )
 
 private fun provideCompletedScreenModel(
     favoritesRepository: FavoritesRepository,
     getUserIdUseCase: GetUserIdUseCase,
-    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
+    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
+    deleteUserRatesUseCase: DeleteUserRatesUseCase
 ) : CompletedScreenModel = CompletedScreenModel(
     favoritesRepository = favoritesRepository,
     getUserIdUseCase = getUserIdUseCase,
-    updateAnimeStatusUseCase = updateAnimeStatusUseCase
+    updateAnimeStatusUseCase = updateAnimeStatusUseCase,
+    deleteUserRatesUseCase = deleteUserRatesUseCase
 )
 
 private fun provideOnHoldScreenModel(
     favoritesRepository: FavoritesRepository,
     getUserIdUseCase: GetUserIdUseCase,
-    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase
+    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
+    deleteUserRatesUseCase: DeleteUserRatesUseCase
 ) : OnHoldScreenModel = OnHoldScreenModel(
     favoritesRepository = favoritesRepository,
     getUserIdUseCase = getUserIdUseCase,
-    updateAnimeStatusUseCase = updateAnimeStatusUseCase
+    updateAnimeStatusUseCase = updateAnimeStatusUseCase,
+    deleteUserRatesUseCase = deleteUserRatesUseCase
 )
 
 private fun provideFavoritesScreenModel(

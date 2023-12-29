@@ -1,8 +1,11 @@
 package com.bekmnsrw.feature.home.impl.di
 
 import com.bekmnsrw.core.network.qualifier.Qualifiers
+import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.home.api.repository.HomeRepository
 import com.bekmnsrw.feature.home.api.usecase.AddToFavoritesUseCase
+import com.bekmnsrw.feature.home.api.usecase.CreateUserRatesUseCase
+import com.bekmnsrw.feature.home.api.usecase.DeleteUserRatesUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetAnimeListUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetAnimeUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetSimilarAnimeListUseCase
@@ -15,6 +18,8 @@ import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel
 import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel
 import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel
 import com.bekmnsrw.feature.home.impl.usecase.AddToFavoritesUseCaseImpl
+import com.bekmnsrw.feature.home.impl.usecase.CreateUserRatesUseCaseImpl
+import com.bekmnsrw.feature.home.impl.usecase.DeleteUserRatesUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.GetAnimeListUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.GetAnimeUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.GetSimilarAnimeListUseCaseImpl
@@ -56,6 +61,14 @@ val homeModule = module {
         provideGetSimilarAnimeListUseCase(homeRepository = get())
     }
 
+    factory<CreateUserRatesUseCase> {
+        provideCreateUserRatesUseCase(homeRepository = get())
+    }
+
+    factory<DeleteUserRatesUseCase> {
+        provideDeleteUserRatesUseCase(homeRepository = get())
+    }
+
     factory<HomeScreenModel> {
         provideHomeScreenModel(
             getAnimeListUseCase = get()
@@ -75,7 +88,10 @@ val homeModule = module {
             animeId = getProperty(ANIME_ID_KOIN_PROPERTY),
             addToFavoritesUseCase = get(),
             removeFromFavoritesUseCase = get(),
-            getSimilarAnimeListUseCase = get()
+            getSimilarAnimeListUseCase = get(),
+            createUserRatesUseCase = get(),
+            updateAnimeStatusUseCase = get(),
+            deleteUserRatesUseCase = get()
         )
     }
 }
@@ -121,13 +137,19 @@ private fun provideDetailsScreenModel(
     animeId: Int,
     addToFavoritesUseCase: AddToFavoritesUseCase,
     removeFromFavoritesUseCase: RemoveFromFavoritesUseCase,
-    getSimilarAnimeListUseCase: GetSimilarAnimeListUseCase
+    getSimilarAnimeListUseCase: GetSimilarAnimeListUseCase,
+    createUserRatesUseCase: CreateUserRatesUseCase,
+    updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
+    deleteUserRatesUseCase: DeleteUserRatesUseCase
 ): DetailsScreenModel = DetailsScreenModel(
     getAnimeUseCase = getAnimeUseCase,
     animeId = animeId,
     addToFavoritesUseCase = addToFavoritesUseCase,
     removeFromFavoritesUseCase = removeFromFavoritesUseCase,
-    getSimilarAnimeListUseCase = getSimilarAnimeListUseCase
+    getSimilarAnimeListUseCase = getSimilarAnimeListUseCase,
+    createUserRatesUseCase = createUserRatesUseCase,
+    updateAnimeStatusUseCase = updateAnimeStatusUseCase,
+    deleteUserRatesUseCase = deleteUserRatesUseCase
 )
 
 private fun provideAddToFavoritesUseCase(
@@ -145,5 +167,17 @@ private fun provideRemoveFromFavoritesUseCase(
 private fun provideGetSimilarAnimeListUseCase(
     homeRepository: HomeRepository
 ): GetSimilarAnimeListUseCase = GetSimilarAnimeListUseCaseImpl(
+    homeRepository = homeRepository
+)
+
+private fun provideCreateUserRatesUseCase(
+    homeRepository: HomeRepository
+): CreateUserRatesUseCase = CreateUserRatesUseCaseImpl(
+    homeRepository = homeRepository
+)
+
+private fun provideDeleteUserRatesUseCase(
+    homeRepository: HomeRepository
+): DeleteUserRatesUseCase = DeleteUserRatesUseCaseImpl(
     homeRepository = homeRepository
 )

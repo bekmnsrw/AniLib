@@ -23,8 +23,8 @@ data class AnimeDetails(
     val synonyms: List<String>,
     val totalScoresStats: Int,
     val totalStatusesStats: Int,
-    val rating: String
-//    val userRate: UserRate?,
+    val rating: String,
+    val userRates: UserRates?,
 //    val videos: List<Video?>
 //    val screenshots: List<Screenshot?>,
 //    val threadId: Int?,

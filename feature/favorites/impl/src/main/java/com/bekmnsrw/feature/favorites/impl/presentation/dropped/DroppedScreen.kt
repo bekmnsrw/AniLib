@@ -24,15 +24,21 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
+import com.bekmnsrw.core.widget.AniLibDialog
 import com.bekmnsrw.core.widget.AniLibSnackbar
+import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.favorites.api.model.UserRates
-import com.bekmnsrw.feature.favorites.impl.UserRatesEnum
 import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeBottomSheet
-import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeStatusDialog
 import com.bekmnsrw.feature.favorites.impl.presentation.container.TabAnimeList
 import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenAction
-import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenAction.*
-import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenEvent.*
+import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenAction.NavigateDetails
+import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenAction.ShowSnackbar
+import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenEvent.OnBottomSheetDismissRequest
+import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenEvent.OnChangeCategoryClick
+import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenEvent.OnDialogDismissRequest
+import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenEvent.OnItemClick
+import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenEvent.OnLongPress
+import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel.DroppedScreenEvent.OnRadioButtonClick
 import kotlinx.coroutines.launch
 
 internal class DroppedScreen : Screen {
@@ -119,7 +125,7 @@ private fun DroppedScreenContent(
     onItemClick: (Int) -> Unit,
     onLongClick: (Int) -> Unit,
     onChangeCategoryClick: () -> Unit,
-    onRadioButtonClick: (String, Int) -> Unit
+    onRadioButtonClick: (String, Int?) -> Unit
 ) {
     TabAnimeList(
         userRatesPaged = droppedAnimePaged,
@@ -143,7 +149,7 @@ private fun DroppedScreenContent(
 
     if (shouldShowDialog) {
         droppedAnimePaged[selectedItemIndex]?.let { userRate ->
-            AnimeStatusDialog(
+            AniLibDialog(
                 id = userRate.id,
                 currentStatus = userRate.userStatus,
                 onDismissRequest = onDialogDismissRequest,

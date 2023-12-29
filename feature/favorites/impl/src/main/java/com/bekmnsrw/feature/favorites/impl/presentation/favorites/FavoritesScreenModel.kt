@@ -49,15 +49,15 @@ internal class FavoritesScreenModel(
     internal sealed interface FavoritesScreenEvent {
         data object OnInit : FavoritesScreenEvent
         data object OnStart : FavoritesScreenEvent
-        data class OnItemClicked(val id: Int) : FavoritesScreenEvent
-        data class OnIconFavoriteClicked(val id: Int) : FavoritesScreenEvent
-        data class OnCardPressed(val id: Int) : FavoritesScreenEvent
+        data class OnItemClick(val id: Int) : FavoritesScreenEvent
+        data class OnIconFavoriteClick(val id: Int) : FavoritesScreenEvent
+        data class OnCardPress(val id: Int) : FavoritesScreenEvent
     }
 
     @Immutable
     internal sealed interface FavoritesScreenAction {
         data class NavigateDetails(val id: Int) : FavoritesScreenAction
-        data class ShowErrorSnackbar(val message: String) : FavoritesScreenAction
+        data class ShowSnackbar(val message: String) : FavoritesScreenAction
     }
 
     init {
@@ -67,14 +67,10 @@ internal class FavoritesScreenModel(
     fun eventHandler(event: FavoritesScreenEvent) {
         when (event) {
             OnInit -> onInit()
-
             OnStart -> onStart()
-
-            is OnItemClicked -> onItemClicked(event.id)
-
-            is OnCardPressed -> onCardPressed(event.id)
-
-            is OnIconFavoriteClicked -> onIconFavoriteClicked(event.id)
+            is OnItemClick -> onItemClick(event.id)
+            is OnCardPress -> onCardPress(event.id)
+            is OnIconFavoriteClick -> onIconFavoriteClick(event.id)
         }
     }
 
@@ -118,11 +114,11 @@ internal class FavoritesScreenModel(
             }
     }
 
-    private fun onItemClicked(id: Int) = screenModelScope.launch {
+    private fun onItemClick(id: Int) = screenModelScope.launch {
         _screenAction.emit(NavigateDetails(id = id))
     }
 
-    private fun onCardPressed(id: Int) = screenModelScope.launch {}
+    private fun onCardPress(id: Int) = screenModelScope.launch {}
 
     private fun deleteFromFavorites(id: Int) = screenModelScope.launch {
         removeFromFavoritesUseCase(type = TYPE, id = id)
@@ -139,12 +135,12 @@ internal class FavoritesScreenModel(
                         )
                     }
 
-                    false -> _screenAction.emit(ShowErrorSnackbar(message = ERROR_MESSAGE))
+                    false -> _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
                 }
             }
     }
 
-    private fun onIconFavoriteClicked(id: Int) = screenModelScope.launch {
+    private fun onIconFavoriteClick(id: Int) = screenModelScope.launch {
         deleteFromFavorites(id = id)
     }
 }

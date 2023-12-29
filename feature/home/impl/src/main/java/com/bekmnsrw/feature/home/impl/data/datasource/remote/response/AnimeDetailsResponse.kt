@@ -26,8 +26,8 @@ internal data class AnimeDetailsResponse(
     @SerialName("rates_scores_stats") val ratesScoresStats: List<RatesScoresStatResponse>,
     @SerialName("rates_statuses_stats") val ratesStatusesStats: List<RatesStatusesStatResponse>,
     @SerialName("score") val score: String,
-    @SerialName("rating") val rating: String
-//    @SerialName("user_rate") val userRate: UserRateResponse?,
+    @SerialName("rating") val rating: String,
+    @SerialName("user_rate") val userRate: UserRatesResponse?,
 //    @SerialName("videos") val videos: List<VideoResponse?>
 //    @SerialName("screenshots") val screenshots: List<ScreenshotResponse?>,
 //    @SerialName("thread_id") val threadId: Int?,

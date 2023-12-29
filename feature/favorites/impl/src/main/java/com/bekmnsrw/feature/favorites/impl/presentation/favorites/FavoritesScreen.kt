@@ -119,7 +119,7 @@ private fun FavoritesScreenActions(
                 navigator.push(item = detailsScreen)
             }
 
-            is FavoritesScreenAction.ShowErrorSnackbar -> coroutineScope.launch {
+            is FavoritesScreenAction.ShowSnackbar -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(
                     message = screenAction.message,
                     duration = SnackbarDuration.Short
@@ -166,8 +166,8 @@ private fun FavoritesAnimeList(
             FavoritesAnimeListItem(
                 modifier = Modifier.animateItemPlacement(),
                 anime = it,
-                onItemClicked = { eventHandler(OnItemClicked(id = it.id)) },
-                onIconFavoriteClicked = { eventHandler(OnIconFavoriteClicked(id = it.id)) }
+                onItemClicked = { eventHandler(OnItemClick(id = it.id)) },
+                onIconFavoriteClicked = { eventHandler(OnIconFavoriteClick(id = it.id)) }
             )
         }
     }

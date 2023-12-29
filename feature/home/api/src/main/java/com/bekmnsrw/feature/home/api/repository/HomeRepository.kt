@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import com.bekmnsrw.feature.home.api.model.FavoritesActionResult
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
+import com.bekmnsrw.feature.home.api.model.UserRates
 import kotlinx.coroutines.flow.Flow
 
 interface HomeRepository {
@@ -35,4 +36,12 @@ interface HomeRepository {
         id: Int,
         limit: Int
     ): Flow<List<Anime>>
+
+    suspend fun createUserRates(
+        userId: Int,
+        targetId: Int,
+        status: String
+    ): Flow<UserRates>
+
+    suspend fun deleteUserRates(id: Int): Flow<Int>
 }
