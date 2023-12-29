@@ -12,6 +12,7 @@ import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,6 +23,15 @@ import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import kotlinx.collections.immutable.persistentListOf
 
+private val statuses = persistentListOf(
+    UserRatesEnum.NOT_IN_MY_LIST,
+    UserRatesEnum.PLANNED,
+    UserRatesEnum.COMPLETED,
+    UserRatesEnum.WATCHING,
+    UserRatesEnum.DROPPED,
+    UserRatesEnum.ON_HOLD
+)
+
 @Composable
 fun AniLibDialog(
     id: Int?,
@@ -29,15 +39,6 @@ fun AniLibDialog(
     onDismissRequest: () -> Unit,
     onRadioButtonClick: (String, Int?) -> Unit
 ) {
-    val statuses = persistentListOf(
-        UserRatesEnum.NOT_IN_MY_LIST,
-        UserRatesEnum.PLANNED,
-        UserRatesEnum.COMPLETED,
-        UserRatesEnum.WATCHING,
-        UserRatesEnum.DROPPED,
-        UserRatesEnum.ON_HOLD
-    )
-
     val selectedValue = remember { mutableStateOf(currentStatus) }
 
     AlertDialog(
@@ -48,52 +49,67 @@ fun AniLibDialog(
             Column {
                 LazyColumn {
                     items(items = statuses) { item ->
-                        val isSelected = selectedValue.value == item.key
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .selectable(
-                                    selected = isSelected,
-                                    role = Role.RadioButton,
-                                    onClick = {
-                                        if (!isSelected) {
-                                            selectedValue.value = item.key
-                                            onRadioButtonClick(item.key, id)
-                                        }
-                                    }
-                                )
-                        ) {
-                            IconToggleButton(
-                                checked = isSelected,
-                                onCheckedChange = {
-                                    if (!isSelected) {
-                                        selectedValue.value = item.key
-                                        onRadioButtonClick(item.key, id)
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = when (isSelected) {
-                                        true -> AniLibIcons.RadioButtonChecked
-                                        false -> AniLibIcons.RadioButtonUnchecked
-                                    },
-                                    tint = when (isSelected) {
-                                        true -> MaterialTheme.colorScheme.primary
-                                        false -> MaterialTheme.colorScheme.onSurface
-                                    },
-                                    contentDescription = null
-                                )
-                            }
-                            Text(
-                                text = item.value,
-                                style = AniLibTypography.bodyLarge
-                            )
-                        }
+                        AniLibIconToggleButton(
+                            id = id,
+                            isSelected = selectedValue.value == item.key,
+                            selectedValue = selectedValue,
+                            item = item,
+                            onClick = onRadioButtonClick
+                        )
                     }
                 }
             }
         }
     )
+}
+
+@Composable
+private fun AniLibIconToggleButton(
+    id: Int?,
+    isSelected: Boolean,
+    selectedValue: MutableState<String?>,
+    item: UserRatesEnum,
+    onClick: (String, Int?) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .selectable(
+                selected = isSelected,
+                role = Role.RadioButton,
+                onClick = {
+                    if (!isSelected) {
+                        selectedValue.value = item.key
+                        onClick(item.key, id)
+                    }
+                }
+            )
+    ) {
+        IconToggleButton(
+            checked = isSelected,
+            onCheckedChange = {
+                if (!isSelected) {
+                    selectedValue.value = item.key
+                    onClick(item.key, id)
+                }
+            }
+        ) {
+            Icon(
+                imageVector = when (isSelected) {
+                    true -> AniLibIcons.RadioButtonChecked
+                    false -> AniLibIcons.RadioButtonUnchecked
+                },
+                tint = when (isSelected) {
+                    true -> MaterialTheme.colorScheme.primary
+                    false -> MaterialTheme.colorScheme.onSurface
+                },
+                contentDescription = null
+            )
+        }
+        Text(
+            text = item.value,
+            style = AniLibTypography.bodyLarge
+        )
+    }
 }

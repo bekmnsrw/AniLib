@@ -59,6 +59,7 @@ import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.designsystem.theme.LocalBackgroundTheme
 import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.core.utils.HandleScreenLifecycle
+import com.bekmnsrw.core.utils.convertNextEpisodeAt
 import com.bekmnsrw.core.widget.AniLibAgeRatingBadge
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.AniLibDialog
@@ -356,17 +357,15 @@ private fun AnimeDetailsInfo(
             )
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
             AnimeInfo(anime = anime)
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
             AnimeGenre(genres = anime.genres)
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
             anime.description?.let {
                 AniLibExpandableTextWithTextButton(
                     text = it,
                     isExpanded = isDescriptionExpanded,
                     onDescriptionButtonClicked = onDescriptionButtonClick
                 )
+                Divider(modifier = Modifier.padding(vertical = 8.dp))
             }
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
             AniLibRateWidget(
                 rate = anime.score,
                 rateStats = anime.scoresStats,
@@ -387,7 +386,6 @@ private fun AnimeDetailsInfo(
                 )
                 Spacer(modifier = Modifier.padding(vertical = 8.dp))
             }
-
         }
     }
 }
@@ -560,12 +558,7 @@ private fun AnimeInfo(anime: AnimeDetails) {
             }
         }
     }
-}
-
-/* Move to utils */
-private fun convertNextEpisodeAt(nextEpisodeAt: String): Pair<String, String> {
-    val dateTime = nextEpisodeAt.split("T")
-    return Pair(dateTime[0], dateTime[1].substring(0, 5))
+    Divider(modifier = Modifier.padding(vertical = 8.dp))
 }
 
 @Composable
@@ -609,6 +602,7 @@ private fun AnimeGenre(genres: List<Genre>) {
             )
         }
     }
+    Divider(modifier = Modifier.padding(vertical = 8.dp))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

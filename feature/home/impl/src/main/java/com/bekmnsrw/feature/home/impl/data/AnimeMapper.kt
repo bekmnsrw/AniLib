@@ -1,27 +1,22 @@
 package com.bekmnsrw.feature.home.impl.data
 
-import com.bekmnsrw.feature.home.api.model.FavoritesActionResult
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
+import com.bekmnsrw.feature.home.api.model.AnimeImage
+import com.bekmnsrw.feature.home.api.model.FavoritesActionResult
 import com.bekmnsrw.feature.home.api.model.Genre
 import com.bekmnsrw.feature.home.api.model.RatesScoresStat
 import com.bekmnsrw.feature.home.api.model.RatesStatusesStat
-import com.bekmnsrw.feature.home.api.model.Screenshot
 import com.bekmnsrw.feature.home.api.model.UserRates
-import com.bekmnsrw.feature.home.api.model.Video
-import com.bekmnsrw.feature.home.api.model.AnimeImage
-import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.FavoritesActionResultResponse
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.AnimeDetailsResponse
-import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.GenreResponse
-import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.RatesScoresStatResponse
-import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.RatesStatusesStatResponse
-import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.ScreenshotResponse
-import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.UserRatesResponse
-import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.VideoResponse
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.AnimeImageResponse
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.AnimeResponse
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.CreateUserRatesResponse
-import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.FavoritesResponse
+import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.FavoritesActionResultResponse
+import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.GenreResponse
+import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.RatesScoresStatResponse
+import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.RatesStatusesStatResponse
+import com.bekmnsrw.feature.home.impl.data.datasource.remote.response.UserRatesResponse
 
 internal fun AnimeResponse.toAnime(): Anime = Anime(
     airedOn = airedOn ?: "",
@@ -126,31 +121,10 @@ internal fun UserRatesResponse.toUserRate(): UserRates = UserRates(
     volumes = volumes
 )
 
-internal fun VideoResponse.toVideo(): Video = Video(
-    hosting = hosting,
-    id = id,
-    imageUrl = imageUrl,
-    kind = kind,
-    name = name,
-    playerUrl = playerUrl,
-    url = url
-)
-
-internal fun List<VideoResponse?>.toVideoList(): List<Video?> = this.map { it?.toVideo() }
-
-internal fun ScreenshotResponse.toScreenshot(): Screenshot = Screenshot(
-    original = original,
-    preview = preview
-)
-
-internal fun List<ScreenshotResponse?>.toScreenshotList(): List<Screenshot?> = this.map { it?.toScreenshot() }
-
 internal fun FavoritesActionResultResponse.toFavoritesActionResult(): FavoritesActionResult = FavoritesActionResult(
     success = success,
     notice = notice
 )
-
-internal fun FavoritesResponse.toAnimes(): List<Anime> = this.animes.toAnimeList()
 
 internal fun CreateUserRatesResponse.toUserRates(): UserRates = UserRates(
     chapters = chapters,
