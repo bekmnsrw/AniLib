@@ -28,7 +28,8 @@ internal fun AnimeResponse.toAnime(): Anime = Anime(
     name = name,
     releasedOn = releasedOn ?: "",
     score = score,
-    status = status
+    status = status,
+    russian = russianName
 )
 
 internal fun AnimeImageResponse.toAnimeImage(): AnimeImage = AnimeImage(

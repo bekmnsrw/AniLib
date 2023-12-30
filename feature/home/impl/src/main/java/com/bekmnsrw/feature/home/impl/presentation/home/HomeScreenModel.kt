@@ -5,10 +5,17 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.usecase.GetAnimeListUseCase
+import com.bekmnsrw.feature.home.api.usecase.SearchAnimeUseCase
 import com.bekmnsrw.feature.home.impl.AnimeStatusEnum.ANONS
 import com.bekmnsrw.feature.home.impl.AnimeStatusEnum.ONGOING
 import com.bekmnsrw.feature.home.impl.AnimeStatusEnum.RELEASED
 import com.bekmnsrw.feature.home.impl.HomeConstants.REQUEST_LIMIT
+import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenAction.NavigateAnimeDetailsScreen
+import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenAction.NavigateMoreAnimeList
+import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenAction.NavigateSearchScreen
+import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenEvent.OnAnimeCardClick
+import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenEvent.OnMoreClick
+import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenEvent.OnSearchIconClick
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -23,7 +30,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 internal class HomeScreenModel(
-    private val getAnimeListUseCase: GetAnimeListUseCase
+    private val getAnimeListUseCase: GetAnimeListUseCase,
+    private val searchAnimeUseCase: SearchAnimeUseCase
 ) : ScreenModel {
 
     private companion object {
@@ -36,19 +44,21 @@ internal class HomeScreenModel(
         val isLoading: Boolean = false,
         val ongoingAnimeListBrief: PersistentList<Anime> = persistentListOf(),
         val anonsAnimeListBrief: PersistentList<Anime> = persistentListOf(),
-        val releasedAnimeListBrief: PersistentList<Anime> = persistentListOf()
+        val releasedAnimeListBrief: PersistentList<Anime> = persistentListOf(),
     )
 
     @Immutable
     internal sealed interface HomeScreenEvent {
-        data class OnMoreClicked(val status: String) : HomeScreenEvent
-        data class OnAnimeCardClicked(val id: Int) : HomeScreenEvent
+        data class OnMoreClick(val status: String) : HomeScreenEvent
+        data class OnAnimeCardClick(val id: Int) : HomeScreenEvent
+        data object OnSearchIconClick : HomeScreenEvent
     }
 
     @Immutable
     internal sealed interface HomeScreenAction {
         data class NavigateMoreAnimeList(val status: String) : HomeScreenAction
         data class NavigateAnimeDetailsScreen(val id: Int) : HomeScreenAction
+        data object NavigateSearchScreen : HomeScreenAction
     }
 
     private val _screenState = MutableStateFlow(HomeScreenState())
@@ -57,15 +67,17 @@ internal class HomeScreenModel(
     private val _screenAction = MutableSharedFlow<HomeScreenAction?>()
     val screenAction: SharedFlow<HomeScreenAction?> = _screenAction.asSharedFlow()
 
-    fun eventHandler(homeScreenEvent: HomeScreenEvent) {
-        when (homeScreenEvent) {
-            is HomeScreenEvent.OnMoreClicked -> onMoreClicked(homeScreenEvent.status)
-
-            is HomeScreenEvent.OnAnimeCardClicked -> onAnimeCardClicked(homeScreenEvent.id)
+    fun eventHandler(event: HomeScreenEvent) {
+        when (event) {
+            is OnMoreClick -> onMoreClicked(event.status)
+            is OnAnimeCardClick -> onAnimeCardClicked(event.id)
+            OnSearchIconClick -> onSearchIconClick()
         }
     }
 
-    init { loadAllAnime() }
+    init {
+        loadAllAnime()
+    }
 
     private fun loadOngoingAnime() = screenModelScope.async {
         getAnimeListUseCase(
@@ -120,18 +132,14 @@ internal class HomeScreenModel(
     }
 
     private fun onMoreClicked(status: String) = screenModelScope.launch {
-        _screenAction.emit(
-            HomeScreenAction.NavigateMoreAnimeList(
-                status = status
-            )
-        )
+        _screenAction.emit(NavigateMoreAnimeList(status = status))
     }
 
     private fun onAnimeCardClicked(id: Int) = screenModelScope.launch {
-        _screenAction.emit(
-            HomeScreenAction.NavigateAnimeDetailsScreen(
-                id = id
-            )
-        )
+        _screenAction.emit(NavigateAnimeDetailsScreen(id = id))
+    }
+
+    private fun onSearchIconClick() = screenModelScope.launch {
+        _screenAction.emit(NavigateSearchScreen)
     }
 }

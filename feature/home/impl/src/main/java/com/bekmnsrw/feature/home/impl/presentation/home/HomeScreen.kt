@@ -32,11 +32,14 @@ import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreen
 import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenAction
 import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenAction.NavigateAnimeDetailsScreen
 import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenAction.NavigateMoreAnimeList
+import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenAction.NavigateSearchScreen
 import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenEvent
-import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenEvent.OnAnimeCardClicked
-import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenEvent.OnMoreClicked
+import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenEvent.OnAnimeCardClick
+import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenEvent.OnMoreClick
+import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenEvent.OnSearchIconClick
 import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel.HomeScreenState
 import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreen
+import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreen
 
 internal class HomeScreen : Screen {
 
@@ -76,6 +79,10 @@ private fun HomeScreenActions(
                     id = screenAction.id
                 )
             )
+
+            NavigateSearchScreen -> navigator.push(
+                item = SearchScreen()
+            )
         }
     }
 }
@@ -98,7 +105,7 @@ private fun HomeScreenContent(
             AniLibTopBarWithSearch(
                 scrollBehavior = scrollBehavior,
                 title = stringResource(id = R.string.app_name),
-                onSearchIconClicked = { /* EventHandler invocation */ }
+                onSearchIconClicked = { eventHandler(OnSearchIconClick) }
             )
         }
     ) { paddingValues ->
@@ -132,8 +139,8 @@ private fun AnimeList(
             AniLibHorizontalList(
                 animeList = screenState.ongoingAnimeListBrief,
                 animeListTitle = stringResource(id = R.string.ongoing),
-                onMoreClicked = { eventHandler(OnMoreClicked(status = ONGOING.status)) },
-                onItemClicked = { eventHandler(OnAnimeCardClicked(id = it)) }
+                onMoreClicked = { eventHandler(OnMoreClick(status = ONGOING.status)) },
+                onItemClicked = { eventHandler(OnAnimeCardClick(id = it)) }
             )
         }
 
@@ -141,8 +148,8 @@ private fun AnimeList(
             AniLibHorizontalList(
                 animeList = screenState.anonsAnimeListBrief,
                 animeListTitle = stringResource(id = R.string.anons),
-                onMoreClicked = { eventHandler(OnMoreClicked(status = ANONS.status)) },
-                onItemClicked = { eventHandler(OnAnimeCardClicked(id = it)) }
+                onMoreClicked = { eventHandler(OnMoreClick(status = ANONS.status)) },
+                onItemClicked = { eventHandler(OnAnimeCardClick(id = it)) }
             )
         }
 
@@ -150,8 +157,8 @@ private fun AnimeList(
             AniLibHorizontalList(
                 animeList = screenState.releasedAnimeListBrief,
                 animeListTitle = stringResource(id = R.string.released),
-                onMoreClicked = { eventHandler(OnMoreClicked(status = RELEASED.status)) },
-                onItemClicked = { eventHandler(OnAnimeCardClicked(id = it)) }
+                onMoreClicked = { eventHandler(OnMoreClick(status = RELEASED.status)) },
+                onItemClicked = { eventHandler(OnAnimeCardClick(id = it)) }
             )
         }
     }

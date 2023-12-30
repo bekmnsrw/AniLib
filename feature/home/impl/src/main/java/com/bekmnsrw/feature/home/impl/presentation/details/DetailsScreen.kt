@@ -351,10 +351,7 @@ private fun AnimeDetailsInfo(
                 ageRating = anime.rating,
                 onIconClick = onIconClick
             )
-            AnimeStatus(
-                anime.userRates,
-                onClick = onAnimeStatusClick
-            )
+            AnimeStatus(anime.userRates, onClick = onAnimeStatusClick)
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
             AnimeInfo(anime = anime)
             AnimeGenre(genres = anime.genres)
@@ -384,6 +381,8 @@ private fun AnimeDetailsInfo(
                     onItemClicked = onSimilarAnimeCardClick,
                     isMoreEnable = false
                 )
+                Spacer(modifier = Modifier.padding(vertical = 8.dp))
+            } else {
                 Spacer(modifier = Modifier.padding(vertical = 8.dp))
             }
         }

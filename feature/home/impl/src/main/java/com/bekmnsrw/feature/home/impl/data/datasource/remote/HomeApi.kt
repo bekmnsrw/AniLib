@@ -60,4 +60,11 @@ internal interface HomeApi {
 
     @DELETE(value = "v2/user_rates/{id}")
     suspend fun deleteUserRates(@Path("id") id: Int): Response<Unit>
+
+    @GET(value = "animes")
+    suspend fun searchAnime(
+        @Query("page") page: Int,
+        @Query("limit") limit: Int,
+        @Query("search") search: String
+    ): List<AnimeResponse>
 }

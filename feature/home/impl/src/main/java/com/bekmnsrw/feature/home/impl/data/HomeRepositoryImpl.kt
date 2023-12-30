@@ -119,4 +119,18 @@ internal class HomeRepositoryImpl(
             homeApi.deleteUserRates(id = id).code()
         )
     }
+
+    override suspend fun searchAnime(
+        search: String
+    ): Flow<PagingData<Anime>> = execute { currentPage, limit ->
+        flow {
+            emit(
+                homeApi.searchAnime(
+                    page = currentPage,
+                    limit = limit,
+                    search = search
+                ).toAnimeList()
+            )
+        }
+    }
 }

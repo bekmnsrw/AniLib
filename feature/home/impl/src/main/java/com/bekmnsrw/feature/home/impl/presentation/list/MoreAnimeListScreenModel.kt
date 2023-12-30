@@ -9,6 +9,7 @@ import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_NAME
 import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_POPULARITY
 import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_RANDOM
 import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_RANK
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 internal class MoreAnimeListScreenModel(
@@ -58,10 +60,9 @@ internal class MoreAnimeListScreenModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val animePaged = animeParams.flatMapLatest { (status, filter) ->
-        homeRepository.getAnimePaged(
-            status = status,
-            order = filter
-        )
+        homeRepository
+            .getAnimePaged(status = status, order = filter)
+            .flowOn(Dispatchers.IO)
     }.cachedIn(screenModelScope)
 
     private val _screenState = MutableStateFlow(MoreAnimeListScreenState())

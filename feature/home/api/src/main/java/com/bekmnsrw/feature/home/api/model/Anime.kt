@@ -10,5 +10,6 @@ data class Anime(
     val numberOfEpisodes: String,
     val episodesAired: Int,
     val kind: String,
-    val image: AnimeImage
+    val image: AnimeImage,
+    val russian: String
 )

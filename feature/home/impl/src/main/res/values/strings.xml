@@ -20,4 +20,6 @@
     <string name="app_name">AniLib</string>
 
     <string name="add_to_my_list">Add to my list</string>
+
+    <string name="search_anime">Search anime</string>
 </resources>

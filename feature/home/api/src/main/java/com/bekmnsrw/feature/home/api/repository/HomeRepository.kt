@@ -44,4 +44,6 @@ interface HomeRepository {
     ): Flow<UserRates>
 
     suspend fun deleteUserRates(id: Int): Flow<Int>
+
+    suspend fun searchAnime(search: String): Flow<PagingData<Anime>>
 }

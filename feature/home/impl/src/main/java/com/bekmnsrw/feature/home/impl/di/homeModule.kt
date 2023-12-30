@@ -10,6 +10,7 @@ import com.bekmnsrw.feature.home.api.usecase.GetAnimeListUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetAnimeUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetSimilarAnimeListUseCase
 import com.bekmnsrw.feature.home.api.usecase.RemoveFromFavoritesUseCase
+import com.bekmnsrw.feature.home.api.usecase.SearchAnimeUseCase
 import com.bekmnsrw.feature.home.impl.HomeConstants.ANIME_ID_KOIN_PROPERTY
 import com.bekmnsrw.feature.home.impl.HomeConstants.STATUS_KOIN_PROPERTY
 import com.bekmnsrw.feature.home.impl.data.HomeRepositoryImpl
@@ -17,6 +18,7 @@ import com.bekmnsrw.feature.home.impl.data.datasource.remote.HomeApi
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel
 import com.bekmnsrw.feature.home.impl.presentation.home.HomeScreenModel
 import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel
+import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel
 import com.bekmnsrw.feature.home.impl.usecase.AddToFavoritesUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.CreateUserRatesUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.DeleteUserRatesUseCaseImpl
@@ -24,6 +26,7 @@ import com.bekmnsrw.feature.home.impl.usecase.GetAnimeListUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.GetAnimeUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.GetSimilarAnimeListUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.RemoveFromFavoritesUseCaseImpl
+import com.bekmnsrw.feature.home.impl.usecase.SearchAnimeUseCaseImpl
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -69,9 +72,14 @@ val homeModule = module {
         provideDeleteUserRatesUseCase(homeRepository = get())
     }
 
+    factory<SearchAnimeUseCase> {
+        provideSearchAnimeUseCase(homeRepository = get())
+    }
+
     factory<HomeScreenModel> {
         provideHomeScreenModel(
-            getAnimeListUseCase = get()
+            getAnimeListUseCase = get(),
+            searchAnimeUseCase = get()
         )
     }
 
@@ -94,6 +102,10 @@ val homeModule = module {
             deleteUserRatesUseCase = get()
         )
     }
+
+    factory<SearchScreenModel> {
+        provideSearchScreenModel(searchAnimeUseCase = get())
+    }
 }
 
 private fun provideHomeApi(
@@ -107,9 +119,11 @@ private fun provideHomeRepository(
 )
 
 private fun provideHomeScreenModel(
-    getAnimeListUseCase: GetAnimeListUseCase
+    getAnimeListUseCase: GetAnimeListUseCase,
+    searchAnimeUseCase: SearchAnimeUseCase
 ): HomeScreenModel = HomeScreenModel(
-    getAnimeListUseCase = getAnimeListUseCase
+    getAnimeListUseCase = getAnimeListUseCase,
+    searchAnimeUseCase = searchAnimeUseCase
 )
 
 private fun provideGetAnimeListUseCase(
@@ -180,4 +194,16 @@ private fun provideDeleteUserRatesUseCase(
     homeRepository: HomeRepository
 ): DeleteUserRatesUseCase = DeleteUserRatesUseCaseImpl(
     homeRepository = homeRepository
+)
+
+private fun provideSearchAnimeUseCase(
+    homeRepository: HomeRepository
+): SearchAnimeUseCase = SearchAnimeUseCaseImpl(
+    homeRepository = homeRepository
+)
+
+private fun provideSearchScreenModel(
+    searchAnimeUseCase: SearchAnimeUseCase
+): SearchScreenModel = SearchScreenModel(
+    searchAnimeUseCase = searchAnimeUseCase
 )
