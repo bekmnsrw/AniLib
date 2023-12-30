@@ -9,6 +9,8 @@ import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_NAME
 import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_POPULARITY
 import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_RANDOM
 import com.bekmnsrw.feature.home.impl.AnimeFilterEnum.BY_RANK
+import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenAction.*
+import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenEvent.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -43,17 +45,19 @@ internal class MoreAnimeListScreenModel(
 
     @Immutable
     internal sealed interface MoreAnimeListScreenEvent {
-        data object OnArrowBackClicked : MoreAnimeListScreenEvent
-        data class OnAnimeCardClicked(val id: Int) : MoreAnimeListScreenEvent
-        data object OnFilterClicked : MoreAnimeListScreenEvent
+        data object OnArrowBackClick : MoreAnimeListScreenEvent
+        data class OnAnimeCardClick(val id: Int) : MoreAnimeListScreenEvent
+        data object OnFilterClick : MoreAnimeListScreenEvent
         data object OnDropDownMenuDismissRequest : MoreAnimeListScreenEvent
-        data class OnDropDownMenuItemClicked(val order: String) : MoreAnimeListScreenEvent
+        data class OnDropDownMenuItemClick(val order: String) : MoreAnimeListScreenEvent
+        data class OnSearchIconClick(val status: String) : MoreAnimeListScreenEvent
     }
 
     @Immutable
     internal sealed interface MoreAnimeListScreenAction {
         data object NavigateHomeScreen : MoreAnimeListScreenAction
         data class NavigateDetailsScreen(val id: Int) : MoreAnimeListScreenAction
+        data class NavigateSearchScreen(val status: String) : MoreAnimeListScreenAction
     }
 
     private val animeParams = MutableStateFlow(Pair(status, BY_RANK.value))
@@ -71,39 +75,26 @@ internal class MoreAnimeListScreenModel(
     private val _screenAction = MutableSharedFlow<MoreAnimeListScreenAction?>()
     val screenAction: SharedFlow<MoreAnimeListScreenAction?> = _screenAction.asSharedFlow()
 
-    fun eventHandler(moreAnimeListScreenEvent: MoreAnimeListScreenEvent) {
-        when (moreAnimeListScreenEvent) {
-            MoreAnimeListScreenEvent.OnArrowBackClicked -> onArrowBackClicked()
-
-            is MoreAnimeListScreenEvent.OnAnimeCardClicked -> onAnimeCardClicked(
-                moreAnimeListScreenEvent.id
-            )
-
-            MoreAnimeListScreenEvent.OnFilterClicked -> onFilterClicked()
-
-            MoreAnimeListScreenEvent.OnDropDownMenuDismissRequest -> onDropDownMenuDismissRequest()
-
-            is MoreAnimeListScreenEvent.OnDropDownMenuItemClicked -> onDropDownMenuItemClicked(
-                order = moreAnimeListScreenEvent.order
-            )
+    fun eventHandler(event: MoreAnimeListScreenEvent) {
+        when (event) {
+            OnArrowBackClick -> onArrowBackClick()
+            is OnAnimeCardClick -> onAnimeCardClick(event.id)
+            OnFilterClick -> onFilterClick()
+            OnDropDownMenuDismissRequest -> onDropDownMenuDismissRequest()
+            is OnDropDownMenuItemClick -> onDropDownMenuItemClick(order = event.order)
+            is OnSearchIconClick -> onSearchIconClick(event.status)
         }
     }
 
-    private fun onArrowBackClicked() = screenModelScope.launch {
-        _screenAction.emit(
-            MoreAnimeListScreenAction.NavigateHomeScreen
-        )
+    private fun onArrowBackClick() = screenModelScope.launch {
+        _screenAction.emit(NavigateHomeScreen)
     }
 
-    private fun onAnimeCardClicked(id: Int) = screenModelScope.launch {
-        _screenAction.emit(
-            MoreAnimeListScreenAction.NavigateDetailsScreen(
-                id = id
-            )
-        )
+    private fun onAnimeCardClick(id: Int) = screenModelScope.launch {
+        _screenAction.emit(NavigateDetailsScreen(id = id))
     }
 
-    private fun onFilterClicked() = screenModelScope.launch {
+    private fun onFilterClick() = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
                 isDropDownMenuExpanded = true
@@ -119,7 +110,7 @@ internal class MoreAnimeListScreenModel(
         )
     }
 
-    private fun onDropDownMenuItemClicked(order: String) = screenModelScope.launch {
+    private fun onDropDownMenuItemClick(order: String) = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
                 isDropDownMenuExpanded = false,
@@ -132,5 +123,9 @@ internal class MoreAnimeListScreenModel(
                 second = order
             )
         )
+    }
+
+    private fun onSearchIconClick(status: String) = screenModelScope.launch {
+        _screenAction.emit(NavigateSearchScreen(status = status))
     }
 }

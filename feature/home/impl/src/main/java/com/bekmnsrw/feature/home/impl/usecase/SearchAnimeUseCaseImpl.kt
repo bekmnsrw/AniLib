@@ -11,8 +11,10 @@ class SearchAnimeUseCaseImpl(
 ) : SearchAnimeUseCase {
 
     override suspend fun invoke(
-        search: String
+        query: String,
+        status: String?
     ): Flow<PagingData<Anime>> = homeRepository.searchAnime(
-        search = search
+        query = query,
+        status = status
     )
 }

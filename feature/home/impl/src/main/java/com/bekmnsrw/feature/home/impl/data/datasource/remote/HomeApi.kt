@@ -65,6 +65,14 @@ internal interface HomeApi {
     suspend fun searchAnime(
         @Query("page") page: Int,
         @Query("limit") limit: Int,
-        @Query("search") search: String
+        @Query("search") query: String
+    ): List<AnimeResponse>
+
+    @GET(value = "animes")
+    suspend fun searchAnimeWithStatus(
+        @Query("page") page: Int,
+        @Query("limit") limit: Int,
+        @Query("status") status: String,
+        @Query("search") query: String
     ): List<AnimeResponse>
 }

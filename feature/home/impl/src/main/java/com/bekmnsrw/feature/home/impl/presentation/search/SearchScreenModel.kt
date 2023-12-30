@@ -31,7 +31,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 internal class SearchScreenModel(
-    private val searchAnimeUseCase: SearchAnimeUseCase
+    private val searchAnimeUseCase: SearchAnimeUseCase,
+    private val status: String
 ) : ScreenModel {
 
     @Immutable
@@ -71,7 +72,10 @@ internal class SearchScreenModel(
         .flatMapLatest { query ->
             when {
                 query.isEmpty() -> flowOf(PagingData.empty())
-                else -> searchAnimeUseCase(search = query).flowOn(Dispatchers.IO)
+                else -> searchAnimeUseCase(
+                    query = query,
+                    status = status.ifEmpty { null }
+                ).flowOn(Dispatchers.IO)
             }
         }.cachedIn(screenModelScope)
 

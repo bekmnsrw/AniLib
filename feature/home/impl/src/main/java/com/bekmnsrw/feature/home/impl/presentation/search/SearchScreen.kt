@@ -43,6 +43,7 @@ import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.core.widget.AniLibIconButton
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.feature.home.api.model.Anime
+import com.bekmnsrw.feature.home.impl.HomeConstants
 import com.bekmnsrw.feature.home.impl.R
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenAction
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenAction.NavigateAnimeDetailsScreen
@@ -53,11 +54,14 @@ import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.Sear
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnArrowBackClick
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnClearQueryClick
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnQueryChange
+import org.koin.androidx.compose.getKoin
 
-internal class SearchScreen : Screen {
+internal data class SearchScreen(val status: String) : Screen {
 
     @Composable
     override fun Content() {
+        getKoin().setProperty(HomeConstants.STATUS_KOIN_PROPERTY, status)
+
         val screenModel = getScreenModel<SearchScreenModel>()
         val screenState by screenModel.screenState.collectAsStateWithLifecycle()
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)

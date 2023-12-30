@@ -121,15 +121,25 @@ internal class HomeRepositoryImpl(
     }
 
     override suspend fun searchAnime(
-        search: String
+        query: String,
+        status: String?
     ): Flow<PagingData<Anime>> = execute { currentPage, limit ->
         flow {
             emit(
-                homeApi.searchAnime(
-                    page = currentPage,
-                    limit = limit,
-                    search = search
-                ).toAnimeList()
+                if (status == null) {
+                    homeApi.searchAnime(
+                        page = currentPage,
+                        limit = limit,
+                        query = query
+                    ).toAnimeList()
+                } else {
+                    homeApi.searchAnimeWithStatus(
+                        page = currentPage,
+                        limit = limit,
+                        query = query,
+                        status = status
+                    ).toAnimeList()
+                }
             )
         }
     }

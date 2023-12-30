@@ -6,5 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface SearchAnimeUseCase {
 
-    suspend operator fun invoke(search: String): Flow<PagingData<Anime>>
+    suspend operator fun invoke(
+        query: String,
+        status: String?
+    ): Flow<PagingData<Anime>>
 }

@@ -26,13 +26,11 @@ import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.impl.HomeConstants.STATUS_KOIN_PROPERTY
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreen
 import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenAction
+import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenAction.*
 import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenEvent
-import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenEvent.OnAnimeCardClicked
-import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenEvent.OnArrowBackClicked
-import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenEvent.OnDropDownMenuDismissRequest
-import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenEvent.OnDropDownMenuItemClicked
-import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenEvent.OnFilterClicked
+import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenEvent.*
 import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel.MoreAnimeListScreenState
+import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreen
 import org.koin.androidx.compose.getKoin
 
 internal data class MoreAnimeListScreen(val status: String) : Screen {
@@ -53,7 +51,10 @@ internal data class MoreAnimeListScreen(val status: String) : Screen {
             eventHandler = screenModel::eventHandler
         )
 
-        MoreAnimeListScreenAction(screenAction = screenAction)
+        MoreAnimeListScreenAction(
+            screenAction = screenAction,
+            status = status
+        )
     }
 }
 
@@ -72,9 +73,9 @@ private fun MoreAnimeListScreenContent(
             AniLibTopBarWithNavIconFilterAndSearch(
                 scrollBehavior = scrollBehavior,
                 title = status.replaceFirstChar { it.uppercase() },
-                onNavigationIconClicked = { eventHandler(OnArrowBackClicked) },
-                onSearchIconClicked = { /* EventHandler invocation */ },
-                onFilterClicked = { eventHandler(OnFilterClicked) }
+                onNavigationIconClicked = { eventHandler(OnArrowBackClick) },
+                onSearchIconClicked = { eventHandler(OnSearchIconClick(status = status)) },
+                onFilterClicked = { eventHandler(OnFilterClick) }
             )
         },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -87,7 +88,7 @@ private fun MoreAnimeListScreenContent(
             onDismissRequest = { eventHandler(OnDropDownMenuDismissRequest) },
             onDropDownMenuItemClicked = {
                 eventHandler(
-                    OnDropDownMenuItemClicked(
+                    OnDropDownMenuItemClick(
                         order = it
                     )
                 )
@@ -100,7 +101,7 @@ private fun MoreAnimeListScreenContent(
             AniLibVerticalList(
                 contentPadding = contentPadding,
                 animePaged = animePaged,
-                onItemClicked = { eventHandler(OnAnimeCardClicked(id = it)) }
+                onItemClicked = { eventHandler(OnAnimeCardClick(id = it)) }
             )
         }
     }
@@ -108,7 +109,8 @@ private fun MoreAnimeListScreenContent(
 
 @Composable
 private fun MoreAnimeListScreenAction(
-    screenAction: MoreAnimeListScreenAction?
+    screenAction: MoreAnimeListScreenAction?,
+    status: String
 ) {
     val navigator = LocalNavigator.currentOrThrow
 
@@ -116,11 +118,17 @@ private fun MoreAnimeListScreenAction(
         when (screenAction) {
             null -> Unit
 
-            MoreAnimeListScreenAction.NavigateHomeScreen -> navigator.pop()
+            NavigateHomeScreen -> navigator.pop()
 
-            is MoreAnimeListScreenAction.NavigateDetailsScreen -> navigator.push(
+            is NavigateDetailsScreen -> navigator.push(
                 item = DetailsScreen(
                     id = screenAction.id
+                )
+            )
+
+            is NavigateSearchScreen -> navigator.push(
+                SearchScreen(
+                    status = status
                 )
             )
         }

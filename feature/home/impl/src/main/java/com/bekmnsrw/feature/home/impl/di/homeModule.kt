@@ -104,7 +104,10 @@ val homeModule = module {
     }
 
     factory<SearchScreenModel> {
-        provideSearchScreenModel(searchAnimeUseCase = get())
+        provideSearchScreenModel(
+            searchAnimeUseCase = get(),
+            status = getProperty(STATUS_KOIN_PROPERTY)
+        )
     }
 }
 
@@ -203,7 +206,9 @@ private fun provideSearchAnimeUseCase(
 )
 
 private fun provideSearchScreenModel(
-    searchAnimeUseCase: SearchAnimeUseCase
+    searchAnimeUseCase: SearchAnimeUseCase,
+    status: String
 ): SearchScreenModel = SearchScreenModel(
-    searchAnimeUseCase = searchAnimeUseCase
+    searchAnimeUseCase = searchAnimeUseCase,
+    status = status
 )

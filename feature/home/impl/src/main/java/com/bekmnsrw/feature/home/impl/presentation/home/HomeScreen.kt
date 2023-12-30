@@ -81,7 +81,9 @@ private fun HomeScreenActions(
             )
 
             NavigateSearchScreen -> navigator.push(
-                item = SearchScreen()
+                item = SearchScreen(
+                    status = ""
+                )
             )
         }
     }

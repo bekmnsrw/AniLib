@@ -45,5 +45,8 @@ interface HomeRepository {
 
     suspend fun deleteUserRates(id: Int): Flow<Int>
 
-    suspend fun searchAnime(search: String): Flow<PagingData<Anime>>
+    suspend fun searchAnime(
+        query: String,
+        status: String?
+    ): Flow<PagingData<Anime>>
 }
