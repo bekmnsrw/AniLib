@@ -21,8 +21,12 @@ android {
 
 dependencies {
 
-    implementation(libs.room)
+    api(libs.room)
     ksp(libs.room.ksp)
+    api(libs.room.ktx)
+
+    implementation(libs.koin)
+    implementation(libs.koin.compose)
 
     implementation(libs.kotlinx.coroutines.core)
 

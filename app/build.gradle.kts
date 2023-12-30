@@ -60,6 +60,7 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
     implementation(project(":core:network"))
+    implementation(project(":core:db"))
 
     implementation(project(":feature:auth:api"))
     implementation(project(":feature:auth:impl"))

@@ -5,7 +5,7 @@ import com.bekmnsrw.feature.home.api.repository.HomeRepository
 import com.bekmnsrw.feature.home.api.usecase.CreateUserRatesUseCase
 import kotlinx.coroutines.flow.Flow
 
-class CreateUserRatesUseCaseImpl(
+internal class CreateUserRatesUseCaseImpl(
     private val homeRepository: HomeRepository
 ) : CreateUserRatesUseCase {
 

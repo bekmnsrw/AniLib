@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -43,6 +44,7 @@ import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.core.widget.AniLibIconButton
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.feature.home.api.model.Anime
+import com.bekmnsrw.feature.home.api.model.SearchRequest
 import com.bekmnsrw.feature.home.impl.HomeConstants
 import com.bekmnsrw.feature.home.impl.R
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenAction
@@ -53,7 +55,10 @@ import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.Sear
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnAnimeClick
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnArrowBackClick
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnClearQueryClick
+import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnImeActionSearchClick
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnQueryChange
+import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnSearchHistoryItemClick
+import kotlinx.collections.immutable.PersistentList
 import org.koin.androidx.compose.getKoin
 
 internal data class SearchScreen(val status: String) : Screen {
@@ -73,6 +78,7 @@ internal data class SearchScreen(val status: String) : Screen {
             isActive = screenState.shouldShowSearch,
             eventHandler = screenModel::eventHandler,
             searchResult = searchResult,
+            searchHistory = screenState.searchHistory
         )
 
         SearchScreenActions(searchScreenAction = screenAction,)
@@ -106,6 +112,7 @@ private fun SearchScreenContent(
     isActive: Boolean,
     eventHandler: (SearchScreenEvent) -> Unit,
     searchResult: LazyPagingItems<Anime>,
+    searchHistory: PersistentList<SearchRequest>
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -119,12 +126,15 @@ private fun SearchScreenContent(
             onSearch = {
                 keyboardController?.hide()
                 focusManager.clearFocus(true)
+                eventHandler(OnImeActionSearchClick)
             },
             onActiveChange = { eventHandler(OnActiveChange(isActive = it)) },
             onArrowBackClick = { eventHandler(OnArrowBackClick) },
             onClearQueryClick = { eventHandler(OnClearQueryClick) },
             searchResult = searchResult,
             onSearchResultItemClick = { eventHandler(OnAnimeClick(id = it)) },
+            searchHistory = searchHistory,
+            onSearchHistoryItemClick = { eventHandler(OnSearchHistoryItemClick(id = it)) }
         )
     }
 }
@@ -141,7 +151,9 @@ private fun AnimeSearchBar(
     onArrowBackClick: () -> Unit,
     onClearQueryClick: () -> Unit,
     searchResult: LazyPagingItems<Anime>,
-    onSearchResultItemClick: (Int) -> Unit
+    onSearchResultItemClick: (Int) -> Unit,
+    searchHistory: PersistentList<SearchRequest>,
+    onSearchHistoryItemClick: (Int) -> Unit
 ) {
     SearchBar(
         modifier = Modifier.fillMaxWidth(),
@@ -176,7 +188,9 @@ private fun AnimeSearchBar(
         SearchBarContent(
             contentPadding = contentPadding,
             searchResult = searchResult,
-            onSearchResultItemClick = onSearchResultItemClick
+            onSearchResultItemClick = onSearchResultItemClick,
+            searchHistory = searchHistory,
+            onSearchHistoryItemClick = onSearchHistoryItemClick
         )
     }
 }
@@ -185,10 +199,15 @@ private fun AnimeSearchBar(
 private fun SearchBarContent(
     contentPadding: PaddingValues,
     searchResult: LazyPagingItems<Anime>,
-    onSearchResultItemClick: (Int) -> Unit
+    onSearchResultItemClick: (Int) -> Unit,
+    searchHistory: PersistentList<SearchRequest>,
+    onSearchHistoryItemClick: (Int) -> Unit
 ) {
     if (searchResult.itemCount == 0) {
-        SearchHistory()
+        SearchHistory(
+            searchHistory = searchHistory,
+            onSearchHistoryItemClick = onSearchHistoryItemClick
+        )
     } else {
         LazyColumn(
             modifier = Modifier
@@ -249,19 +268,47 @@ private fun SearchResultItem(
     }
 }
 
-// Replace with data stored in database
 @Composable
-private fun SearchHistory() {
-    repeat(6) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+private fun SearchHistory(
+    searchHistory: PersistentList<SearchRequest>,
+    onSearchHistoryItemClick: (Int) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 56.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        items(
+            items = searchHistory,
+            key = { it.id },
+            contentType = { "SearchHistory" }
         ) {
-            Icon(
-                imageVector = AniLibIcons.History,
-                contentDescription = null
+            SearchHistoryItem(
+                searchRequest = it,
+                onClick = onSearchHistoryItemClick
             )
-            Text(text = "History")
         }
+    }
+}
+
+@Composable
+private fun SearchHistoryItem(
+    searchRequest: SearchRequest,
+    onClick: (Int) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick(searchRequest.id) }
+    ) {
+        Icon(
+            imageVector = AniLibIcons.History,
+            contentDescription = null
+        )
+        Text(text = searchRequest.query)
     }
 }

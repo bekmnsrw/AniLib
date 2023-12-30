@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import com.bekmnsrw.feature.home.api.model.FavoritesActionResult
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
+import com.bekmnsrw.feature.home.api.model.SearchRequest
 import com.bekmnsrw.feature.home.api.model.UserRates
 import kotlinx.coroutines.flow.Flow
 
@@ -49,4 +50,12 @@ interface HomeRepository {
         query: String,
         status: String?
     ): Flow<PagingData<Anime>>
+
+    suspend fun saveSearchRequest(searchRequest: SearchRequest)
+
+    suspend fun deleteSearchRequestById(id: Int)
+
+    suspend fun deleteAllSearchRequests()
+
+    suspend fun getAllSearchRequests(): Flow<List<SearchRequest>>
 }

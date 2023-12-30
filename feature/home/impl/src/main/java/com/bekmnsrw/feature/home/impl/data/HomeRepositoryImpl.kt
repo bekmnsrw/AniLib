@@ -1,10 +1,12 @@
 package com.bekmnsrw.feature.home.impl.data
 
 import androidx.paging.PagingData
+import com.bekmnsrw.core.db.AppDatabase
 import com.bekmnsrw.core.network.GenericPagingSource
 import com.bekmnsrw.feature.home.api.model.FavoritesActionResult
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
+import com.bekmnsrw.feature.home.api.model.SearchRequest
 import com.bekmnsrw.feature.home.api.model.UserRates
 import com.bekmnsrw.feature.home.api.repository.HomeRepository
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.HomeApi
@@ -12,9 +14,11 @@ import com.bekmnsrw.feature.home.impl.data.datasource.remote.request.CreateUserR
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.request.CreateUserRatesRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 internal class HomeRepositoryImpl(
-    private val homeApi: HomeApi
+    private val homeApi: HomeApi,
+    private val appDatabase: AppDatabase
 ) : HomeRepository, GenericPagingSource<Anime>() {
 
     private companion object {
@@ -143,4 +147,21 @@ internal class HomeRepositoryImpl(
             )
         }
     }
+
+    override suspend fun saveSearchRequest(searchRequest: SearchRequest) = appDatabase
+        .searchRequestDao()
+        .saveSearchRequest(searchRequestEntity = searchRequest.toSearchRequestEntity())
+
+    override suspend fun deleteSearchRequestById(id: Int) = appDatabase
+        .searchRequestDao()
+        .deleteSearchRequestById(id = id)
+
+    override suspend fun deleteAllSearchRequests() = appDatabase
+        .searchRequestDao()
+        .deleteAllSearchRequests()
+
+    override suspend fun getAllSearchRequests(): Flow<List<SearchRequest>> = appDatabase
+        .searchRequestDao()
+        .getAllSearchRequestsOrderedByIdDesc()
+        .map { it.toSearchRequestList() }
 }

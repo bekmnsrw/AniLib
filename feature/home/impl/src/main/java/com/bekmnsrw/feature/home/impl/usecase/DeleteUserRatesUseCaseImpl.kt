@@ -4,7 +4,7 @@ import com.bekmnsrw.feature.home.api.repository.HomeRepository
 import com.bekmnsrw.feature.home.api.usecase.DeleteUserRatesUseCase
 import kotlinx.coroutines.flow.Flow
 
-class DeleteUserRatesUseCaseImpl(
+internal class DeleteUserRatesUseCaseImpl(
     private val homeRepository: HomeRepository
 ) : DeleteUserRatesUseCase {
 

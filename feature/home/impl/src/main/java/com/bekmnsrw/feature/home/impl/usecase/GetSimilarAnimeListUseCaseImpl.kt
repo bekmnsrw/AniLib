@@ -5,7 +5,7 @@ import com.bekmnsrw.feature.home.api.repository.HomeRepository
 import com.bekmnsrw.feature.home.api.usecase.GetSimilarAnimeListUseCase
 import kotlinx.coroutines.flow.Flow
 
-class GetSimilarAnimeListUseCaseImpl(
+internal class GetSimilarAnimeListUseCaseImpl(
     private val homeRepository: HomeRepository
 ) : GetSimilarAnimeListUseCase {
 

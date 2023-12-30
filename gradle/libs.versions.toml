@@ -103,6 +103,7 @@ retrofit-kotlin-serialization = { group = "com.jakewharton.retrofit", name = "re
 
 room = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ksp = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 

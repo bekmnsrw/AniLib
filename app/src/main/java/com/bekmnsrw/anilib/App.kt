@@ -2,6 +2,7 @@ package com.bekmnsrw.anilib
 
 import android.app.Application
 import cafe.adriel.voyager.core.registry.ScreenRegistry
+import com.bekmnsrw.core.db.di.dbModule
 import com.bekmnsrw.core.network.di.networkModule
 import com.bekmnsrw.feature.auth.impl.di.authModule
 import com.bekmnsrw.feature.auth.impl.di.authScreenModule
@@ -29,7 +30,8 @@ class App : Application() {
                 authModule,
                 homeModule,
                 favoritesModule,
-                profileModule
+                profileModule,
+                dbModule
             )
         }
 

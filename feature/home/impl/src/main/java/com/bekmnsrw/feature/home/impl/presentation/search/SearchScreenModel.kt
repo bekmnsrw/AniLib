@@ -5,15 +5,18 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.bekmnsrw.feature.home.api.model.SearchRequest
+import com.bekmnsrw.feature.home.api.usecase.DeleteAllSearchRequestsUseCase
+import com.bekmnsrw.feature.home.api.usecase.DeleteSearchRequestByIdUseCase
+import com.bekmnsrw.feature.home.api.usecase.GetAllSearchRequestsUseCase
+import com.bekmnsrw.feature.home.api.usecase.SaveSearchRequestUseCase
 import com.bekmnsrw.feature.home.api.usecase.SearchAnimeUseCase
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenAction.NavigateAnimeDetailsScreen
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenAction.NavigateBack
-import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnActiveChange
-import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnAnimeClick
-import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnArrowBackClick
-import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnClearQueryClick
-import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnQueryChange
-import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnSearchIconClick
+import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.*
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -32,12 +35,17 @@ import kotlinx.coroutines.launch
 
 internal class SearchScreenModel(
     private val searchAnimeUseCase: SearchAnimeUseCase,
-    private val status: String
+    private val status: String,
+    private val getAllSearchRequestsUseCase: GetAllSearchRequestsUseCase,
+    private val saveSearchRequestUseCase: SaveSearchRequestUseCase,
+    private val deleteSearchRequestByIdUseCase: DeleteSearchRequestByIdUseCase,
+    private val deleteAllSearchRequestsUseCase: DeleteAllSearchRequestsUseCase
 ) : ScreenModel {
 
     @Immutable
     internal data class SearchScreenState(
-        val shouldShowSearch: Boolean = false
+        val shouldShowSearch: Boolean = false,
+        val searchHistory: PersistentList<SearchRequest> = persistentListOf()
     )
 
     @Immutable
@@ -48,6 +56,10 @@ internal class SearchScreenModel(
         data object OnClearQueryClick : SearchScreenEvent
         data object OnArrowBackClick : SearchScreenEvent
         data class OnAnimeClick(val id: Int) : SearchScreenEvent
+        data class OnDeleteSearchHistoryItemClick(val id: Int) : SearchScreenEvent
+        data object OnImeActionSearchClick : SearchScreenEvent
+        data object OnDeleteSearchHistoryClick : SearchScreenEvent
+        data class OnSearchHistoryItemClick(val id: Int) : SearchScreenEvent
     }
 
     @Immutable
@@ -79,6 +91,10 @@ internal class SearchScreenModel(
             }
         }.cachedIn(screenModelScope)
 
+    init {
+        getSearchHistory()
+    }
+
     fun eventHandler(event: SearchScreenEvent) {
         when (event) {
             is OnActiveChange -> onActiveChange(event.isActive)
@@ -87,7 +103,23 @@ internal class SearchScreenModel(
             OnSearchIconClick -> onSearchIconClick()
             OnArrowBackClick -> onArrowBackClick()
             is OnAnimeClick -> onAnimeClick(event.id)
+            OnDeleteSearchHistoryClick -> onDeleteSearchHistoryClick()
+            is OnDeleteSearchHistoryItemClick -> onDeleteSearchHistoryItemClick(event.id)
+            OnImeActionSearchClick -> onImeActionSearchClick()
+            is OnSearchHistoryItemClick -> onSearchHistoryItemClick(event.id)
         }
+    }
+
+    private fun getSearchHistory() = screenModelScope.launch {
+        getAllSearchRequestsUseCase()
+            .flowOn(Dispatchers.IO)
+            .collect {
+                _screenState.emit(
+                    _screenState.value.copy(
+                        searchHistory = it.toPersistentList()
+                    )
+                )
+            }
     }
 
     private fun onSearchIconClick() = screenModelScope.launch {
@@ -120,5 +152,27 @@ internal class SearchScreenModel(
 
     private fun onAnimeClick(id: Int) = screenModelScope.launch {
         _screenAction.emit(NavigateAnimeDetailsScreen(id = id))
+    }
+
+    private fun onImeActionSearchClick() = screenModelScope.launch {
+        saveSearchRequestUseCase(
+            searchRequest = SearchRequest(
+                id = 0,
+                query = _searchInput.value
+            )
+        )
+    }
+
+    private fun onDeleteSearchHistoryClick() = screenModelScope.launch {
+        deleteAllSearchRequestsUseCase()
+    }
+
+    private fun onDeleteSearchHistoryItemClick(id: Int) = screenModelScope.launch {
+        deleteSearchRequestByIdUseCase(id = id)
+    }
+
+    private fun onSearchHistoryItemClick(id: Int) = screenModelScope.launch {
+        val query = _screenState.value.searchHistory.first { it.id == id }.query
+        _searchInput.value = query
     }
 }

@@ -1,15 +1,20 @@
 package com.bekmnsrw.feature.home.impl.di
 
+import com.bekmnsrw.core.db.AppDatabase
 import com.bekmnsrw.core.network.qualifier.Qualifiers
 import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.home.api.repository.HomeRepository
 import com.bekmnsrw.feature.home.api.usecase.AddToFavoritesUseCase
 import com.bekmnsrw.feature.home.api.usecase.CreateUserRatesUseCase
+import com.bekmnsrw.feature.home.api.usecase.DeleteAllSearchRequestsUseCase
+import com.bekmnsrw.feature.home.api.usecase.DeleteSearchRequestByIdUseCase
 import com.bekmnsrw.feature.home.api.usecase.DeleteUserRatesUseCase
+import com.bekmnsrw.feature.home.api.usecase.GetAllSearchRequestsUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetAnimeListUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetAnimeUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetSimilarAnimeListUseCase
 import com.bekmnsrw.feature.home.api.usecase.RemoveFromFavoritesUseCase
+import com.bekmnsrw.feature.home.api.usecase.SaveSearchRequestUseCase
 import com.bekmnsrw.feature.home.api.usecase.SearchAnimeUseCase
 import com.bekmnsrw.feature.home.impl.HomeConstants.ANIME_ID_KOIN_PROPERTY
 import com.bekmnsrw.feature.home.impl.HomeConstants.STATUS_KOIN_PROPERTY
@@ -21,11 +26,15 @@ import com.bekmnsrw.feature.home.impl.presentation.list.MoreAnimeListScreenModel
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel
 import com.bekmnsrw.feature.home.impl.usecase.AddToFavoritesUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.CreateUserRatesUseCaseImpl
+import com.bekmnsrw.feature.home.impl.usecase.DeleteAllSearchRequestsUseCaseImpl
+import com.bekmnsrw.feature.home.impl.usecase.DeleteSearchRequestByIdUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.DeleteUserRatesUseCaseImpl
+import com.bekmnsrw.feature.home.impl.usecase.GetAllSearchRequestsUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.GetAnimeListUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.GetAnimeUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.GetSimilarAnimeListUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.RemoveFromFavoritesUseCaseImpl
+import com.bekmnsrw.feature.home.impl.usecase.SaveSearchRequestUseCaseImpl
 import com.bekmnsrw.feature.home.impl.usecase.SearchAnimeUseCaseImpl
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -41,7 +50,10 @@ val homeModule = module {
     }
 
     factory<HomeRepository> {
-        provideHomeRepository(homeApi = get())
+        provideHomeRepository(
+            homeApi = get(),
+            appDatabase = get()
+        )
     }
 
     factory<GetAnimeListUseCase> {
@@ -76,6 +88,22 @@ val homeModule = module {
         provideSearchAnimeUseCase(homeRepository = get())
     }
 
+    factory<DeleteSearchRequestByIdUseCase> {
+        provideDeleteSearchRequestByIdUseCase(homeRepository = get())
+    }
+
+    factory<DeleteAllSearchRequestsUseCase> {
+        provideDeleteAllSearchRequestsUseCase(homeRepository = get())
+    }
+
+    factory<SaveSearchRequestUseCase> {
+        provideSaveSearchRequestUseCase(homeRepository = get())
+    }
+
+    factory<GetAllSearchRequestsUseCase> {
+        provideGetAllSearchRequestsUseCase(homeRepository = get())
+    }
+
     factory<HomeScreenModel> {
         provideHomeScreenModel(
             getAnimeListUseCase = get(),
@@ -106,7 +134,11 @@ val homeModule = module {
     factory<SearchScreenModel> {
         provideSearchScreenModel(
             searchAnimeUseCase = get(),
-            status = getProperty(STATUS_KOIN_PROPERTY)
+            status = getProperty(STATUS_KOIN_PROPERTY),
+            getAllSearchRequestsUseCase = get(),
+            saveSearchRequestUseCase = get(),
+            deleteSearchRequestByIdUseCase = get(),
+            deleteAllSearchRequestsUseCase = get()
         )
     }
 }
@@ -116,9 +148,11 @@ private fun provideHomeApi(
 ): HomeApi = retrofit.create(HomeApi::class.java)
 
 private fun provideHomeRepository(
-    homeApi: HomeApi
+    homeApi: HomeApi,
+    appDatabase: AppDatabase
 ): HomeRepository = HomeRepositoryImpl(
-    homeApi = homeApi
+    homeApi = homeApi,
+    appDatabase = appDatabase
 )
 
 private fun provideHomeScreenModel(
@@ -207,8 +241,40 @@ private fun provideSearchAnimeUseCase(
 
 private fun provideSearchScreenModel(
     searchAnimeUseCase: SearchAnimeUseCase,
-    status: String
+    status: String,
+    getAllSearchRequestsUseCase: GetAllSearchRequestsUseCase,
+    saveSearchRequestUseCase: SaveSearchRequestUseCase,
+    deleteAllSearchRequestsUseCase: DeleteAllSearchRequestsUseCase,
+    deleteSearchRequestByIdUseCase: DeleteSearchRequestByIdUseCase
 ): SearchScreenModel = SearchScreenModel(
     searchAnimeUseCase = searchAnimeUseCase,
-    status = status
+    status = status,
+    getAllSearchRequestsUseCase = getAllSearchRequestsUseCase,
+    saveSearchRequestUseCase = saveSearchRequestUseCase,
+    deleteAllSearchRequestsUseCase = deleteAllSearchRequestsUseCase,
+    deleteSearchRequestByIdUseCase = deleteSearchRequestByIdUseCase
+)
+
+private fun provideDeleteAllSearchRequestsUseCase(
+    homeRepository: HomeRepository
+): DeleteAllSearchRequestsUseCase = DeleteAllSearchRequestsUseCaseImpl(
+    homeRepository = homeRepository
+)
+
+private fun provideDeleteSearchRequestByIdUseCase(
+    homeRepository: HomeRepository
+): DeleteSearchRequestByIdUseCase = DeleteSearchRequestByIdUseCaseImpl(
+    homeRepository = homeRepository
+)
+
+private fun provideSaveSearchRequestUseCase(
+    homeRepository: HomeRepository
+): SaveSearchRequestUseCase = SaveSearchRequestUseCaseImpl(
+    homeRepository = homeRepository
+)
+
+private fun provideGetAllSearchRequestsUseCase(
+    homeRepository: HomeRepository
+): GetAllSearchRequestsUseCase = GetAllSearchRequestsUseCaseImpl(
+    homeRepository = homeRepository
 )
