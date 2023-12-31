@@ -40,6 +40,7 @@ fun AniLibVerticalList(
         modifier = Modifier
             .fillMaxSize()
             .padding(contentPadding)
+            .padding(bottom = 56.dp)
     ) {
         items(
             count = animePaged.itemCount,
