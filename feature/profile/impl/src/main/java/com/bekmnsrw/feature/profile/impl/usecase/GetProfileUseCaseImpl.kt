@@ -1,8 +1,8 @@
-package com.bekmnsrw.feature.profile.impl.usecase.remote
+package com.bekmnsrw.feature.profile.impl.usecase
 
 import com.bekmnsrw.feature.profile.api.model.WhoAmI
 import com.bekmnsrw.feature.profile.api.repository.ProfileRepository
-import com.bekmnsrw.feature.profile.api.usecase.remote.GetProfileUseCase
+import com.bekmnsrw.feature.profile.api.usecase.GetProfileUseCase
 import kotlinx.coroutines.flow.Flow
 
 class GetProfileUseCaseImpl(

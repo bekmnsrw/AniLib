@@ -105,6 +105,8 @@ private fun AniLibStatusBarItem(
     statusBarWidthDp: Dp,
     totalStatusStats: Int
 ) {
+    val isDarkMode = isSystemInDarkTheme()
+
     Card(
         modifier = Modifier
             .height(32.dp)
@@ -124,32 +126,32 @@ private fun AniLibStatusBarItem(
         },
         colors = CardDefaults.cardColors(
             containerColor = when (statusName) {
-                PLANNED_ENG, PLANNED_RU -> when (isSystemInDarkTheme()) {
+                PLANNED_ENG, PLANNED_RU -> when (isDarkMode) {
                     true -> DarkDefaultColorScheme.primary
                     false -> LightDefaultColorScheme.primary
                 }
 
-                COMPLETED_ENG, COMPLETED_RU -> when (isSystemInDarkTheme()) {
+                COMPLETED_ENG, COMPLETED_RU -> when (isDarkMode) {
                     true -> DarkAndroidColorScheme.primary
                     false -> LightAndroidColorScheme.primary
                 }
 
-                WATCHING_ENG, WATCHING_RU -> when (isSystemInDarkTheme()) {
+                WATCHING_ENG, WATCHING_RU -> when (isDarkMode) {
                     true -> DarkDefaultColorScheme.tertiaryContainer
                     false -> LightDefaultColorScheme.tertiaryContainer
                 }
 
-                DROPPED_ENG, DROPPED_RU -> when (isSystemInDarkTheme()) {
+                DROPPED_ENG, DROPPED_RU -> when (isDarkMode) {
                     true -> DarkDefaultColorScheme.error
                     false -> LightDefaultColorScheme.error
                 }
 
-                ON_HOLD_ENG, ON_HOLD_RU -> when (isSystemInDarkTheme()) {
+                ON_HOLD_ENG, ON_HOLD_RU -> when (isDarkMode) {
                     true -> DarkAndroidColorScheme.tertiary
                     false -> LightAndroidColorScheme.tertiary
                 }
 
-                else -> when (isSystemInDarkTheme()) {
+                else -> when (isDarkMode) {
                     true -> DarkAndroidColorScheme.tertiary
                     false -> LightAndroidColorScheme.tertiary
                 }
@@ -163,6 +165,8 @@ private fun AniLibStatusBarLegendItem(
     statusName: String,
     statusValue: Int
 ) {
+    val isDarkMode = isSystemInDarkTheme()
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -171,32 +175,32 @@ private fun AniLibStatusBarLegendItem(
             modifier = Modifier.size(16.dp),
             colors = CardDefaults.cardColors(
                 containerColor = when (statusName) {
-                    PLANNED_ENG, PLANNED_RU -> when (isSystemInDarkTheme()) {
+                    PLANNED_ENG, PLANNED_RU -> when (isDarkMode) {
                         true -> DarkDefaultColorScheme.primary
                         false -> LightDefaultColorScheme.primary
                     }
 
-                    COMPLETED_ENG, COMPLETED_RU -> when (isSystemInDarkTheme()) {
+                    COMPLETED_ENG, COMPLETED_RU -> when (isDarkMode) {
                         true -> DarkAndroidColorScheme.primary
                         false -> LightAndroidColorScheme.primary
                     }
 
-                    WATCHING_ENG, WATCHING_RU -> when (isSystemInDarkTheme()) {
+                    WATCHING_ENG, WATCHING_RU -> when (isDarkMode) {
                         true -> DarkDefaultColorScheme.tertiaryContainer
                         false -> LightDefaultColorScheme.tertiaryContainer
                     }
 
-                    DROPPED_ENG, DROPPED_RU -> when (isSystemInDarkTheme()) {
+                    DROPPED_ENG, DROPPED_RU -> when (isDarkMode) {
                         true -> DarkDefaultColorScheme.error
                         false -> LightDefaultColorScheme.error
                     }
 
-                    ON_HOLD_ENG, ON_HOLD_RU -> when (isSystemInDarkTheme()) {
+                    ON_HOLD_ENG, ON_HOLD_RU -> when (isDarkMode) {
                         true -> DarkAndroidColorScheme.tertiary
                         false -> LightAndroidColorScheme.tertiary
                     }
 
-                    else -> when (isSystemInDarkTheme()) {
+                    else -> when (isDarkMode) {
                         true -> DarkAndroidColorScheme.tertiary
                         false -> LightAndroidColorScheme.tertiary
                     }

@@ -122,6 +122,9 @@ voyager-transitions = { group = "cafe.adriel.voyager", name = "voyager-transitio
 paging-core = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 
+#implementation "com.github.tehras:charts:$latest_release"
+compose-charts = { group = "com.github.tehras", name = "charts", version = "0.2.4-alpha" }
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

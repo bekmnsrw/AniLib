@@ -1,3 +1,5 @@
 <resources>
-    <string name="home_tab">Home</string>
+    <string name="more">More ></string>
+    <string name="statistics">Statistics</string>
+    <string name="your_rates">Your rates</string>
 </resources>

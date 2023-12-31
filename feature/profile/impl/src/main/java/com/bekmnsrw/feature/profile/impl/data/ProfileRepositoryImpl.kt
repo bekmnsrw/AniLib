@@ -1,5 +1,6 @@
 package com.bekmnsrw.feature.profile.impl.data
 
+import com.bekmnsrw.feature.profile.api.model.AnimeRates
 import com.bekmnsrw.feature.profile.api.model.WhoAmI
 import com.bekmnsrw.feature.profile.api.repository.ProfileRepository
 import com.bekmnsrw.feature.profile.impl.data.datasource.remote.ProfileApi
@@ -13,6 +14,25 @@ internal class ProfileRepositoryImpl(
     override suspend fun getProfile(): Flow<WhoAmI> = flow {
         emit(
             profileApi.getProfile().toWhoAmI()
+        )
+    }
+
+    override suspend fun getUserAnimeRates(id: Int): Flow<List<AnimeRates>> = flow {
+        emit(
+            profileApi
+                .getUserAnimeRates(id = id)
+                .toAnimeRatesList()
+        )
+    }
+
+    override suspend fun getUserAnimeByStatus(
+        id: Int,
+        status: String
+    ): Flow<List<AnimeRates>> = flow {
+        emit(
+            profileApi
+                .getUserAnimeByStatus(id = id, status = status)
+                .toAnimeRatesList()
         )
     }
 }

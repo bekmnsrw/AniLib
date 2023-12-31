@@ -1,4 +1,4 @@
-package com.bekmnsrw.feature.profile.api.usecase.remote
+package com.bekmnsrw.feature.profile.api.usecase
 
 import com.bekmnsrw.feature.profile.api.model.WhoAmI
 import kotlinx.coroutines.flow.Flow

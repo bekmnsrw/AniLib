@@ -15,7 +15,8 @@ private const val IMAGE_BASE_URL = "https://shikimori.one/"
 fun AniLibImage(
     modifier: Modifier,
     imageUrl: String,
-    alpha: Float = 1.0f
+    alpha: Float = 1.0f,
+    isAvatar: Boolean = false
 ) {
     AsyncImage(
         modifier = modifier,
@@ -23,7 +24,12 @@ fun AniLibImage(
         contentScale = ContentScale.Crop,
         alpha = alpha,
         model = ImageRequest.Builder(LocalContext.current)
-            .data(data = "$IMAGE_BASE_URL$imageUrl")
+            .data(
+                data = when(isAvatar) {
+                    true -> imageUrl
+                    false -> "$IMAGE_BASE_URL$imageUrl"
+                }
+            )
             .error(R.drawable.ic_broken_image)
             .fallback(R.drawable.ic_broken_image)
             .placeholder(R.drawable.loading_animation)

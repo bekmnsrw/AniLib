@@ -59,7 +59,7 @@ import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.designsystem.theme.LocalBackgroundTheme
 import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.core.utils.HandleScreenLifecycle
-import com.bekmnsrw.core.utils.convertNextEpisodeAt
+import com.bekmnsrw.core.utils.convertStringToDateTime
 import com.bekmnsrw.core.widget.AniLibAgeRatingBadge
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.AniLibAnimeStatusDialog
@@ -547,7 +547,7 @@ private fun AnimeInfo(anime: AnimeDetails) {
                 }
                 if (status == ONGOING.status) {
                     nextEpisodeAt?.let {
-                        val nextEpisodeAt = convertNextEpisodeAt(it)
+                        val nextEpisodeAt = convertStringToDateTime(it)
                         AnimeInfoItem(
                             key = stringResource(id = R.string.next_episode_at),
                             value = "${nextEpisodeAt.first} ${nextEpisodeAt.second}"

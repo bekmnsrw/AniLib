@@ -43,6 +43,10 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.compose)
 
+    implementation(libs.kotlinx.collections.immutable)
+
+    implementation(libs.compose.charts)
+
     implementation(libs.voyager.tab)
     implementation(libs.voyager.koin)
 

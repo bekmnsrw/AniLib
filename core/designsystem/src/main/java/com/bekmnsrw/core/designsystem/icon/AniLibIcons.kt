@@ -19,6 +19,7 @@ import androidx.compose.material.icons.rounded.PlaylistAdd
 import androidx.compose.material.icons.rounded.RadioButtonChecked
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.StarRate
 
 object AniLibIcons {
@@ -42,4 +43,5 @@ object AniLibIcons {
     val RadioButtonUnchecked = Icons.Rounded.RadioButtonUnchecked
     val Close = Icons.Rounded.Close
     val History = Icons.Rounded.History
+    val Settings = Icons.Rounded.Settings
 }

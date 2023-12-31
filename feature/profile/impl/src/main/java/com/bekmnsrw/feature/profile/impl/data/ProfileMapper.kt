@@ -1,7 +1,9 @@
 package com.bekmnsrw.feature.profile.impl.data
 
+import com.bekmnsrw.feature.profile.api.model.AnimeRates
 import com.bekmnsrw.feature.profile.api.model.Image
 import com.bekmnsrw.feature.profile.api.model.WhoAmI
+import com.bekmnsrw.feature.profile.impl.data.datasource.remote.response.AnimeRatesResponse
 import com.bekmnsrw.feature.profile.impl.data.datasource.remote.response.ImageResponse
 import com.bekmnsrw.feature.profile.impl.data.datasource.remote.response.WhoAmIResponse
 
@@ -29,3 +31,17 @@ internal fun ImageResponse.toImage(): Image = Image(
     x64 = x64,
     x80 = x80
 )
+
+internal fun AnimeRatesResponse.toAnimeRates(): AnimeRates = AnimeRates(
+    image = animeResponse.image.original,
+    name = animeResponse.name,
+    russian = animeResponse.russian,
+    updatedAt = updatedAt,
+    score = score,
+    status = status,
+    animeId = animeResponse.id
+)
+
+internal fun List<AnimeRatesResponse>.toAnimeRatesList(): List<AnimeRates> = this.map {
+    it.toAnimeRates()
+}
