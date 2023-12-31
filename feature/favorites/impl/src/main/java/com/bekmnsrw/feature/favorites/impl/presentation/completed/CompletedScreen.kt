@@ -24,7 +24,7 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.core.widget.AniLibDialog
+import com.bekmnsrw.core.widget.AniLibAnimeStatusDialog
 import com.bekmnsrw.core.widget.AniLibSnackbar
 import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.favorites.api.model.UserRates
@@ -149,7 +149,7 @@ private fun CompletedScreenContent(
 
     if (shouldShowDialog) {
         completedAnimePaged[selectedItemIndex]?.let { userRate ->
-            AniLibDialog(
+            AniLibAnimeStatusDialog(
                 id = userRate.id,
                 currentStatus = userRate.userStatus,
                 onDismissRequest = onDialogDismissRequest,

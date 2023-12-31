@@ -1,6 +1,8 @@
 package com.bekmnsrw.feature.home.impl.presentation.search
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,6 +43,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.navigation.SharedScreen
+import com.bekmnsrw.core.widget.AniLibAlertDialog
 import com.bekmnsrw.core.widget.AniLibIconButton
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.feature.home.api.model.Anime
@@ -55,9 +58,13 @@ import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.Sear
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnAnimeClick
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnArrowBackClick
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnClearQueryClick
+import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnDeleteSearchHistoryClick
+import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnDialogConfirmButtonClick
+import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnDialogDismissRequest
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnImeActionSearchClick
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnQueryChange
 import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnSearchHistoryItemClick
+import com.bekmnsrw.feature.home.impl.presentation.search.SearchScreenModel.SearchScreenEvent.OnSearchHistoryItemLongClick
 import kotlinx.collections.immutable.PersistentList
 import org.koin.androidx.compose.getKoin
 
@@ -78,15 +85,16 @@ internal data class SearchScreen(val status: String) : Screen {
             isActive = screenState.shouldShowSearch,
             eventHandler = screenModel::eventHandler,
             searchResult = searchResult,
-            searchHistory = screenState.searchHistory
+            searchHistory = screenState.searchHistory,
+            shouldShowDialog = screenState.shouldShowDialog
         )
 
-        SearchScreenActions(searchScreenAction = screenAction,)
+        SearchScreenActions(searchScreenAction = screenAction)
     }
 }
 
 @Composable
-private fun SearchScreenActions(searchScreenAction: SearchScreenAction?, ) {
+private fun SearchScreenActions(searchScreenAction: SearchScreenAction?) {
     val navigator = LocalNavigator.currentOrThrow
 
     LaunchedEffect(searchScreenAction) {
@@ -112,7 +120,8 @@ private fun SearchScreenContent(
     isActive: Boolean,
     eventHandler: (SearchScreenEvent) -> Unit,
     searchResult: LazyPagingItems<Anime>,
-    searchHistory: PersistentList<SearchRequest>
+    searchHistory: PersistentList<SearchRequest>,
+    shouldShowDialog: Boolean
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -134,8 +143,19 @@ private fun SearchScreenContent(
             searchResult = searchResult,
             onSearchResultItemClick = { eventHandler(OnAnimeClick(id = it)) },
             searchHistory = searchHistory,
-            onSearchHistoryItemClick = { eventHandler(OnSearchHistoryItemClick(id = it)) }
+            onSearchHistoryItemClick = { eventHandler(OnSearchHistoryItemClick(id = it)) },
+            onClearHistoryClick = { eventHandler(OnDeleteSearchHistoryClick) },
+            onSearchHistoryItemLongClick = { eventHandler(OnSearchHistoryItemLongClick(id = it)) }
         )
+
+        if (shouldShowDialog) {
+            AniLibAlertDialog(
+                onDismissRequest = { eventHandler(OnDialogDismissRequest) },
+                text = stringResource(id = R.string.confirm_deletion),
+                onConfirmButtonClick = { eventHandler(OnDialogConfirmButtonClick) },
+                onDismissButtonClick = { eventHandler(OnDialogDismissRequest) }
+            )
+        }
     }
 }
 
@@ -153,7 +173,9 @@ private fun AnimeSearchBar(
     searchResult: LazyPagingItems<Anime>,
     onSearchResultItemClick: (Int) -> Unit,
     searchHistory: PersistentList<SearchRequest>,
-    onSearchHistoryItemClick: (Int) -> Unit
+    onSearchHistoryItemClick: (Int) -> Unit,
+    onClearHistoryClick: () -> Unit,
+    onSearchHistoryItemLongClick: (Int) -> Unit
 ) {
     SearchBar(
         modifier = Modifier.fillMaxWidth(),
@@ -170,7 +192,7 @@ private fun AnimeSearchBar(
                         onActiveChange(false)
                         onClearQueryClick()
                     } else {
-                     onArrowBackClick()
+                        onArrowBackClick()
                     }
                 },
                 imageVector = AniLibIcons.ArrowBack
@@ -190,7 +212,10 @@ private fun AnimeSearchBar(
             searchResult = searchResult,
             onSearchResultItemClick = onSearchResultItemClick,
             searchHistory = searchHistory,
-            onSearchHistoryItemClick = onSearchHistoryItemClick
+            onSearchHistoryItemClick = onSearchHistoryItemClick,
+            isSearchInputEmpty = query.isEmpty(),
+            onClearHistoryClick = onClearHistoryClick,
+            onSearchHistoryItemLongClick = onSearchHistoryItemLongClick
         )
     }
 }
@@ -201,15 +226,20 @@ private fun SearchBarContent(
     searchResult: LazyPagingItems<Anime>,
     onSearchResultItemClick: (Int) -> Unit,
     searchHistory: PersistentList<SearchRequest>,
-    onSearchHistoryItemClick: (Int) -> Unit
+    onSearchHistoryItemClick: (Int) -> Unit,
+    isSearchInputEmpty: Boolean,
+    onClearHistoryClick: () -> Unit,
+    onSearchHistoryItemLongClick: (Int) -> Unit
 ) {
-    if (searchResult.itemCount == 0) {
-        SearchHistory(
+    when (isSearchInputEmpty) {
+        true -> SearchHistory(
             searchHistory = searchHistory,
-            onSearchHistoryItemClick = onSearchHistoryItemClick
+            onSearchHistoryItemClick = onSearchHistoryItemClick,
+            onClearHistoryClick = onClearHistoryClick,
+            onSearchHistoryItemLongClick = onSearchHistoryItemLongClick
         )
-    } else {
-        LazyColumn(
+
+        false -> LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
@@ -268,10 +298,13 @@ private fun SearchResultItem(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SearchHistory(
     searchHistory: PersistentList<SearchRequest>,
-    onSearchHistoryItemClick: (Int) -> Unit
+    onSearchHistoryItemClick: (Int) -> Unit,
+    onClearHistoryClick: () -> Unit,
+    onSearchHistoryItemLongClick: (Int) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -280,6 +313,21 @@ private fun SearchHistory(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(16.dp)
     ) {
+        if (searchHistory.isNotEmpty()) {
+            stickyHeader {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = stringResource(id = R.string.search_history))
+                    Text(
+                        text = stringResource(id = R.string.clear_history),
+                        modifier = Modifier.clickable { onClearHistoryClick() }
+                    )
+                }
+            }
+        }
         items(
             items = searchHistory,
             key = { it.id },
@@ -287,23 +335,30 @@ private fun SearchHistory(
         ) {
             SearchHistoryItem(
                 searchRequest = it,
-                onClick = onSearchHistoryItemClick
+                onClick = onSearchHistoryItemClick,
+                onLongClick = onSearchHistoryItemLongClick
             )
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SearchHistoryItem(
     searchRequest: SearchRequest,
-    onClick: (Int) -> Unit
+    onClick: (Int) -> Unit,
+    onLongClick: (Int) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(searchRequest.id) }
+            .combinedClickable(
+                onClick = { onClick(searchRequest.id) },
+                onLongClick = { onLongClick(searchRequest.id) }
+            )
+            .padding(vertical = 8.dp)
     ) {
         Icon(
             imageVector = AniLibIcons.History,

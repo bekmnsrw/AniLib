@@ -45,7 +45,9 @@ internal class SearchScreenModel(
     @Immutable
     internal data class SearchScreenState(
         val shouldShowSearch: Boolean = false,
-        val searchHistory: PersistentList<SearchRequest> = persistentListOf()
+        val searchHistory: PersistentList<SearchRequest> = persistentListOf(),
+        val shouldShowDialog: Boolean = false,
+        val selectedHistoryItemId: Int = 0
     )
 
     @Immutable
@@ -60,6 +62,9 @@ internal class SearchScreenModel(
         data object OnImeActionSearchClick : SearchScreenEvent
         data object OnDeleteSearchHistoryClick : SearchScreenEvent
         data class OnSearchHistoryItemClick(val id: Int) : SearchScreenEvent
+        data class OnSearchHistoryItemLongClick(val id: Int) : SearchScreenEvent
+        data object OnDialogDismissRequest : SearchScreenEvent
+        data object OnDialogConfirmButtonClick : SearchScreenEvent
     }
 
     @Immutable
@@ -107,6 +112,9 @@ internal class SearchScreenModel(
             is OnDeleteSearchHistoryItemClick -> onDeleteSearchHistoryItemClick(event.id)
             OnImeActionSearchClick -> onImeActionSearchClick()
             is OnSearchHistoryItemClick -> onSearchHistoryItemClick(event.id)
+            is OnSearchHistoryItemLongClick -> onSearchHistoryItemLongClick(event.id)
+            OnDialogDismissRequest -> onDialogDismissRequest()
+            OnDialogConfirmButtonClick -> onDialogConfirmButtonClick()
         }
     }
 
@@ -174,5 +182,34 @@ internal class SearchScreenModel(
     private fun onSearchHistoryItemClick(id: Int) = screenModelScope.launch {
         val query = _screenState.value.searchHistory.first { it.id == id }.query
         _searchInput.value = query
+    }
+
+    private fun onSearchHistoryItemLongClick(id: Int) = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = true,
+                selectedHistoryItemId = id
+            )
+        )
+    }
+
+    private fun onDialogDismissRequest() = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = false
+            )
+        )
+    }
+
+    private fun onDialogConfirmButtonClick() = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowDialog = false
+            )
+        )
+
+        deleteSearchRequestByIdUseCase(
+            id = _screenState.value.selectedHistoryItemId
+        )
     }
 }

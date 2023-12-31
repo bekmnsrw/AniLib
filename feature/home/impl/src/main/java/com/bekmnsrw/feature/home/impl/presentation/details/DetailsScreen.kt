@@ -62,7 +62,7 @@ import com.bekmnsrw.core.utils.HandleScreenLifecycle
 import com.bekmnsrw.core.utils.convertNextEpisodeAt
 import com.bekmnsrw.core.widget.AniLibAgeRatingBadge
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
-import com.bekmnsrw.core.widget.AniLibDialog
+import com.bekmnsrw.core.widget.AniLibAnimeStatusDialog
 import com.bekmnsrw.core.widget.AniLibExpandableTextWithTextButton
 import com.bekmnsrw.core.widget.AniLibHorizontalList
 import com.bekmnsrw.core.widget.AniLibImage
@@ -188,7 +188,7 @@ private fun DetailsScreenContent(
 
             if (screenState.shouldShowDialog) {
                 screenState.animeDetails?.let {
-                    AniLibDialog(
+                    AniLibAnimeStatusDialog(
                         id = it.userRates?.id,
                         currentStatus = it.userRates?.status ?: UserRatesEnum.NOT_IN_MY_LIST.key,
                         onDismissRequest = { eventHandler(OnDialogDismissRequest) },

@@ -33,7 +33,7 @@ private val statuses = persistentListOf(
 )
 
 @Composable
-fun AniLibDialog(
+fun AniLibAnimeStatusDialog(
     id: Int?,
     currentStatus: String?,
     onDismissRequest: () -> Unit,

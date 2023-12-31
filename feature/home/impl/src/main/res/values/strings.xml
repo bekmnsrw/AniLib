@@ -22,4 +22,7 @@
     <string name="add_to_my_list">Add to my list</string>
 
     <string name="search_anime">Search anime</string>
+    <string name="search_history">Search history</string>
+    <string name="clear_history">Clear history</string>
+    <string name="confirm_deletion">Do you really want to delete this history item?</string>
 </resources>
