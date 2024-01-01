@@ -106,11 +106,10 @@ val authModule = module {
         provideOnSignOutUseCase(authRepository = get())
     }
 
-    factory<AuthScreenModel> {
+    single<AuthScreenModel> {
         provideAuthScreenModel(
             getRemoteAccessTokenUseCase = get(),
             onAuthenticationUseCase = get(),
-            isAuthenticatedUseCase = get(),
             saveLocalRefreshTokenUseCase = get(),
             saveLocalAccessTokenUseCase = get()
         )
@@ -174,13 +173,11 @@ private fun provideOnFirstAppLaunchUseCase(
 private fun provideAuthScreenModel(
     getRemoteAccessTokenUseCase: GetRemoteAccessTokenUseCase,
     onAuthenticationUseCase: OnAuthenticationUseCase,
-    isAuthenticatedUseCase: IsAuthenticatedUseCase,
     saveLocalAccessTokenUseCase: SaveLocalAccessTokenUseCase,
     saveLocalRefreshTokenUseCase: SaveLocalRefreshTokenUseCase
 ): AuthScreenModel = AuthScreenModel(
     getRemoteAccessTokenUseCase = getRemoteAccessTokenUseCase,
     onAuthenticationUseCase = onAuthenticationUseCase,
-    isAuthenticatedUseCase = isAuthenticatedUseCase,
     saveLocalAccessTokenUseCase = saveLocalAccessTokenUseCase,
     saveLocalRefreshTokenUseCase = saveLocalRefreshTokenUseCase
 )

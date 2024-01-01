@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.bekmnsrw.anilib.splashscreen.SplashScreenModel
 import com.bekmnsrw.core.designsystem.theme.AniLibTheme
@@ -23,23 +22,14 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             AniLibTheme {
-                val isFirstAppLaunch by splashScreenModel.isFirstAppLaunch
-
-                println("MainActivity (isFirstAppLaunch): $isFirstAppLaunch")
-
                 NavHost()
-//                if (isFirstAppLaunch == true) {
-//                    AuthScreen(isFirstAppLaunch = true)
-//                } else {
-//                    NavHost()
-//                }
             }
         }
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-
+        println("onNewIntent")
         val authCode = intent?.data?.getQueryParameter(AuthConstant.RESPONSE_TYPE)
         if (authCode != null) authScreenModel.getAccessToken(authCode = authCode)
     }

@@ -3,18 +3,15 @@ package com.bekmnsrw.feature.auth.impl.presentation
 import androidx.compose.runtime.Immutable
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.bekmnsrw.feature.auth.api.AuthConstant
 import com.bekmnsrw.feature.auth.api.model.AccessToken
-import com.bekmnsrw.feature.auth.api.usecase.remote.GetRemoteAccessTokenUseCase
-import com.bekmnsrw.feature.auth.api.usecase.local.IsAuthenticatedUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.OnAuthenticationUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveLocalAccessTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveLocalRefreshTokenUseCase
-import com.bekmnsrw.feature.auth.api.AuthConstant
+import com.bekmnsrw.feature.auth.api.usecase.remote.GetRemoteAccessTokenUseCase
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.NavigateProfileScreen
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.OpenChromeCustomTabs
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent.OnAuthenticateButtonClicked
-import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent.OnResume
-import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent.OnStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +26,6 @@ import kotlinx.coroutines.launch
 class AuthScreenModel(
     private val getRemoteAccessTokenUseCase: GetRemoteAccessTokenUseCase,
     private val onAuthenticationUseCase: OnAuthenticationUseCase,
-    private val isAuthenticatedUseCase: IsAuthenticatedUseCase,
     private val saveLocalAccessTokenUseCase: SaveLocalAccessTokenUseCase,
     private val saveLocalRefreshTokenUseCase: SaveLocalRefreshTokenUseCase
 ) : ScreenModel {
@@ -51,8 +47,6 @@ class AuthScreenModel(
     @Immutable
     sealed interface AuthScreenEvent {
         data object OnAuthenticateButtonClicked : AuthScreenEvent
-        data object OnResume : AuthScreenEvent
-        data object OnStart : AuthScreenEvent
     }
 
     @Immutable
@@ -67,52 +61,14 @@ class AuthScreenModel(
     private val _screenAction = MutableSharedFlow<AuthScreenAction?>()
     val screenAction: SharedFlow<AuthScreenAction?> = _screenAction.asSharedFlow()
 
-    fun eventHandler(authScreenEvent: AuthScreenEvent) {
-        when (authScreenEvent) {
+    fun eventHandler(event: AuthScreenEvent) {
+        when (event) {
             OnAuthenticateButtonClicked -> onAuthenticateButtonClicked()
-            OnResume -> onResume()
-            OnStart -> onStart()
         }
     }
 
     private fun onAuthenticateButtonClicked() = screenModelScope.launch {
-        _screenAction.emit(
-            OpenChromeCustomTabs(
-                authUri = AUTH_URI
-            )
-        )
-    }
-
-    private fun onResume() = screenModelScope.launch {
-        val isAuthenticated = isAuthenticatedUseCase()
-            .flowOn(Dispatchers.IO)
-            .first()
-
-        println("AuthSM (isAuthenticated): $isAuthenticated")
-
-        _screenState.emit(
-            _screenState.value.copy(
-                isAuthenticated = isAuthenticated
-            )
-        )
-
-        if (isAuthenticated == true) _screenAction.emit(NavigateProfileScreen)
-    }
-
-    private fun onStart() = screenModelScope.launch {
-        val isAuthenticated = isAuthenticatedUseCase()
-            .flowOn(Dispatchers.IO)
-            .first()
-
-        println("AuthSM (isAuthenticated): $isAuthenticated")
-
-        _screenState.emit(
-            _screenState.value.copy(
-                isAuthenticated = isAuthenticated
-            )
-        )
-
-        if (isAuthenticated == true) _screenAction.emit(NavigateProfileScreen)
+        _screenAction.emit(OpenChromeCustomTabs(authUri = AUTH_URI))
     }
 
     fun getAccessToken(authCode: String) = screenModelScope.launch {
@@ -127,22 +83,13 @@ class AuthScreenModel(
                 .first()
 
         onAuthenticationUseCase()
-
-        _screenAction.emit(NavigateProfileScreen)
-
-//            .flowOn(Dispatchers.IO)
-//            .collect {
-////                _screenAction.emit(NavigateProfileScreen)
-//                onAuthenticationUseCase()
-
-        println("AuthSM (accessToken): ${accessToken.accessToken}")
-        println("AuthSM (refreshToken): ${accessToken.refreshToken}")
-
         saveTokens(accessToken = accessToken)
+        _screenAction.emit(NavigateProfileScreen)
     }
 
-    private fun saveTokens(accessToken: AccessToken) = screenModelScope.launch {
+    private suspend fun saveTokens(accessToken: AccessToken) = screenModelScope.launch {
         saveLocalAccessTokenUseCase(accessToken = accessToken.accessToken)
         saveLocalRefreshTokenUseCase(refreshToken = accessToken.refreshToken)
+        println("Access token was saved!")
     }
 }

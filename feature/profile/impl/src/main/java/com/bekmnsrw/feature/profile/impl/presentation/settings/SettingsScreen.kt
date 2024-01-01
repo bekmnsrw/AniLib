@@ -19,12 +19,16 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
+import com.bekmnsrw.core.widget.AniLibIconButton
 import com.bekmnsrw.core.widget.AniLibSnackbar
 import com.bekmnsrw.feature.profile.impl.presentation.settings.SettingsScreenModel.SettingsScreenAction
 import com.bekmnsrw.feature.profile.impl.presentation.settings.SettingsScreenModel.SettingsScreenAction.NavigateAuthScreen
+import com.bekmnsrw.feature.profile.impl.presentation.settings.SettingsScreenModel.SettingsScreenAction.NavigateBack
 import com.bekmnsrw.feature.profile.impl.presentation.settings.SettingsScreenModel.SettingsScreenAction.ShowSnackbar
+import com.bekmnsrw.feature.profile.impl.presentation.settings.SettingsScreenModel.SettingsScreenEvent.OnArrowBackClick
 import com.bekmnsrw.feature.profile.impl.presentation.settings.SettingsScreenModel.SettingsScreenEvent.OnSignOutButtonClick
 import kotlinx.coroutines.launch
 
@@ -39,7 +43,8 @@ internal class SettingsScreen : Screen {
         val snackbarHostState = remember { SnackbarHostState() }
 
         SettingsScreenContent(
-            onClick = { screenModel.eventHandler(OnSignOutButtonClick) },
+            onSignOutButtonClick = { screenModel.eventHandler(OnSignOutButtonClick) },
+            onArrowBackClick = { screenModel.eventHandler(OnArrowBackClick) },
             isLoading = screenState.isLoading,
             snackbarHostState = snackbarHostState
         )
@@ -67,7 +72,7 @@ private fun SettingsScreenActions(
                 val authScreen = ScreenRegistry.get(
                     provider = SharedScreen.AuthScreen
                 )
-                navigator.push(item = authScreen)
+                navigator.replaceAll(item = authScreen)
             }
 
             is ShowSnackbar -> coroutineScope.launch {
@@ -76,26 +81,36 @@ private fun SettingsScreenActions(
                     duration = SnackbarDuration.Short
                 )
             }
+
+            NavigateBack -> navigator.pop()
         }
     }
 }
 
 @Composable
 private fun SettingsScreenContent(
-    onClick: () -> Unit,
+    onSignOutButtonClick: () -> Unit,
+    onArrowBackClick: () -> Unit,
     isLoading: Boolean,
     snackbarHostState: SnackbarHostState
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Button(
-            onClick = onClick,
+            onClick = onSignOutButtonClick,
             modifier = Modifier.align(Alignment.Center)
         ) {
             Text(text = "SignOut")
         }
+        AniLibIconButton(
+            modifier = Modifier.align(Alignment.TopStart),
+            onClick = onArrowBackClick,
+            imageVector =  AniLibIcons.ArrowBack,
+        )
     }
     
-    if (isLoading) AniLibCircularProgressBar(shouldShow = true)
+    if (isLoading) {
+        AniLibCircularProgressBar(shouldShow = true)
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AniLibSnackbar(

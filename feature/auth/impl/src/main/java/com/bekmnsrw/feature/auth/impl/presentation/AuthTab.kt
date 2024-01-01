@@ -10,15 +10,12 @@ object AuthTab : Tab {
 
     override val options: TabOptions
         @Composable
-        get() {
-            val title = ""
-
-            return remember {
-                TabOptions(
-                    index = 3u,
-                    title = title
-                )
-            }
+        get() = remember {
+            TabOptions(
+                index = 3u,
+                title = "Auth",
+                icon = null
+            )
         }
 
     @Composable

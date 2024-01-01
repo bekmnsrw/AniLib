@@ -20,7 +20,8 @@ internal interface ProfileApi {
 
     @GET(value = "users/{id}/anime_rates")
     suspend fun getUserAnimeRates(
-        @Path("id") id: Int
+        @Path("id") id: Int,
+        @Query("limit") limit: Int = 2
     ): List<AnimeRatesResponse>
 
 

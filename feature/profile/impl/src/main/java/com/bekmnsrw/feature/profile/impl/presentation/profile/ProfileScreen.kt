@@ -48,6 +48,7 @@ import com.bekmnsrw.core.designsystem.theme.DarkDefaultColorScheme
 import com.bekmnsrw.core.designsystem.theme.LightAndroidColorScheme
 import com.bekmnsrw.core.designsystem.theme.LightDefaultColorScheme
 import com.bekmnsrw.core.navigation.SharedScreen
+import com.bekmnsrw.core.utils.HandleScreenLifecycle
 import com.bekmnsrw.core.utils.convertStringToDateTime
 import com.bekmnsrw.core.utils.formatStatusString
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
@@ -177,7 +178,7 @@ private fun UserAnimeStatuses(
     userAnimeStatuses: PersistentMap<String, Int>,
     onMoreClick: () -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         ProfileItemHeader(
             text = stringResource(id = R.string.statistics),
             onClick = onMoreClick
@@ -298,12 +299,12 @@ private fun UserAnimeRates(
     onMoreClick: () -> Unit = {},
     onItemClick: (Int) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         ProfileItemHeader(
             text = stringResource(id = R.string.your_rates),
             onClick = onMoreClick
         )
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             userAnimeRates.forEach {
                 Row(
                     verticalAlignment = Alignment.Top,
@@ -385,7 +386,7 @@ private fun ProfileScreenActions(screenAction: ProfileScreenAction?) {
                 val authScreen = ScreenRegistry.get(
                     provider = SharedScreen.AuthScreen
                 )
-                navigator.push(item = authScreen)
+                navigator.replaceAll(item = authScreen)
             }
 
             is NavigateDetailsScreen -> {

@@ -31,11 +31,13 @@ internal class SettingsScreenModel(
     @Immutable
     internal sealed interface SettingsScreenEvent {
         data object OnSignOutButtonClick : SettingsScreenEvent
+        data object OnArrowBackClick : SettingsScreenEvent
     }
 
     @Immutable
     internal sealed interface SettingsScreenAction {
         data object NavigateAuthScreen : SettingsScreenAction
+        data object NavigateBack : SettingsScreenAction
         data class ShowSnackbar(val message: String) : SettingsScreenAction
     }
 
@@ -48,6 +50,7 @@ internal class SettingsScreenModel(
     fun eventHandler(event: SettingsScreenEvent) {
         when (event) {
             OnSignOutButtonClick -> onSignOutButtonClick()
+            OnArrowBackClick -> onArrowBackClick()
         }
     }
 
@@ -76,5 +79,9 @@ internal class SettingsScreenModel(
                     else -> _screenAction.emit(ShowSnackbar(message = "Oops, please try again!"))
                 }
             }
+    }
+
+    private fun onArrowBackClick() = screenModelScope.launch {
+        _screenAction.emit(NavigateBack)
     }
 }
