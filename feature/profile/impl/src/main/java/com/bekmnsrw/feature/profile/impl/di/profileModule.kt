@@ -1,16 +1,14 @@
 package com.bekmnsrw.feature.profile.impl.di
 
 import com.bekmnsrw.core.network.qualifier.Qualifiers
-import com.bekmnsrw.feature.auth.api.repository.AuthRepository
 import com.bekmnsrw.feature.auth.api.usecase.local.IsAuthenticatedUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.OnSignOutUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveUserIdUseCase
-import com.bekmnsrw.feature.profile.api.usecase.SignOutUseCase
-import com.bekmnsrw.feature.profile.impl.usecase.SignOutUseCaseImpl
 import com.bekmnsrw.feature.profile.api.repository.ProfileRepository
 import com.bekmnsrw.feature.profile.api.usecase.GetProfileUseCase
 import com.bekmnsrw.feature.profile.api.usecase.GetUserAnimeByStatusUseCase
 import com.bekmnsrw.feature.profile.api.usecase.GetUserAnimeRatesUseCase
+import com.bekmnsrw.feature.profile.api.usecase.SignOutUseCase
 import com.bekmnsrw.feature.profile.impl.data.ProfileRepositoryImpl
 import com.bekmnsrw.feature.profile.impl.data.datasource.remote.ProfileApi
 import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel
@@ -18,6 +16,7 @@ import com.bekmnsrw.feature.profile.impl.presentation.settings.SettingsScreenMod
 import com.bekmnsrw.feature.profile.impl.usecase.GetProfileUseCaseImpl
 import com.bekmnsrw.feature.profile.impl.usecase.GetUserAnimeByStatusUseCaseImpl
 import com.bekmnsrw.feature.profile.impl.usecase.GetUserAnimeRatesUseCaseImpl
+import com.bekmnsrw.feature.profile.impl.usecase.SignOutUseCaseImpl
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
