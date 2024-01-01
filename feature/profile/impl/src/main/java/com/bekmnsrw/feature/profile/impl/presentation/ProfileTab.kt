@@ -5,6 +5,8 @@ import androidx.compose.runtime.remember
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import cafe.adriel.voyager.transitions.SlideTransition
+import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreen
 
 object ProfileTab : Tab {
 
@@ -20,6 +22,8 @@ object ProfileTab : Tab {
 
     @Composable
     override fun Content() {
-        Navigator(screen = ProfileScreen())
+        Navigator(screen = ProfileScreen()) { navigator ->
+            SlideTransition(navigator = navigator)
+        }
     }
 }

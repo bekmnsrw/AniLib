@@ -1,4 +1,4 @@
-package com.bekmnsrw.feature.profile.impl.presentation
+package com.bekmnsrw.feature.profile.impl.presentation.profile
 
 import androidx.compose.runtime.Immutable
 import cafe.adriel.voyager.core.model.ScreenModel
@@ -11,12 +11,8 @@ import com.bekmnsrw.feature.profile.api.model.WhoAmI
 import com.bekmnsrw.feature.profile.api.usecase.GetProfileUseCase
 import com.bekmnsrw.feature.profile.api.usecase.GetUserAnimeByStatusUseCase
 import com.bekmnsrw.feature.profile.api.usecase.GetUserAnimeRatesUseCase
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenAction.NavigateAuthScreen
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenAction.NavigateDetailsScreen
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenAction.NavigateFavoritesTab
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenEvent.OnInit
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenEvent.OnItemClick
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenEvent.OnMoreClick
+import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenAction.*
+import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenEvent.*
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentListOf
@@ -56,6 +52,7 @@ internal class ProfileScreenModel(
         data object NavigateAuthScreen : ProfileScreenAction
         data class NavigateDetailsScreen(val id: Int) : ProfileScreenAction
         data object NavigateFavoritesTab : ProfileScreenAction
+        data object NavigateSettingsScreen : ProfileScreenAction
     }
 
     @Immutable
@@ -63,6 +60,7 @@ internal class ProfileScreenModel(
         data object OnInit : ProfileScreenEvent
         data class OnItemClick(val id: Int) : ProfileScreenEvent
         data object OnMoreClick : ProfileScreenEvent
+        data object OnSettingsIconClick : ProfileScreenEvent
     }
 
     private val _screenState = MutableStateFlow(ProfileScreenState())
@@ -80,6 +78,7 @@ internal class ProfileScreenModel(
             OnInit -> onInit()
             is OnItemClick -> onItemClick(event.id)
             OnMoreClick -> onMoreClick()
+            OnSettingsIconClick -> onSettingsIconClick()
         }
     }
 
@@ -184,5 +183,9 @@ internal class ProfileScreenModel(
 
     private fun onMoreClick() = screenModelScope.launch {
         _screenAction.emit(NavigateFavoritesTab)
+    }
+
+    private fun onSettingsIconClick() = screenModelScope.launch {
+        _screenAction.emit(NavigateSettingsScreen)
     }
 }

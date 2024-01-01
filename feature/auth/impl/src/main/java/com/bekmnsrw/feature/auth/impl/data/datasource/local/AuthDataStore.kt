@@ -72,4 +72,10 @@ internal class AuthDataStore(
     suspend fun saveUserId(id: Int): Preferences = context.dataStore.edit {
         it[USER_ID_KEY] = id
     }
+
+    suspend fun onSignOut(): Preferences = context.dataStore.edit {
+        it[IS_AUTHENTICATED_KEY] = false
+        it[ACCESS_TOKEN_KEY] = ""
+        it[REFRESH_TOKEN_KEY] = ""
+    }
 }

@@ -1,15 +1,20 @@
 package com.bekmnsrw.feature.profile.impl.di
 
 import com.bekmnsrw.core.network.qualifier.Qualifiers
+import com.bekmnsrw.feature.auth.api.repository.AuthRepository
 import com.bekmnsrw.feature.auth.api.usecase.local.IsAuthenticatedUseCase
+import com.bekmnsrw.feature.auth.api.usecase.local.OnSignOutUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveUserIdUseCase
+import com.bekmnsrw.feature.profile.api.usecase.SignOutUseCase
+import com.bekmnsrw.feature.profile.impl.usecase.SignOutUseCaseImpl
 import com.bekmnsrw.feature.profile.api.repository.ProfileRepository
 import com.bekmnsrw.feature.profile.api.usecase.GetProfileUseCase
 import com.bekmnsrw.feature.profile.api.usecase.GetUserAnimeByStatusUseCase
 import com.bekmnsrw.feature.profile.api.usecase.GetUserAnimeRatesUseCase
 import com.bekmnsrw.feature.profile.impl.data.ProfileRepositoryImpl
 import com.bekmnsrw.feature.profile.impl.data.datasource.remote.ProfileApi
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel
+import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel
+import com.bekmnsrw.feature.profile.impl.presentation.settings.SettingsScreenModel
 import com.bekmnsrw.feature.profile.impl.usecase.GetProfileUseCaseImpl
 import com.bekmnsrw.feature.profile.impl.usecase.GetUserAnimeByStatusUseCaseImpl
 import com.bekmnsrw.feature.profile.impl.usecase.GetUserAnimeRatesUseCaseImpl
@@ -28,6 +33,13 @@ val profileModule = module {
         )
     }
 
+    factory<SettingsScreenModel> {
+        provideSettingsScreenModel(
+            signOutUseCase = get(),
+            onSignOutUseCase = get()
+        )
+    }
+
     factory<ProfileRepository> {
         provideProfileRepository(profileApi = get())
     }
@@ -42,6 +54,10 @@ val profileModule = module {
 
     factory<GetUserAnimeByStatusUseCase> {
         provideGetUserAnimeByStatusUseCase(profileRepository = get())
+    }
+
+    factory<SignOutUseCase> {
+        provideSignOutUseCase(profileRepository = get())
     }
 
     factory<ProfileApi> {
@@ -90,5 +106,19 @@ private fun provideGetUserAnimeRatesUseCase(
 private fun provideGetUserAnimeByStatusUseCase(
     profileRepository: ProfileRepository
 ): GetUserAnimeByStatusUseCase = GetUserAnimeByStatusUseCaseImpl(
+    profileRepository = profileRepository
+)
+
+private fun provideSettingsScreenModel(
+    signOutUseCase: SignOutUseCase,
+    onSignOutUseCase: OnSignOutUseCase
+): SettingsScreenModel = SettingsScreenModel(
+    signOutUseCase = signOutUseCase,
+    onSignOutUseCase = onSignOutUseCase
+)
+
+private fun provideSignOutUseCase(
+    profileRepository: ProfileRepository
+): SignOutUseCase = SignOutUseCaseImpl(
     profileRepository = profileRepository
 )

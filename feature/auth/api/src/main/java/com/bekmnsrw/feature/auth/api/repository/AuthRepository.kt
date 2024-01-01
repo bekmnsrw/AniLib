@@ -40,4 +40,5 @@ interface AuthRepository {
     suspend fun getUserId(): Flow<Int?>
 
     suspend fun saveUserId(id: Int): Preferences
+    suspend fun onSignOut(): Preferences
 }

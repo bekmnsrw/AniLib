@@ -35,4 +35,10 @@ internal class ProfileRepositoryImpl(
                 .toAnimeRatesList()
         )
     }
+
+    override suspend fun signOut(): Flow<Int> = flow {
+        emit(
+            profileApi.signOut().code()
+        )
+    }
 }

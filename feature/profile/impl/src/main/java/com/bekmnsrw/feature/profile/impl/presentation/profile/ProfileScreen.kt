@@ -1,4 +1,4 @@
-package com.bekmnsrw.feature.profile.impl.presentation
+package com.bekmnsrw.feature.profile.impl.presentation.profile
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -56,10 +56,12 @@ import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.profile.api.model.AnimeRates
 import com.bekmnsrw.feature.profile.api.model.WhoAmI
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenAction
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenAction.NavigateAuthScreen
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenEvent.OnItemClick
-import com.bekmnsrw.feature.profile.impl.presentation.ProfileScreenModel.ProfileScreenEvent.OnMoreClick
+import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.*
+import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenAction
+import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenAction.*
+import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenEvent
+import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenEvent.*
+import com.bekmnsrw.feature.profile.impl.presentation.settings.SettingsScreen
 import com.bekmnsrw.profile.impl.R
 import com.github.tehras.charts.piechart.PieChart
 import com.github.tehras.charts.piechart.PieChartData
@@ -83,7 +85,7 @@ internal class ProfileScreen : Screen {
                 whoAmI = screenState.profile,
                 userAnimeRates = screenState.userAnimeRates,
                 userAnimeStatuses = screenState.userAnimeStatuses,
-                onSettingsIconClick = {},
+                onSettingsIconClick = { screenModel.eventHandler(OnSettingsIconClick) },
                 onItemClick = { screenModel.eventHandler(OnItemClick(id = it)) },
                 onMoreClick = { screenModel.eventHandler(OnMoreClick) }
             )
@@ -157,15 +159,15 @@ private fun ProfileTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     onClick: () -> Unit
 ) = TopAppBar(
-        title = {},
-        scrollBehavior = scrollBehavior,
-        actions = {
-            AniLibIconButton(
-                onClick = onClick,
-                imageVector = AniLibIcons.Settings
-            )
-        }
-    )
+    title = {},
+    scrollBehavior = scrollBehavior,
+    actions = {
+        AniLibIconButton(
+            onClick = onClick,
+            imageVector = AniLibIcons.Settings
+        )
+    }
+)
 
 @Composable
 private fun UserAnimeStatuses(
@@ -383,7 +385,7 @@ private fun ProfileScreenActions(screenAction: ProfileScreenAction?) {
                 navigator.push(item = authScreen)
             }
 
-            is ProfileScreenAction.NavigateDetailsScreen -> {
+            is NavigateDetailsScreen -> {
                 val detailsScreen = ScreenRegistry.get(
                     provider = SharedScreen.DetailsScreen(
                         id = screenAction.id
@@ -392,12 +394,16 @@ private fun ProfileScreenActions(screenAction: ProfileScreenAction?) {
                 navigator.push(item = detailsScreen)
             }
 
-            ProfileScreenAction.NavigateFavoritesTab -> {
+            NavigateFavoritesTab -> {
                 val favoritesTab = ScreenRegistry.get(
                     provider = SharedScreen.FavoritesScreen
                 )
                 navigator.push(item = favoritesTab)
             }
+
+            NavigateSettingsScreen -> navigator.push(
+                item = SettingsScreen()
+            )
         }
     }
 }

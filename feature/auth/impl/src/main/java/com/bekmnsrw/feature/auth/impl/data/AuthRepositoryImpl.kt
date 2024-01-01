@@ -84,4 +84,5 @@ internal class AuthRepositoryImpl(
     override suspend fun getUserId(): Flow<Int?> = authDataStore.getUserId()
 
     override suspend fun saveUserId(id: Int): Preferences = authDataStore.saveUserId(id = id)
+    override suspend fun onSignOut(): Preferences = authDataStore.onSignOut()
 }

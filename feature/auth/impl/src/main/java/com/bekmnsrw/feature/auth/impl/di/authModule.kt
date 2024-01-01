@@ -11,6 +11,7 @@ import com.bekmnsrw.feature.auth.api.usecase.local.IsAuthenticatedUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.IsFirstAppLaunchUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.OnAuthenticationUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.OnFirstAppLaunchUseCase
+import com.bekmnsrw.feature.auth.api.usecase.local.OnSignOutUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveLocalAccessTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveLocalRefreshTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveUserIdUseCase
@@ -27,6 +28,7 @@ import com.bekmnsrw.feature.auth.impl.usecase.local.IsAuthenticatedUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.IsFirstAppLaunchUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.OnAuthenticationUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.OnFirstAppLaunchUseCaseImpl
+import com.bekmnsrw.feature.auth.impl.usecase.local.OnSignOutUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.SaveLocalAccessTokenUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.SaveLocalRefreshTokenUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.SaveUserIdUseCaseImpl
@@ -98,6 +100,10 @@ val authModule = module {
 
     factory<GetUserIdUseCase> {
         provideGetUserIdUseCase(authRepository = get())
+    }
+
+    factory<OnSignOutUseCase> {
+        provideOnSignOutUseCase(authRepository = get())
     }
 
     factory<AuthScreenModel> {
@@ -212,5 +218,11 @@ private fun provideGetUserIdUseCase(
 private fun provideSaveUserIdUseCase(
     authRepository: AuthRepository
 ): SaveUserIdUseCase = SaveUserIdUseCaseImpl(
+    authRepository = authRepository
+)
+
+private fun provideOnSignOutUseCase(
+    authRepository: AuthRepository
+): OnSignOutUseCase = OnSignOutUseCaseImpl(
     authRepository = authRepository
 )

@@ -12,4 +12,5 @@ interface ProfileRepository {
         id: Int,
         status: String
     ): Flow<List<AnimeRates>>
+    suspend fun signOut(): Flow<Int>
 }

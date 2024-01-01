@@ -50,6 +50,8 @@ datastore-preferences = "1.0.0"
 system-ui-controller = "0.30.1"
 pager = "0.25.0"
 
+charts = "0.2.4-alpha"
+
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
@@ -122,8 +124,7 @@ voyager-transitions = { group = "cafe.adriel.voyager", name = "voyager-transitio
 paging-core = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 
-#implementation "com.github.tehras:charts:$latest_release"
-compose-charts = { group = "com.github.tehras", name = "charts", version = "0.2.4-alpha" }
+compose-charts = { group = "com.github.tehras", name = "charts", version.ref = "charts" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
