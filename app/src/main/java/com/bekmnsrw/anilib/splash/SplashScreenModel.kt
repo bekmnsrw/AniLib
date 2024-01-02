@@ -1,4 +1,4 @@
-package com.bekmnsrw.anilib
+package com.bekmnsrw.anilib.splash
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State

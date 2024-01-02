@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AniLib</string>
+    <string name="fcm_notification_channel_id">fcm_channel_id</string>
 </resources>
