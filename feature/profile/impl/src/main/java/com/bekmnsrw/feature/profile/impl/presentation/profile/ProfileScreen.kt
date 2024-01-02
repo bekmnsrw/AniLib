@@ -48,7 +48,6 @@ import com.bekmnsrw.core.designsystem.theme.DarkDefaultColorScheme
 import com.bekmnsrw.core.designsystem.theme.LightAndroidColorScheme
 import com.bekmnsrw.core.designsystem.theme.LightDefaultColorScheme
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.core.utils.HandleScreenLifecycle
 import com.bekmnsrw.core.utils.convertStringToDateTime
 import com.bekmnsrw.core.utils.formatStatusString
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
