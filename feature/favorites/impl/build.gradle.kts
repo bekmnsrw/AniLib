@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.detekt)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.firebaseCrashlytics)
 }
 
 android {
@@ -30,7 +31,6 @@ dependencies {
     implementation(project(":feature:favorites:api"))
     implementation(project(":feature:home:api"))
     implementation(project(":feature:auth:api"))
-    implementation(project(":core:utils"))
 
     implementation(project(":core:widget"))
     implementation(project(":core:db"))

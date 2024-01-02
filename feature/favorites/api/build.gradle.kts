@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.firebaseCrashlytics)
 }
 
 android {
@@ -23,6 +24,9 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":feature:home:api"))
     implementation(project(":core:navigation"))
+
+    api(platform(libs.firebase.bom))
+    api(libs.firebase.crashlytics)
 
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)

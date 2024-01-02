@@ -17,6 +17,8 @@ import com.bekmnsrw.feature.home.api.usecase.RemoveFromFavoritesUseCase
 import com.bekmnsrw.feature.home.impl.HomeConstants.REQUEST_LIMIT
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.*
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.*
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -276,7 +278,10 @@ internal class DetailsScreenModel(
             status = status
         )
             .flowOn(Dispatchers.IO)
-            .catch { _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE)) }
+            .catch {
+                _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
+                Firebase.crashlytics.recordException(it)
+            }
             .collect { response ->
                 _screenAction.emit(
                     ShowSnackbar(

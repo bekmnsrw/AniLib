@@ -17,6 +17,8 @@ import com.bekmnsrw.feature.favorites.impl.FavoritesConstants.WAS_REMOVED_FROM_M
 import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenAction.*
 import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.*
 import com.bekmnsrw.feature.home.api.usecase.DeleteUserRatesUseCase
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -168,7 +170,10 @@ internal class PlannedScreenModel(
         status: String
     ) = updateAnimeStatusUseCase(id = id, status = status)
         .flowOn(Dispatchers.IO)
-        .catch { _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE)) }
+        .catch {
+            _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
+            Firebase.crashlytics.recordException(it)
+        }
         .collect { response ->
             _screenAction.emit(
                 ShowSnackbar(

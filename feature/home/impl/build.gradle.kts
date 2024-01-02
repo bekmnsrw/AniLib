@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.detekt)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.firebaseCrashlytics)
 }
 
 android {
@@ -44,9 +45,6 @@ dependencies {
     implementation(libs.voyager.tab)
     implementation(libs.voyager.transitions)
     implementation(libs.voyager.koin)
-
-//    implementation(libs.paging.core)
-//    implementation(libs.paging.compose)
 
     implementation(libs.kotlinx.collections.immutable)
 
