@@ -73,10 +73,6 @@ internal class AuthRepositoryImpl(
         )
     }
 
-    override suspend fun isFirstAppLaunch(): Flow<Boolean?> = authDataStore.isFirstAppLaunch()
-
-    override suspend fun onFirstAppLaunch(): Preferences = authDataStore.onFirstAppLaunch()
-
     override suspend fun isAuthenticated(): Flow<Boolean?> = authDataStore.isAuthenticated()
 
     override suspend fun onAuthentication(): Preferences = authDataStore.onAuthentication()
@@ -84,5 +80,6 @@ internal class AuthRepositoryImpl(
     override suspend fun getUserId(): Flow<Int?> = authDataStore.getUserId()
 
     override suspend fun saveUserId(id: Int): Preferences = authDataStore.saveUserId(id = id)
+
     override suspend fun onSignOut(): Preferences = authDataStore.onSignOut()
 }

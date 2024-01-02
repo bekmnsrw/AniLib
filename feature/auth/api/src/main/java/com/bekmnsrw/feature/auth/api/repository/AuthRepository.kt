@@ -29,10 +29,6 @@ interface AuthRepository {
         refreshToken: String
     ): Flow<AccessToken>
 
-    suspend fun isFirstAppLaunch(): Flow<Boolean?>
-
-    suspend fun onFirstAppLaunch(): Preferences
-
     suspend fun isAuthenticated(): Flow<Boolean?>
 
     suspend fun onAuthentication(): Preferences

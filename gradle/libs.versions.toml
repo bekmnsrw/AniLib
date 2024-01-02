@@ -36,9 +36,11 @@ ksp = "1.9.10-1.0.13"
 timber = "5.0.1"
 detekt = "1.23.3"
 
-google-service = "4.4.0"
-google-service-bom = "32.6.0"
-google-app-distribution = "4.0.1"
+firebase-bom = "32.6.0"
+firebase-service = "4.4.0"
+firebase-app-distribution = "4.0.1"
+firebase-crashlytics = "2.9.9"
+firebase-perf = "1.4.2"
 
 coil = "2.3.0"
 koin = "3.4.0"
@@ -113,7 +115,11 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 
-google-service = { group = "com.google.firebase", name = "firebase-bom", version.ref = "google-service-bom" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+firebase-perf = { group = "com.google.firebase", name = "firebase-perf" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
 
 voyager-navigator = { group = "cafe.adriel.voyager", name = "voyager-navigator", version.ref = "voyager" }
 voyager-tab = { group = "cafe.adriel.voyager", name = "voyager-tab-navigator", version.ref = "voyager" }
@@ -137,5 +143,7 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 
-googleService = { id = "com.google.gms.google-services", version.ref = "google-service" }
-googleAppDistribution = { id = "com.google.firebase.appdistribution", version.ref = "google-app-distribution" }
+firebaseService = { id = "com.google.gms.google-services", version.ref = "firebase-service" }
+firebaseAppDistribution = { id = "com.google.firebase.appdistribution", version.ref = "firebase-app-distribution" }
+firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }
+firebasePerf = { id = "com.google.firebase.firebase-perf", version.ref = "firebase-perf" }

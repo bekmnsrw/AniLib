@@ -6,15 +6,13 @@ import com.bekmnsrw.feature.auth.api.repository.AuthRepository
 import com.bekmnsrw.feature.auth.api.usecase.local.GetLocalAccessTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.GetLocalRefreshTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
-import com.bekmnsrw.feature.auth.api.usecase.remote.GetRemoteAccessTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.IsAuthenticatedUseCase
-import com.bekmnsrw.feature.auth.api.usecase.local.IsFirstAppLaunchUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.OnAuthenticationUseCase
-import com.bekmnsrw.feature.auth.api.usecase.local.OnFirstAppLaunchUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.OnSignOutUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveLocalAccessTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveLocalRefreshTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveUserIdUseCase
+import com.bekmnsrw.feature.auth.api.usecase.remote.GetRemoteAccessTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.remote.RefreshAccessTokenUseCase
 import com.bekmnsrw.feature.auth.impl.data.AuthRepositoryImpl
 import com.bekmnsrw.feature.auth.impl.data.datasource.local.AuthDataStore
@@ -23,15 +21,13 @@ import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel
 import com.bekmnsrw.feature.auth.impl.usecase.local.GetLocalAccessTokenUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.GetLocalRefreshTokenUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.GetUserIdUseCaseImpl
-import com.bekmnsrw.feature.auth.impl.usecase.remote.GetRemoteAccessTokenUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.IsAuthenticatedUseCaseImpl
-import com.bekmnsrw.feature.auth.impl.usecase.local.IsFirstAppLaunchUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.OnAuthenticationUseCaseImpl
-import com.bekmnsrw.feature.auth.impl.usecase.local.OnFirstAppLaunchUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.OnSignOutUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.SaveLocalAccessTokenUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.SaveLocalRefreshTokenUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.local.SaveUserIdUseCaseImpl
+import com.bekmnsrw.feature.auth.impl.usecase.remote.GetRemoteAccessTokenUseCaseImpl
 import com.bekmnsrw.feature.auth.impl.usecase.remote.RefreshAccessTokenUseCaseImpl
 import org.koin.android.ext.koin.androidApplication
 import org.koin.core.qualifier.named
@@ -66,16 +62,8 @@ val authModule = module {
         provideIsAuthenticatedUseCase(authRepository = get())
     }
 
-    factory<IsFirstAppLaunchUseCase> {
-        provideIsFirstAppLaunchUseCase(authRepository = get())
-    }
-
     factory<OnAuthenticationUseCase> {
         provideOnAuthenticationUseCase(authRepository = get())
-    }
-
-    factory<OnFirstAppLaunchUseCase> {
-        provideOnFirstAppLaunchUseCase(authRepository = get())
     }
 
     factory<GetLocalRefreshTokenUseCase> {
@@ -152,21 +140,9 @@ private fun provideIsAuthenticatedUseCase(
     authRepository = authRepository
 )
 
-private fun provideIsFirstAppLaunchUseCase(
-    authRepository: AuthRepository
-): IsFirstAppLaunchUseCase = IsFirstAppLaunchUseCaseImpl(
-    authRepository = authRepository
-)
-
 private fun provideOnAuthenticationUseCase(
     authRepository: AuthRepository
 ): OnAuthenticationUseCase = OnAuthenticationUseCaseImpl(
-    authRepository = authRepository
-)
-
-private fun provideOnFirstAppLaunchUseCase(
-    authRepository: AuthRepository
-): OnFirstAppLaunchUseCase = OnFirstAppLaunchUseCaseImpl(
     authRepository = authRepository
 )
 

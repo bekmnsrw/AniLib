@@ -3,8 +3,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.detekt)
-    alias(libs.plugins.googleService)
-    alias(libs.plugins.googleAppDistribution)
+    alias(libs.plugins.firebaseService)
+    alias(libs.plugins.firebaseAppDistribution)
 }
 
 android {
@@ -69,7 +69,8 @@ dependencies {
     implementation(project(":feature:favorites:impl"))
     implementation(project(":feature:profile:impl"))
 
-    implementation(platform(libs.google.service))
+    api(platform(libs.firebase.bom))
+    api(libs.firebase.analytics)
 
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.kotlinx.coroutines.android)
