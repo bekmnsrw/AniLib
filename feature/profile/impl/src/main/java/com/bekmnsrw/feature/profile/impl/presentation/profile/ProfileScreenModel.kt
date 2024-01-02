@@ -1,6 +1,7 @@
 package com.bekmnsrw.feature.profile.impl.presentation.profile
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.mutableIntStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.bekmnsrw.core.widget.UserRatesEnum
@@ -37,6 +38,8 @@ internal class ProfileScreenModel(
     private val getUserAnimeRatesUseCase: GetUserAnimeRatesUseCase,
     private val getUserAnimeByStatusUseCase: GetUserAnimeByStatusUseCase
 ) : ScreenModel {
+
+    private val userId by lazy { mutableIntStateOf(0) }
 
     @Immutable
     internal data class ProfileScreenState(
@@ -91,6 +94,7 @@ internal class ProfileScreenModel(
                 )
             )
             saveUserIdUseCase(id = it.id)
+            userId.intValue = it.id
         }
 
     private suspend fun isAuthenticated() = isAuthenticatedUseCase()
@@ -98,7 +102,7 @@ internal class ProfileScreenModel(
         .first()
 
 
-    private suspend fun getUserAnimeRates(id: Int) = getUserAnimeRatesUseCase(id = id)
+    private suspend fun getUserAnimeRates() = getUserAnimeRatesUseCase(id = userId.intValue)
         .flowOn(Dispatchers.IO)
         .collect {
             _screenState.emit(
@@ -108,7 +112,7 @@ internal class ProfileScreenModel(
             )
         }
 
-    private suspend fun getUserAnimeStatuses(id: Int) {
+    private suspend fun getUserAnimeStatuses() {
         val userAnimeStatuses = mutableMapOf(
             UserRatesEnum.WATCHING.key to 0,
             UserRatesEnum.DROPPED.key to 0,
@@ -117,23 +121,23 @@ internal class ProfileScreenModel(
             UserRatesEnum.COMPLETED.key to 0
         )
 
-        getUserAnimeByStatusUseCase(id = id, status = UserRatesEnum.WATCHING.key)
+        getUserAnimeByStatusUseCase(id = userId.intValue, status = UserRatesEnum.WATCHING.key)
             .flowOn(Dispatchers.IO)
             .collect { userAnimeStatuses[UserRatesEnum.WATCHING.key] = it.size }
 
-        getUserAnimeByStatusUseCase(id = id, status = UserRatesEnum.DROPPED.key)
+        getUserAnimeByStatusUseCase(id = userId.intValue, status = UserRatesEnum.DROPPED.key)
             .flowOn(Dispatchers.IO)
             .collect { userAnimeStatuses[UserRatesEnum.DROPPED.key] = it.size }
 
-        getUserAnimeByStatusUseCase(id = id, status = UserRatesEnum.PLANNED.key)
+        getUserAnimeByStatusUseCase(id = userId.intValue, status = UserRatesEnum.PLANNED.key)
             .flowOn(Dispatchers.IO)
             .collect { userAnimeStatuses[UserRatesEnum.PLANNED.key] = it.size }
 
-        getUserAnimeByStatusUseCase(id = id, status = UserRatesEnum.ON_HOLD.key)
+        getUserAnimeByStatusUseCase(id = userId.intValue, status = UserRatesEnum.ON_HOLD.key)
             .flowOn(Dispatchers.IO)
             .collect { userAnimeStatuses[UserRatesEnum.ON_HOLD.key] = it.size }
 
-        getUserAnimeByStatusUseCase(id = id, status = UserRatesEnum.COMPLETED.key)
+        getUserAnimeByStatusUseCase(id = userId.intValue, status = UserRatesEnum.COMPLETED.key)
             .flowOn(Dispatchers.IO)
             .collect { userAnimeStatuses[UserRatesEnum.COMPLETED.key] = it.size }
 
@@ -164,8 +168,8 @@ internal class ProfileScreenModel(
         when (isAuthenticated) {
             true -> {
                 getProfile()
-                getUserAnimeRates(id = 1_379_176)
-                getUserAnimeStatuses(id = 1_379_176)
+                getUserAnimeRates()
+                getUserAnimeStatuses()
             }
             else -> _screenAction.emit(NavigateAuthScreen)
         }

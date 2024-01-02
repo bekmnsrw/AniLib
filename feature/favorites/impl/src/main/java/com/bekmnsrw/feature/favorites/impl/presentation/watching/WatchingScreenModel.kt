@@ -1,6 +1,7 @@
 package com.bekmnsrw.feature.favorites.impl.presentation.watching
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import cafe.adriel.voyager.core.model.ScreenModel
@@ -37,6 +38,8 @@ internal class WatchingScreenModel(
     private val updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
     private val deleteUserRatesUseCase: DeleteUserRatesUseCase
 ) : ScreenModel {
+
+    private val userId by lazy { mutableIntStateOf(0) }
 
     private val _screenState = MutableStateFlow(WatchingScreenState())
     val screenState: StateFlow<WatchingScreenState> = _screenState.asStateFlow()
@@ -88,10 +91,15 @@ internal class WatchingScreenModel(
     }
 
     private fun onInit() = screenModelScope.launch {
-        favoritesRepository.getPlannedPaged(1_379_176, UserRatesEnum.WATCHING.key)
+        getUserIdUseCase()
             .flowOn(Dispatchers.IO)
-            .cachedIn(screenModelScope)
-            .collect { data -> _watching.value = data }
+            .collect { id ->
+                userId.intValue = id ?: 0
+                favoritesRepository.getPlannedPaged(userId.intValue, UserRatesEnum.WATCHING.key)
+                    .flowOn(Dispatchers.IO)
+                    .cachedIn(screenModelScope)
+                    .collect { data -> _watching.value = data }
+            }
     }
 
     private fun onItemClick(id: Int) = screenModelScope.launch {

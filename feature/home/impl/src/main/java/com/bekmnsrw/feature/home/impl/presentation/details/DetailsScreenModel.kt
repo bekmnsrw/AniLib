@@ -1,10 +1,12 @@
 package com.bekmnsrw.feature.home.impl.presentation.details
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.mutableIntStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.bekmnsrw.core.utils.formatStatusString
 import com.bekmnsrw.core.widget.UserRatesEnum
+import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
 import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
@@ -44,8 +46,11 @@ internal class DetailsScreenModel(
     private val getSimilarAnimeListUseCase: GetSimilarAnimeListUseCase,
     private val createUserRatesUseCase: CreateUserRatesUseCase,
     private val updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
-    private val deleteUserRatesUseCase: DeleteUserRatesUseCase
+    private val deleteUserRatesUseCase: DeleteUserRatesUseCase,
+    private val getUserIdUseCase: GetUserIdUseCase
 ) : ScreenModel {
+
+    private val userId by lazy { mutableIntStateOf(0) }
 
     private companion object {
         const val WAS_ADDED_TO_FAVORITES = "was added to favorites"
@@ -116,6 +121,12 @@ internal class DetailsScreenModel(
     }
 
     private fun onInit() = screenModelScope.launch {
+        getUserIdUseCase()
+            .flowOn(Dispatchers.IO)
+            .collect { id ->
+                userId.intValue = id ?: 0
+            }
+
         getAnimeUseCase(id = animeId)
             .flowOn(Dispatchers.IO)
             .onStart {
@@ -359,7 +370,7 @@ internal class DetailsScreenModel(
 
         when (id) {
             null -> createUserRates(
-                userId = 1_379_176,
+                userId = userId.intValue,
                 targetId = animeId,
                 status = status
             )

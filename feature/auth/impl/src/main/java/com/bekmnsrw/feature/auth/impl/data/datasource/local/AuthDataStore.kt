@@ -11,34 +11,22 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-internal class AuthDataStore(
-    private val context: Context
-) {
+internal class AuthDataStore(private val context: Context) {
 
     private companion object {
         const val DATASTORE_NAME = "AUTH_DATASTORE"
 
         val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = DATASTORE_NAME)
 
-        const val IS_FIRST_APP_LAUNCH_KEY_NAME = "IS_FIRST_APP_LAUNCH"
         const val IS_AUTHENTICATED_KEY_NAME = "IS_AUTHENTICATED"
         const val ACCESS_TOKEN_KEY_NAME = "AUTH_TOKEN"
         const val REFRESH_TOKEN_KEY_NAME = "REFRESH_TOKEN"
         const val USER_ID_KEY_NAME = "USER_ID"
 
-        val IS_FIRST_APP_LAUNCH_KEY = booleanPreferencesKey(name = IS_FIRST_APP_LAUNCH_KEY_NAME)
         val IS_AUTHENTICATED_KEY = booleanPreferencesKey(name = IS_AUTHENTICATED_KEY_NAME)
         val ACCESS_TOKEN_KEY = stringPreferencesKey(name = ACCESS_TOKEN_KEY_NAME)
         val REFRESH_TOKEN_KEY = stringPreferencesKey(name = REFRESH_TOKEN_KEY_NAME)
         val USER_ID_KEY = intPreferencesKey(name = USER_ID_KEY_NAME)
-    }
-
-    fun isFirstAppLaunch(): Flow<Boolean?> = context.dataStore.data.map {
-        it.get(key = IS_FIRST_APP_LAUNCH_KEY)
-    }
-
-    suspend fun onFirstAppLaunch(): Preferences = context.dataStore.edit {
-        it[IS_FIRST_APP_LAUNCH_KEY] = false
     }
 
     fun isAuthenticated(): Flow<Boolean?> = context.dataStore.data.map {
@@ -77,5 +65,6 @@ internal class AuthDataStore(
         it[IS_AUTHENTICATED_KEY] = false
         it[ACCESS_TOKEN_KEY] = ""
         it[REFRESH_TOKEN_KEY] = ""
+        it[USER_ID_KEY] = 0
     }
 }

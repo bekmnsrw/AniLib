@@ -2,6 +2,7 @@ package com.bekmnsrw.feature.home.impl.di
 
 import com.bekmnsrw.core.db.AppDatabase
 import com.bekmnsrw.core.network.qualifier.Qualifiers
+import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
 import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.home.api.repository.HomeRepository
 import com.bekmnsrw.feature.home.api.usecase.AddToFavoritesUseCase
@@ -127,7 +128,8 @@ val homeModule = module {
             getSimilarAnimeListUseCase = get(),
             createUserRatesUseCase = get(),
             updateAnimeStatusUseCase = get(),
-            deleteUserRatesUseCase = get()
+            deleteUserRatesUseCase = get(),
+            getUserIdUseCase = get()
         )
     }
 
@@ -191,7 +193,8 @@ private fun provideDetailsScreenModel(
     getSimilarAnimeListUseCase: GetSimilarAnimeListUseCase,
     createUserRatesUseCase: CreateUserRatesUseCase,
     updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
-    deleteUserRatesUseCase: DeleteUserRatesUseCase
+    deleteUserRatesUseCase: DeleteUserRatesUseCase,
+    getUserIdUseCase: GetUserIdUseCase
 ): DetailsScreenModel = DetailsScreenModel(
     getAnimeUseCase = getAnimeUseCase,
     animeId = animeId,
@@ -200,7 +203,8 @@ private fun provideDetailsScreenModel(
     getSimilarAnimeListUseCase = getSimilarAnimeListUseCase,
     createUserRatesUseCase = createUserRatesUseCase,
     updateAnimeStatusUseCase = updateAnimeStatusUseCase,
-    deleteUserRatesUseCase = deleteUserRatesUseCase
+    deleteUserRatesUseCase = deleteUserRatesUseCase,
+    getUserIdUseCase = getUserIdUseCase
 )
 
 private fun provideAddToFavoritesUseCase(

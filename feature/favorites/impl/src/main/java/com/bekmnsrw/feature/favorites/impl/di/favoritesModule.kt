@@ -2,12 +2,14 @@ package com.bekmnsrw.feature.favorites.impl.di
 
 import com.bekmnsrw.core.network.qualifier.Qualifiers
 import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
+import com.bekmnsrw.feature.auth.api.usecase.local.IsAuthenticatedUseCase
 import com.bekmnsrw.feature.favorites.api.repository.FavoritesRepository
 import com.bekmnsrw.feature.favorites.api.usecase.GetUserFavoritesUseCase
 import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.favorites.impl.data.FavoritesApi
 import com.bekmnsrw.feature.favorites.impl.data.FavoritesRepositoryImpl
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel
+import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabScreenModel
 import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel
 import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel
@@ -90,10 +92,21 @@ val favoritesModule = module {
     factory<FavoritesScreenModel> {
         provideFavoritesScreenModel(
             getUserFavoritesUseCase = get(),
-            removeFromFavoritesUseCase = get()
+            removeFromFavoritesUseCase = get(),
+            getUserIdUseCase = get()
         )
     }
+
+    factory<FavoritesTabScreenModel> {
+        provideFavoritesTabScreenModel(isAuthenticatedUseCase = get())
+    }
 }
+
+private fun provideFavoritesTabScreenModel(
+    isAuthenticatedUseCase: IsAuthenticatedUseCase
+): FavoritesTabScreenModel = FavoritesTabScreenModel(
+    isAuthenticatedUseCase = isAuthenticatedUseCase
+)
 
 private fun provideFavoritesApi(
     retrofit: Retrofit
@@ -173,10 +186,12 @@ private fun provideOnHoldScreenModel(
 
 private fun provideFavoritesScreenModel(
     getUserFavoritesUseCase: GetUserFavoritesUseCase,
-    removeFromFavoritesUseCase: RemoveFromFavoritesUseCase
+    removeFromFavoritesUseCase: RemoveFromFavoritesUseCase,
+    getUserIdUseCase: GetUserIdUseCase
 ) : FavoritesScreenModel = FavoritesScreenModel(
     getUserFavoritesUseCase = getUserFavoritesUseCase,
-    removeFromFavoritesUseCase = removeFromFavoritesUseCase
+    removeFromFavoritesUseCase = removeFromFavoritesUseCase,
+    getUserIdUseCase = getUserIdUseCase
 )
 
 private fun provideUpdateAnimeStatusUseCase(

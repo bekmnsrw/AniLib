@@ -44,7 +44,9 @@ class MainActivity : ComponentActivity() {
                 ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED -> { /* FCM SDK (and your app) can post notifications */ }
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    /* FCM SDK (and your app) can post notifications */
+                }
 
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
                     /*
@@ -55,8 +57,10 @@ class MainActivity : ComponentActivity() {
                     */
                 }
 
-                /* Directly ask for the permission */
-                else -> requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                else -> {
+                    /* Directly ask for the permission */
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
             }
         }
     }

@@ -1,8 +1,10 @@
 package com.bekmnsrw.feature.favorites.impl.presentation.favorites
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.mutableIntStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
 import com.bekmnsrw.feature.favorites.api.model.FavoriteAnime
 import com.bekmnsrw.feature.favorites.api.usecase.GetUserFavoritesUseCase
 import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenAction.*
@@ -25,13 +27,16 @@ import kotlinx.coroutines.launch
 
 internal class FavoritesScreenModel(
     private val getUserFavoritesUseCase: GetUserFavoritesUseCase,
-    private val removeFromFavoritesUseCase: RemoveFromFavoritesUseCase
+    private val removeFromFavoritesUseCase: RemoveFromFavoritesUseCase,
+    private val getUserIdUseCase: GetUserIdUseCase
 ) : ScreenModel {
 
     private companion object {
         const val ERROR_MESSAGE = "Oops, something went wrong. Please try again!"
         const val TYPE = "Anime"
     }
+
+    private val userId by lazy { mutableIntStateOf(0) }
 
     private val _screenState = MutableStateFlow(FavoritesScreenState())
     val screenState: StateFlow<FavoritesScreenState> = _screenState.asStateFlow()
@@ -75,7 +80,7 @@ internal class FavoritesScreenModel(
     }
 
     private fun onStart() = screenModelScope.launch {
-        getUserFavoritesUseCase(1_379_176)
+        getUserFavoritesUseCase(userId.intValue)
             .flowOn(Dispatchers.IO)
             .collect {
                 if (!_screenState.value.favorites.containsAll(it)) {
@@ -89,28 +94,33 @@ internal class FavoritesScreenModel(
     }
 
     private fun onInit() = screenModelScope.launch {
-        getUserFavoritesUseCase(1_379_176)
+        getUserIdUseCase()
             .flowOn(Dispatchers.IO)
-            .onStart {
-                _screenState.emit(
-                    _screenState.value.copy(
-                        isLoading = true
-                    )
-                )
-            }
-            .onCompletion {
-                _screenState.emit(
-                    _screenState.value.copy(
-                        isLoading = false
-                    )
-                )
-            }
-            .collect {
-                _screenState.emit(
-                    _screenState.value.copy(
-                        favorites = it.toPersistentList()
-                    )
-                )
+            .collect { id ->
+                userId.intValue = id ?: 0
+                getUserFavoritesUseCase(userId.intValue)
+                    .flowOn(Dispatchers.IO)
+                    .onStart {
+                        _screenState.emit(
+                            _screenState.value.copy(
+                                isLoading = true
+                            )
+                        )
+                    }
+                    .onCompletion {
+                        _screenState.emit(
+                            _screenState.value.copy(
+                                isLoading = false
+                            )
+                        )
+                    }
+                    .collect {
+                        _screenState.emit(
+                            _screenState.value.copy(
+                                favorites = it.toPersistentList()
+                            )
+                        )
+                    }
             }
     }
 

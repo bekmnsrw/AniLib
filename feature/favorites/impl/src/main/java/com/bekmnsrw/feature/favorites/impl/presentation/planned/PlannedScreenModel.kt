@@ -1,6 +1,7 @@
 package com.bekmnsrw.feature.favorites.impl.presentation.planned
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import cafe.adriel.voyager.core.model.ScreenModel
@@ -14,8 +15,15 @@ import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.favorites.impl.FavoritesConstants.ERROR_MESSAGE
 import com.bekmnsrw.feature.favorites.impl.FavoritesConstants.WAS_ADDED_TO_CATEGORY
 import com.bekmnsrw.feature.favorites.impl.FavoritesConstants.WAS_REMOVED_FROM_MY_LIST
-import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenAction.*
-import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.*
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenAction.NavigateDetails
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenAction.ShowSnackbar
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.OnBottomSheetDismissRequest
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.OnChangeCategoryClick
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.OnDialogDismissRequest
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.OnInit
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.OnItemClick
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.OnLongPress
+import com.bekmnsrw.feature.favorites.impl.presentation.planned.PlannedScreenModel.PlannedScreenEvent.OnRadioButtonClick
 import com.bekmnsrw.feature.home.api.usecase.DeleteUserRatesUseCase
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
@@ -38,21 +46,7 @@ internal class PlannedScreenModel(
     private val deleteUserRatesUseCase: DeleteUserRatesUseCase
 ) : ScreenModel {
 
-//    private val userId by lazy { getId() }
-//
-//    private fun getId(): Int {
-//        var id: Int? = null
-//
-//        screenModelScope.launch {
-//            id = getUserIdUseCase()
-//                .flowOn(Dispatchers.IO)
-//                .first()
-//        }
-//
-//        println()
-//
-//        return id ?: 0
-//    }
+    private val userId by lazy { mutableIntStateOf(0) }
 
     private val _screenState = MutableStateFlow(PlannedScreenState())
     val screenState: StateFlow<PlannedScreenState> = _screenState.asStateFlow()
@@ -60,7 +54,8 @@ internal class PlannedScreenModel(
     private val _screenAction = MutableSharedFlow<PlannedScreenAction?>()
     val screenAction: SharedFlow<PlannedScreenAction?> = _screenAction.asSharedFlow()
 
-    private val _planned: MutableStateFlow<PagingData<UserRates>> = MutableStateFlow(PagingData.empty())
+    private val _planned: MutableStateFlow<PagingData<UserRates>> =
+        MutableStateFlow(PagingData.empty())
     val planned: StateFlow<PagingData<UserRates>> = _planned.asStateFlow()
 
     init {
@@ -104,12 +99,15 @@ internal class PlannedScreenModel(
     }
 
     private fun onInit() = screenModelScope.launch {
-//        userId?.let {
-            favoritesRepository.getPlannedPaged(1_379_176, UserRatesEnum.PLANNED.key)
-                .flowOn(Dispatchers.IO)
-                .cachedIn(screenModelScope)
-                .collect { data -> _planned.value = data }
-//        }
+        getUserIdUseCase()
+            .flowOn(Dispatchers.IO)
+            .collect { id ->
+                userId.intValue = id ?: 0
+                favoritesRepository.getPlannedPaged(userId.intValue, UserRatesEnum.PLANNED.key)
+                    .flowOn(Dispatchers.IO)
+                    .cachedIn(screenModelScope)
+                    .collect { data -> _planned.value = data }
+            }
     }
 
     private fun onItemClick(id: Int) = screenModelScope.launch {
@@ -159,6 +157,7 @@ internal class PlannedScreenModel(
                         ShowSnackbar(message = WAS_REMOVED_FROM_MY_LIST)
                     )
                 }
+
                 else -> _screenAction.emit(
                     ShowSnackbar(message = ERROR_MESSAGE)
                 )
@@ -196,14 +195,4 @@ internal class PlannedScreenModel(
             }
         }
     }
-
-//    private val params = MutableStateFlow("planned")
-//
-//    @OptIn(ExperimentalCoroutinesApi::class)
-//    val plannedPaged =
-//         favoritesRepository.getPlannedPaged(
-//            id = 1379176,
-//            status = status
-//         )
-//    .cachedIn(screenModelScope)
 }

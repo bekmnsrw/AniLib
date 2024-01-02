@@ -9,8 +9,7 @@ import com.bekmnsrw.feature.auth.api.usecase.local.OnAuthenticationUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveLocalAccessTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveLocalRefreshTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.remote.GetRemoteAccessTokenUseCase
-import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.NavigateProfileScreen
-import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.OpenChromeCustomTabs
+import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.*
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent.OnAuthenticateButtonClicked
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow

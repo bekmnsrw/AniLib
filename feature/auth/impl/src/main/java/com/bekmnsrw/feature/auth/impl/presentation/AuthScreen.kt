@@ -26,10 +26,10 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction
-import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.NavigateProfileScreen
-import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.OpenChromeCustomTabs
+import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.*
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent.OnAuthenticateButtonClicked
+import org.koin.androidx.compose.getKoin
 
 internal class AuthScreen : Screen {
 

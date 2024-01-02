@@ -1,6 +1,7 @@
 package com.bekmnsrw.feature.favorites.impl.presentation.completed
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import cafe.adriel.voyager.core.model.ScreenModel
@@ -37,6 +38,8 @@ internal class CompletedScreenModel(
     private val updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
     private val deleteUserRatesUseCase: DeleteUserRatesUseCase
 ) : ScreenModel {
+
+    private val userId by lazy { mutableIntStateOf(0) }
 
     private val _screenState = MutableStateFlow(CompletedScreenState())
     val screenState: StateFlow<CompletedScreenState> = _screenState.asStateFlow()
@@ -89,10 +92,15 @@ internal class CompletedScreenModel(
     }
 
     private fun onInit() = screenModelScope.launch {
-        favoritesRepository.getPlannedPaged(1_379_176, UserRatesEnum.COMPLETED.key)
+        getUserIdUseCase()
             .flowOn(Dispatchers.IO)
-            .cachedIn(screenModelScope)
-            .collect { data -> _completed.value = data }
+            .collect { id ->
+                userId.intValue = id ?: 0
+                favoritesRepository.getPlannedPaged(userId.intValue, UserRatesEnum.COMPLETED.key)
+                    .flowOn(Dispatchers.IO)
+                    .cachedIn(screenModelScope)
+                    .collect { data -> _completed.value = data }
+            }
     }
 
     private fun onItemClick(id: Int) = screenModelScope.launch {

@@ -37,6 +37,7 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:designsystem"))
     implementation(project(":feature:auth:impl"))
+    implementation(project(":feature:auth:api"))
     implementation(project(":feature:favorites:api"))
 
     implementation(libs.koin)

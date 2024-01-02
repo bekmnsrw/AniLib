@@ -29,6 +29,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,12 +39,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import cafe.adriel.voyager.core.registry.ScreenRegistry
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
+import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.core.widget.AniLibModalBottomSheet
@@ -50,6 +58,9 @@ import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.impl.R
 import com.bekmnsrw.feature.favorites.impl.presentation.TabItem
+import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabScreenModel.*
+import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabScreenModel.FavoritesTabScreenAction
+import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabScreenModel.FavoritesTabScreenAction.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -75,12 +86,35 @@ internal class FavoritesTabsContainer : Screen {
     @OptIn(ExperimentalPagerApi::class)
     @Composable
     override fun Content() {
+        val screenModel = getScreenModel<FavoritesTabScreenModel>()
+        val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
+
         val pagerState = rememberPagerState()
 
         FavoritesScreenContent(
             tabs = tabs,
             pagerState = pagerState
         )
+
+        FavoritesScreenActions(screenAction = screenAction)
+    }
+}
+
+@Composable
+private fun FavoritesScreenActions(screenAction: FavoritesTabScreenAction?) {
+    val navigator = LocalNavigator.currentOrThrow
+
+    LaunchedEffect(screenAction) {
+        when (screenAction) {
+            null -> Unit
+
+            NavigateAuthScreen -> {
+                val authScreen = ScreenRegistry.get(
+                    provider = SharedScreen.AuthScreen
+                )
+                navigator.replaceAll(authScreen)
+            }
+        }
     }
 }
 
