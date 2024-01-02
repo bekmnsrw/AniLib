@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.firebaseCrashlytics)
 }
 
 android {
@@ -19,6 +20,11 @@ android {
 }
 
 dependencies {
+
+    api(platform(libs.firebase.bom))
+    api(libs.firebase.analytics)
+    api(libs.firebase.crashlytics)
+    api(libs.firebase.perf)
 
     api(libs.datastore.preferences)
 

@@ -26,7 +26,9 @@ dependencies {
     implementation(project(":core:navigation"))
 
     api(platform(libs.firebase.bom))
+    api(libs.firebase.analytics)
     api(libs.firebase.crashlytics)
+    api(libs.firebase.perf)
 
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)

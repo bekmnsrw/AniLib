@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.firebaseService)
     alias(libs.plugins.firebaseAppDistribution)
     alias(libs.plugins.firebaseCrashlytics)
+    alias(libs.plugins.firebasePerf)
 }
 
 android {
@@ -73,6 +74,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.perf)
 
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.kotlinx.coroutines.android)

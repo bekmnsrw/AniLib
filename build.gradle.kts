@@ -10,5 +10,6 @@ plugins {
     alias(libs.plugins.firebaseService) apply false
     alias(libs.plugins.firebaseAppDistribution) apply false
     alias(libs.plugins.firebaseCrashlytics) apply false
+    alias(libs.plugins.firebasePerf) apply false
 }
 true // Needed to make the Suppress annotation work for the plugins block
