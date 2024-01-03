@@ -39,25 +39,20 @@ dependencies {
     implementation(project(":core:network"))
 
     implementation(libs.kotlinx.collections.immutable)
-
     implementation(libs.androidx.lifecycle.runtime.ktx)
-
     implementation(libs.pager)
     implementation(libs.pager.indicators)
-
     implementation(libs.koin)
     implementation(libs.koin.compose)
-
-    implementation(libs.voyager.tab)
-    implementation(libs.voyager.transitions)
-    implementation(libs.voyager.koin)
-
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.lifecycle.compose)
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.juint.kotlin)
+    testImplementation(libs.coroutines.test)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -34,10 +34,8 @@ dependencies {
     api(libs.voyager.transitions)
 
     implementation(libs.androidx.core.splashscreen)
-
     implementation(libs.compose)
     implementation(libs.androidx.compose.material)
-
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
