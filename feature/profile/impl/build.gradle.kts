@@ -31,7 +31,6 @@ dependencies {
     
     implementation(project(":feature:auth:api"))
     implementation(project(":feature:auth:impl"))
-
     implementation(project(":core:widget"))
     implementation(project(":core:db"))
     implementation(project(":core:utils"))
@@ -40,21 +39,19 @@ dependencies {
 
     implementation(libs.koin)
     implementation(libs.koin.compose)
-
     implementation(libs.androidx.lifecycle.compose)
-
     implementation(libs.kotlinx.collections.immutable)
-
     implementation(libs.compose.charts)
-
-    implementation(libs.voyager.tab)
-    implementation(libs.voyager.koin)
-
+//    implementation(libs.voyager.tab)
+//    implementation(libs.voyager.koin)
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.juint.kotlin)
+    testImplementation(libs.coroutines.test)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)

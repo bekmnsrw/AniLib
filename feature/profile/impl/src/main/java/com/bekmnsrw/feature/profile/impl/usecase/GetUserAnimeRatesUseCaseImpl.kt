@@ -10,8 +10,8 @@ class GetUserAnimeRatesUseCaseImpl(
 ) : GetUserAnimeRatesUseCase {
 
     override suspend fun invoke(
-        id: Int)
-    : Flow<List<AnimeRates>> = profileRepository.getUserAnimeRates(
+        id: Int
+    ) : Flow<List<AnimeRates>> = profileRepository.getUserAnimeRates(
         id = id
     )
 }
