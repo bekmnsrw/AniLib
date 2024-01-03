@@ -39,7 +39,7 @@ internal class AuthScreen : Screen {
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
 
         AuthScreenContent(eventHandler = screenModel::eventHandler)
-        AuthScreenActions(screenAction = screenAction,)
+        AuthScreenActions(screenAction = screenAction)
     }
 }
 

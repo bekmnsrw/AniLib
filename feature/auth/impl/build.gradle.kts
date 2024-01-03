@@ -35,15 +35,15 @@ dependencies {
 
     implementation(libs.compose)
     implementation(libs.material3)
-
     implementation(libs.androidx.lifecycle.compose)
-
     implementation(libs.koin)
     implementation(libs.koin.compose)
-
     implementation(libs.androidx.browser)
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.juint.kotlin)
+    testImplementation(libs.coroutines.test)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)

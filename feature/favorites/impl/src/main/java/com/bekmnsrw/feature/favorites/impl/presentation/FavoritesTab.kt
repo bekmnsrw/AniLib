@@ -22,8 +22,9 @@ object FavoritesTab : Tab {
 
     @Composable
     override fun Content() {
-        Navigator(screen = FavoritesTabsContainer()) { navigator ->
-            SlideTransition(navigator = navigator)
-        }
+        Navigator(screen = FavoritesTabsContainer())
+//        { navigator ->
+//            SlideTransition(navigator = navigator)
+//        }
     }
 }

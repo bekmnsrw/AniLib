@@ -22,8 +22,9 @@ object ProfileTab : Tab {
 
     @Composable
     override fun Content() {
-        Navigator(screen = ProfileScreen()) { navigator ->
-            SlideTransition(navigator = navigator)
-        }
+        Navigator(screen = ProfileScreen())
+//        { navigator ->
+//            SlideTransition(navigator = navigator)
+//        }
     }
 }

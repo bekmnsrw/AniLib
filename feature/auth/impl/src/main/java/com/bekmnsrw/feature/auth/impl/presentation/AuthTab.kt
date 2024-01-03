@@ -21,5 +21,8 @@ object AuthTab : Tab {
     @Composable
     override fun Content() {
         Navigator(screen = AuthScreen())
+//        {
+//            it.items.forEach { item -> println(item.key) }
+//        }
     }
 }
