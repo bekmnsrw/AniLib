@@ -1,10 +1,7 @@
 package com.bekmnsrw.feature.home.impl.usecase
 
-import androidx.room.util.query
 import com.bekmnsrw.feature.home.api.model.SearchRequest
-import com.bekmnsrw.feature.home.api.model.UserRates
 import com.bekmnsrw.feature.home.api.repository.HomeRepository
-import com.bekmnsrw.feature.home.api.usecase.CreateUserRatesUseCase
 import com.bekmnsrw.feature.home.api.usecase.GetAllSearchRequestsUseCase
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -14,13 +11,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
-
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.koin.core.qualifier.qualifier
-import java.net.UnknownHostException
-import kotlin.test.assertFailsWith
 
 internal class GetAllSearchRequestsUseCaseImplTest {
 

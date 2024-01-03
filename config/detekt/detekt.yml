@@ -101,6 +101,8 @@ complexity:
   LongMethod:
     active: true
     threshold: 55
+    ignoreAnnotated:
+      - Test
   LongParameterList:
     active: true
     functionThreshold: 20
@@ -298,6 +300,8 @@ naming:
   FunctionMaxLength:
     active: true
     maximumFunctionNameLength: 40
+    ignoreAnnotated:
+      - Test
   FunctionMinLength:
     active: true
     minimumFunctionNameLength: 3
