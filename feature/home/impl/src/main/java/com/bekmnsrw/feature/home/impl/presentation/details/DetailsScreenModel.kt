@@ -2,11 +2,13 @@ package com.bekmnsrw.feature.home.impl.presentation.details
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.bekmnsrw.core.utils.formatStatusString
 import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
+import com.bekmnsrw.feature.auth.api.usecase.local.IsAuthenticatedUseCase
 import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
@@ -47,10 +49,12 @@ internal class DetailsScreenModel(
     private val createUserRatesUseCase: CreateUserRatesUseCase,
     private val updateAnimeStatusUseCase: UpdateAnimeStatusUseCase,
     private val deleteUserRatesUseCase: DeleteUserRatesUseCase,
-    private val getUserIdUseCase: GetUserIdUseCase
+    private val getUserIdUseCase: GetUserIdUseCase,
+    private val isAuthenticatedUseCase: IsAuthenticatedUseCase
 ) : ScreenModel {
 
     private val userId by lazy { mutableIntStateOf(0) }
+    private val isAuthenticated by lazy { mutableStateOf<Boolean?>(null) }
 
     private companion object {
         const val WAS_ADDED_TO_FAVORITES = "was added to favorites"
@@ -120,47 +124,70 @@ internal class DetailsScreenModel(
         eventHandler(OnInit)
     }
 
+    private suspend fun getUserId() = getUserIdUseCase()
+        .flowOn(Dispatchers.IO)
+        .collect { userId.intValue = it ?: 0 }
+
+    private suspend fun isAuthenticated() = isAuthenticatedUseCase()
+        .flowOn(Dispatchers.IO)
+        .collect { isAuthenticated.value = it }
+
+    private suspend fun getAnime() = getAnimeUseCase(id = animeId)
+        .flowOn(Dispatchers.IO)
+//        .onStart {
+//            _screenState.emit(
+//                _screenState.value.copy(
+//                    isLoading = true
+//                )
+//            )
+//        }
+//        .onCompletion {
+//            _screenState.emit(
+//                _screenState.value.copy(
+//                    isLoading = false
+//                )
+//            )
+//        }
+        .collect {
+            _screenState.emit(
+                _screenState.value.copy(
+                    animeDetails = it,
+                    isFavoured = it.favoured
+                )
+            )
+        }
+
+    private suspend fun getSimilarAnime() = getSimilarAnimeListUseCase(
+        id = animeId,
+        limit = REQUEST_LIMIT
+    )
+        .flowOn(Dispatchers.IO)
+        .collect {
+            _screenState.emit(
+                _screenState.value.copy(
+                    similarAnimeList = it.toPersistentList()
+                )
+            )
+        }
+
     private fun onInit() = screenModelScope.launch {
-        getUserIdUseCase()
-            .flowOn(Dispatchers.IO)
-            .collect { id ->
-                userId.intValue = id ?: 0
-            }
+        getUserId()
+        isAuthenticated()
 
-        getAnimeUseCase(id = animeId)
-            .flowOn(Dispatchers.IO)
-            .onStart {
-                _screenState.emit(
-                    _screenState.value.copy(
-                        isLoading = true
-                    )
-                )
-            }
-            .onCompletion {
-                _screenState.emit(
-                    _screenState.value.copy(
-                        isLoading = false
-                    )
-                )
-            }
-            .collect {
-                _screenState.emit(
-                    _screenState.value.copy(
-                        animeDetails = it,
-                        isFavoured = it.favoured
-                    )
-                )
-            }
+        _screenState.emit(
+            _screenState.value.copy(
+                isLoading = true
+            )
+        )
 
-        getSimilarAnimeListUseCase(id = animeId, limit = REQUEST_LIMIT)
-            .flowOn(Dispatchers.IO)
-            .collect {
-                _screenState.emit(
-                    _screenState.value.copy(
-                        similarAnimeList = it.toPersistentList()
-                    )
-                )
-            }
+        getAnime()
+        getSimilarAnime()
+
+        _screenState.emit(
+            _screenState.value.copy(
+                isLoading = false
+            )
+        )
     }
 
     private fun checkIfAnimeIsNotFavoured() = screenModelScope.launch {
@@ -180,49 +207,51 @@ internal class DetailsScreenModel(
     }
 
     private fun onFavouredClick() = screenModelScope.launch {
-        val isFavoured = _screenState.value.isFavoured
-        val name = _screenState.value.animeDetails?.name
+        if (isAuthenticated.value == true) {
+            val isFavoured = _screenState.value.isFavoured
+            val name = _screenState.value.animeDetails?.name
 
-        when (isFavoured) {
-            true -> removeFromFavoritesUseCase(type = TYPE, id = animeId)
-                .flowOn(Dispatchers.IO)
-                .collect { response ->
-                    when (response.success) {
-                        true -> {
-                            _screenState.emit(
-                                _screenState.value.copy(
-                                    isFavoured = false
+            when (isFavoured) {
+                true -> removeFromFavoritesUseCase(type = TYPE, id = animeId)
+                    .flowOn(Dispatchers.IO)
+                    .collect { response ->
+                        when (response.success) {
+                            true -> {
+                                _screenState.emit(
+                                    _screenState.value.copy(
+                                        isFavoured = false
+                                    )
                                 )
-                            )
-                            _screenAction.emit(
+                                _screenAction.emit(
+                                    ShowSnackbar(
+                                        message = "'$name' $WAS_REMOVED_FROM_FAVORITES"
+                                    )
+                                )
+                            }
+
+                            false -> _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
+                        }
+                    }
+
+                false -> addToFavoritesUseCase(type = TYPE, id = animeId)
+                    .flowOn(Dispatchers.IO)
+                    .collect { response ->
+                        when (response.success) {
+                            true -> {
+                                _screenState.emit(
+                                    _screenState.value.copy(
+                                        isFavoured = true
+                                    )
+                                )
                                 ShowSnackbar(
-                                    message = "'$name' $WAS_REMOVED_FROM_FAVORITES"
+                                    message = "'$name' $WAS_ADDED_TO_FAVORITES"
                                 )
-                            )
+                            }
+
+                            false -> _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
                         }
-
-                        false -> _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
                     }
-                }
-
-            false -> addToFavoritesUseCase(type = TYPE, id = animeId)
-                .flowOn(Dispatchers.IO)
-                .collect { response ->
-                    when (response.success) {
-                        true -> {
-                            _screenState.emit(
-                                _screenState.value.copy(
-                                    isFavoured = true
-                                )
-                            )
-                            ShowSnackbar(
-                                message = "'$name' $WAS_ADDED_TO_FAVORITES"
-                            )
-                        }
-
-                        false -> _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
-                    }
-                }
+            }
         }
     }
 
