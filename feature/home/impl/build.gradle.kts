@@ -42,16 +42,16 @@ dependencies {
 
     implementation(libs.koin)
     implementation(libs.koin.compose)
-
-    implementation(libs.voyager.tab)
-    implementation(libs.voyager.transitions)
-    implementation(libs.voyager.koin)
-
+//    implementation(libs.voyager.tab)
+//    implementation(libs.voyager.transitions)
+//    implementation(libs.voyager.koin)
     implementation(libs.kotlinx.collections.immutable)
-
     implementation(libs.androidx.lifecycle.compose)
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.juint.kotlin)
+    testImplementation(libs.coroutines.test)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
