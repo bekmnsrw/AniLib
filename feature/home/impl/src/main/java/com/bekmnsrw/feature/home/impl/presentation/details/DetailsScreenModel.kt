@@ -112,7 +112,7 @@ internal class DetailsScreenModel(
     fun eventHandler(event: DetailsScreenEvent) {
         when (event) {
             OnInit -> onInit()
-            OnStart -> checkIfAnimeIsNotFavoured()
+            OnStart -> checkIfAnimeIsNoMoreFavoured()
             OnArrowBackClick -> onArrowBacClick()
             is OnFavouredClick -> onFavouredClick()
             OnInfoIconClick -> onInfoButtonClick()
@@ -205,7 +205,7 @@ internal class DetailsScreenModel(
             }
     }
 
-    private fun checkIfAnimeIsNotFavoured() = screenModelScope.launch {
+    private fun checkIfAnimeIsNoMoreFavoured() = screenModelScope.launch {
         getAnimeUseCase(id = animeId)
             .flowOn(Dispatchers.IO)
             .collect {
@@ -257,8 +257,10 @@ internal class DetailsScreenModel(
                                     isFavoured = true
                                 )
                             )
-                            ShowSnackbar(
-                                message = "'$name' $WAS_ADDED_TO_FAVORITES"
+                            _screenAction.emit(
+                                ShowSnackbar(
+                                    message = "'$name' $WAS_ADDED_TO_FAVORITES"
+                                )
                             )
                         }
 
