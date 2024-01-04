@@ -2,6 +2,9 @@ package com.bekmnsrw.feature.favorites.impl.presentation.completed
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarDuration
@@ -43,7 +46,7 @@ import kotlinx.coroutines.launch
 
 internal class CompletedScreen : Screen {
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<CompletedScreenModel>()
@@ -51,12 +54,18 @@ internal class CompletedScreen : Screen {
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
         val completedAnimePaged = screenModel.completed.collectAsLazyPagingItems()
 
+        val pullRefreshState = rememberPullRefreshState(
+            refreshing = completedAnimePaged.loadState.refresh == LoadState.Loading,
+            onRefresh = { completedAnimePaged.refresh() }
+        )
+
         val modalBottomSheetState = rememberModalBottomSheetState()
         val snackbarHostState = remember { SnackbarHostState() }
 
         with(screenModel) {
             CompletedScreenContent(
                 completedAnimePaged = completedAnimePaged,
+                pullRefreshState = pullRefreshState,
                 snackbarHostState = snackbarHostState,
                 modalBottomSheetState = modalBottomSheetState,
                 shouldShowModalBottomSheet = screenState.shouldShowBottomSheet,
@@ -111,9 +120,10 @@ private fun CompletedScreenActions(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 private fun CompletedScreenContent(
+    pullRefreshState: PullRefreshState,
     completedAnimePaged: LazyPagingItems<UserRates>,
     snackbarHostState: SnackbarHostState,
     modalBottomSheetState: SheetState,
@@ -125,14 +135,15 @@ private fun CompletedScreenContent(
     onItemClick: (Int) -> Unit,
     onLongClick: (Int) -> Unit,
     onChangeCategoryClick: () -> Unit,
-    onRadioButtonClick: (String, Int?) -> Unit
+    onRadioButtonClick: (String, Int?) -> Unit,
 ) {
     TabAnimeList(
+        pullRefreshState = pullRefreshState,
         userRatesPaged = completedAnimePaged,
         status = UserRatesEnum.COMPLETED.key,
-        isLoading = completedAnimePaged.loadState.refresh == LoadState.Loading,
         onItemClick = onItemClick,
-        onLongClick = onLongClick
+        onLongClick = onLongClick,
+        refreshing = completedAnimePaged.loadState.refresh == LoadState.Loading
     )
 
     if (shouldShowModalBottomSheet) {

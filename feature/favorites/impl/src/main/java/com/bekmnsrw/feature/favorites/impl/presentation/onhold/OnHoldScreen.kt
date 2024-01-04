@@ -2,6 +2,9 @@ package com.bekmnsrw.feature.favorites.impl.presentation.onhold
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarDuration
@@ -41,7 +44,7 @@ import kotlinx.coroutines.launch
 
 internal class OnHoldScreen : Screen {
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<OnHoldScreenModel>()
@@ -49,11 +52,17 @@ internal class OnHoldScreen : Screen {
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
         val onHoldAnimePaged = screenModel.onHold.collectAsLazyPagingItems()
 
+        val pullRefreshState = rememberPullRefreshState(
+            refreshing = onHoldAnimePaged.loadState.refresh == LoadState.Loading,
+            onRefresh = { onHoldAnimePaged.refresh() }
+        )
+
         val modalBottomSheetState = rememberModalBottomSheetState()
         val snackbarHostState = remember { SnackbarHostState() }
 
         with(screenModel) {
             OnHoldScreenContent(
+                pullRefreshState = pullRefreshState,
                 onHoldAnimePaged = onHoldAnimePaged,
                 snackbarHostState = snackbarHostState,
                 modalBottomSheetState = modalBottomSheetState,
@@ -109,9 +118,10 @@ private fun OnHoldScreenActions(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 private fun OnHoldScreenContent(
+    pullRefreshState: PullRefreshState,
     onHoldAnimePaged: LazyPagingItems<UserRates>,
     snackbarHostState: SnackbarHostState,
     modalBottomSheetState: SheetState,
@@ -126,11 +136,12 @@ private fun OnHoldScreenContent(
     onRadioButtonClick: (String, Int?) -> Unit
 ) {
     TabAnimeList(
+        pullRefreshState = pullRefreshState,
         userRatesPaged = onHoldAnimePaged,
         status = UserRatesEnum.PLANNED.key,
         onItemClick = onItemClick,
-        isLoading = onHoldAnimePaged.loadState.refresh == LoadState.Loading,
-        onLongClick = onLongClick
+        onLongClick = onLongClick,
+        refreshing = onHoldAnimePaged.loadState.refresh == LoadState.Loading
     )
 
     if (shouldShowModalBottomSheet) {

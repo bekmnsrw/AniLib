@@ -15,8 +15,15 @@ import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.favorites.impl.FavoritesConstants.ERROR_MESSAGE
 import com.bekmnsrw.feature.favorites.impl.FavoritesConstants.WAS_ADDED_TO_CATEGORY
 import com.bekmnsrw.feature.favorites.impl.FavoritesConstants.WAS_REMOVED_FROM_MY_LIST
-import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel.WatchingScreenAction.*
-import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel.WatchingScreenEvent.*
+import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel.WatchingScreenAction.NavigateDetails
+import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel.WatchingScreenAction.ShowSnackbar
+import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel.WatchingScreenEvent.OnBottomSheetDismissRequest
+import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel.WatchingScreenEvent.OnChangeCategoryClick
+import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel.WatchingScreenEvent.OnDialogDismissRequest
+import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel.WatchingScreenEvent.OnInit
+import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel.WatchingScreenEvent.OnItemClick
+import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel.WatchingScreenEvent.OnLongPress
+import com.bekmnsrw.feature.favorites.impl.presentation.watching.WatchingScreenModel.WatchingScreenEvent.OnRadioButtonClick
 import com.bekmnsrw.feature.home.api.usecase.DeleteUserRatesUseCase
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
@@ -95,10 +102,10 @@ internal class WatchingScreenModel(
             .flowOn(Dispatchers.IO)
             .collect { id ->
                 userId.intValue = id ?: 0
-                favoritesRepository.getPlannedPaged(userId.intValue, UserRatesEnum.WATCHING.key)
+                favoritesRepository.getAnimePagedByStatus(userId.intValue, UserRatesEnum.WATCHING.key)
                     .flowOn(Dispatchers.IO)
                     .cachedIn(screenModelScope)
-                    .collect { data -> _watching.value = data }
+                    .collect { _watching.value = it }
             }
     }
 

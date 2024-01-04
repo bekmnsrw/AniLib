@@ -103,7 +103,7 @@ internal class PlannedScreenModel(
             .flowOn(Dispatchers.IO)
             .collect { id ->
                 userId.intValue = id ?: 0
-                favoritesRepository.getPlannedPaged(userId.intValue, UserRatesEnum.PLANNED.key)
+                favoritesRepository.getAnimePagedByStatus(userId.intValue, UserRatesEnum.PLANNED.key)
                     .flowOn(Dispatchers.IO)
                     .cachedIn(screenModelScope)
                     .collect { data -> _planned.value = data }

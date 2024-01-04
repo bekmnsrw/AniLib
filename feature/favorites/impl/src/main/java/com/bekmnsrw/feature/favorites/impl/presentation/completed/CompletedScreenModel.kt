@@ -96,7 +96,7 @@ internal class CompletedScreenModel(
             .flowOn(Dispatchers.IO)
             .collect { id ->
                 userId.intValue = id ?: 0
-                favoritesRepository.getPlannedPaged(userId.intValue, UserRatesEnum.COMPLETED.key)
+                favoritesRepository.getAnimePagedByStatus(userId.intValue, UserRatesEnum.COMPLETED.key)
                     .flowOn(Dispatchers.IO)
                     .cachedIn(screenModelScope)
                     .collect { data -> _completed.value = data }

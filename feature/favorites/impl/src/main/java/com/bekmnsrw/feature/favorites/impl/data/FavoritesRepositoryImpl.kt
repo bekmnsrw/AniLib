@@ -1,7 +1,7 @@
 package com.bekmnsrw.feature.favorites.impl.data
 
 import androidx.paging.PagingData
-import com.bekmnsrw.core.network.GenericPagingSource
+import com.bekmnsrw.core.network.createPager
 import com.bekmnsrw.feature.favorites.api.model.FavoriteAnime
 import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.api.repository.FavoritesRepository
@@ -12,25 +12,19 @@ import kotlinx.coroutines.flow.flow
 
 internal class FavoritesRepositoryImpl(
     private val favoritesApi: FavoritesApi
-) : FavoritesRepository, GenericPagingSource<UserRates>() {
+) : FavoritesRepository {
 
-    override suspend fun getPlannedPaged(
+    override suspend fun getAnimePagedByStatus(
         id: Int,
         status: String
-    ): Flow<PagingData<UserRates>> {
-        return execute { currentPage, limit ->
-            flow {
-                emit(
-                    favoritesApi.getPlannedPaged(
-                        id = id,
-                        page = currentPage,
-                        limit = limit,
-                        status = status
-                    ).toUserRateList()
-                )
-            }
-        }
-    }
+    ): Flow<PagingData<UserRates>> = createPager { page, limit ->
+        favoritesApi.getAnimePagedByStatus(
+            id = id,
+            page = page,
+            limit = limit,
+            status = status
+        ).toUserRateList()
+    }.flow
 
     override suspend fun getUserFavorites(id: Int): Flow<List<FavoriteAnime>> = flow {
         emit(

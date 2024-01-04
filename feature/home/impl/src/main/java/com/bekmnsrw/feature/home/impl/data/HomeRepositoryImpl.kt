@@ -2,10 +2,10 @@ package com.bekmnsrw.feature.home.impl.data
 
 import androidx.paging.PagingData
 import com.bekmnsrw.core.db.AppDatabase
-import com.bekmnsrw.core.network.GenericPagingSource
-import com.bekmnsrw.feature.home.api.model.FavoritesActionResult
+import com.bekmnsrw.core.network.createPager
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
+import com.bekmnsrw.feature.home.api.model.FavoritesActionResult
 import com.bekmnsrw.feature.home.api.model.SearchRequest
 import com.bekmnsrw.feature.home.api.model.UserRates
 import com.bekmnsrw.feature.home.api.repository.HomeRepository
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.map
 internal class HomeRepositoryImpl(
     private val homeApi: HomeApi,
     private val appDatabase: AppDatabase
-) : HomeRepository, GenericPagingSource<Anime>() {
+) : HomeRepository {
 
     private companion object {
         const val TARGET_TYPE = "Anime"
@@ -34,18 +34,14 @@ internal class HomeRepositoryImpl(
     override suspend fun getAnimePaged(
         status: String,
         order: String
-    ): Flow<PagingData<Anime>> = execute { currentPage, limit ->
-        flow {
-            emit(
-                homeApi.getAnimePaged(
-                    page = currentPage,
-                    limit = limit,
-                    status = status,
-                    order = order
-                ).toAnimeList()
-            )
-        }
-    }
+    ): Flow<PagingData<Anime>> = createPager { page, limit ->
+        homeApi.getAnimePaged(
+            page = page,
+            status = status,
+            order = order,
+            limit = limit
+        ).toAnimeList()
+    }.flow
 
     override suspend fun getAnimeList(
         limit: Int,
@@ -133,26 +129,13 @@ internal class HomeRepositoryImpl(
     override suspend fun searchAnime(
         query: String,
         status: String?
-    ): Flow<PagingData<Anime>> = execute { currentPage, limit ->
-        flow {
-            emit(
-                if (status == null) {
-                    homeApi.searchAnime(
-                        page = currentPage,
-                        limit = limit,
-                        query = query
-                    ).toAnimeList()
-                } else {
-                    homeApi.searchAnimeWithStatus(
-                        page = currentPage,
-                        limit = limit,
-                        query = query,
-                        status = status
-                    ).toAnimeList()
-                }
-            )
-        }
-    }
+    ): Flow<PagingData<Anime>> = createPager { page, limit ->
+        homeApi.searchAnime(
+            page = page,
+            limit = limit,
+            query = query
+        ).toAnimeList()
+    }.flow
 
     override suspend fun saveSearchRequest(searchRequest: SearchRequest) = appDatabase
         .searchRequestDao()

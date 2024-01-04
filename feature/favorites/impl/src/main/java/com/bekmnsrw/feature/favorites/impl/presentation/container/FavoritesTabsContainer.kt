@@ -1,5 +1,8 @@
 package com.bekmnsrw.feature.favorites.impl.presentation.container
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -17,9 +20,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRowDefaults
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,16 +58,15 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.core.widget.AniLibCircularProgressBar
+import com.bekmnsrw.core.utils.formatStatusString
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.core.widget.AniLibModalBottomSheet
 import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.impl.R
 import com.bekmnsrw.feature.favorites.impl.presentation.TabItem
-import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabScreenModel.*
 import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabScreenModel.FavoritesTabScreenAction
-import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabScreenModel.FavoritesTabScreenAction.*
+import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabScreenModel.FavoritesTabScreenAction.NavigateAuthScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -184,41 +190,57 @@ private fun TabsContent(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TabAnimeList(
     userRatesPaged: LazyPagingItems<UserRates>,
     status: String,
-    isLoading: Boolean,
+    pullRefreshState: PullRefreshState,
+    refreshing: Boolean,
     onItemClick: (Int) -> Unit,
     onLongClick: (Int) -> Unit
 ) {
-    if (isLoading) {
-        AniLibCircularProgressBar(shouldShow = true)
-    } else {
-        if (userRatesPaged.itemCount == 0) {
-            EmptyListText(status = status)
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(16.dp),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 56.dp)
-            ) {
-                items(
-                    count = userRatesPaged.itemCount,
-                    key = userRatesPaged.itemKey { it.anime.id },
-                    contentType = userRatesPaged.itemContentType { "AnimePaged" }
-                ) { index ->
-                    ListItem(
-                        index = index,
-                        userRates = userRatesPaged[index],
-                        onItemClick = onItemClick,
-                        onLongClick = onLongClick
-                    )
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .pullRefresh(pullRefreshState)
+    ) {
+        AnimatedVisibility(
+            visible = !refreshing,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            if (userRatesPaged.itemCount == 0) {
+                EmptyListText(status = status)
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 56.dp)
+                ) {
+                    items(
+                        count = userRatesPaged.itemCount,
+                        key = userRatesPaged.itemKey { it.anime.id },
+                        contentType = userRatesPaged.itemContentType { "AnimePaged" }
+                    ) { index ->
+                        ListItem(
+                            index = index,
+                            userRates = userRatesPaged[index],
+                            onItemClick = onItemClick,
+                            onLongClick = onLongClick
+                        )
+                    }
                 }
             }
         }
+        PullRefreshIndicator(
+            refreshing = refreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter),
+            backgroundColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.background
+        )
     }
 }
 
@@ -353,7 +375,12 @@ fun AnimeBottomSheet(
                     imageVector = AniLibIcons.AddToList,
                     contentDescription = null
                 )
-                Text(text = stringResource(id = R.string.in_category, category))
+                Text(
+                    text = stringResource(
+                        id = R.string.in_category,
+                        "${formatStatusString(category)}"
+                    )
+                )
             }
         }
     }

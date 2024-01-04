@@ -2,6 +2,9 @@ package com.bekmnsrw.feature.favorites.impl.presentation.dropped
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarDuration
@@ -43,7 +46,7 @@ import kotlinx.coroutines.launch
 
 internal class DroppedScreen : Screen {
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<DroppedScreenModel>()
@@ -51,11 +54,17 @@ internal class DroppedScreen : Screen {
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
         val droppedAnimePaged = screenModel.dropped.collectAsLazyPagingItems()
 
+        val pullRefreshState = rememberPullRefreshState(
+            refreshing = droppedAnimePaged.loadState.refresh == LoadState.Loading,
+            onRefresh = { droppedAnimePaged.refresh() }
+        )
+
         val modalBottomSheetState = rememberModalBottomSheetState()
         val snackbarHostState = remember { SnackbarHostState() }
 
         with(screenModel) {
             DroppedScreenContent(
+                pullRefreshState = pullRefreshState,
                 droppedAnimePaged = droppedAnimePaged,
                 snackbarHostState = snackbarHostState,
                 modalBottomSheetState = modalBottomSheetState,
@@ -111,9 +120,10 @@ private fun DroppedScreenActions(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 private fun DroppedScreenContent(
+    pullRefreshState: PullRefreshState,
     droppedAnimePaged: LazyPagingItems<UserRates>,
     snackbarHostState: SnackbarHostState,
     modalBottomSheetState: SheetState,
@@ -128,11 +138,12 @@ private fun DroppedScreenContent(
     onRadioButtonClick: (String, Int?) -> Unit
 ) {
     TabAnimeList(
+        pullRefreshState = pullRefreshState,
         userRatesPaged = droppedAnimePaged,
         status = UserRatesEnum.DROPPED.key,
-        isLoading = droppedAnimePaged.loadState.refresh == LoadState.Loading,
         onItemClick = onItemClick,
-        onLongClick = onLongClick
+        onLongClick = onLongClick,
+        refreshing = droppedAnimePaged.loadState.refresh == LoadState.Loading
     )
 
     if (shouldShowModalBottomSheet) {

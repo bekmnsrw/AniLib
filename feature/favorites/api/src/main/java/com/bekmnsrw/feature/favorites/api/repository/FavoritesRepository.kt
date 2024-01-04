@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface FavoritesRepository {
 
-    suspend fun getPlannedPaged(
+    suspend fun getAnimePagedByStatus(
         id: Int,
         status: String
     ): Flow<PagingData<UserRates>>

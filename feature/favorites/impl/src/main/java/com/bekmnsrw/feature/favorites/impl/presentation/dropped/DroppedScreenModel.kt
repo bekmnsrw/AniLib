@@ -96,7 +96,7 @@ internal class DroppedScreenModel(
             .flowOn(Dispatchers.IO)
             .collect { id ->
                 userId.intValue = id ?: 0
-                favoritesRepository.getPlannedPaged(userId.intValue, UserRatesEnum.DROPPED.key)
+                favoritesRepository.getAnimePagedByStatus(userId.intValue, UserRatesEnum.DROPPED.key)
                     .flowOn(Dispatchers.IO)
                     .cachedIn(screenModelScope)
                     .collect { data -> _dropped.value = data }

@@ -2,6 +2,9 @@ package com.bekmnsrw.feature.favorites.impl.presentation.watching
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarDuration
@@ -24,9 +27,9 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.core.widget.dialog.AniLibAnimeStatusDialog
 import com.bekmnsrw.core.widget.AniLibSnackbar
 import com.bekmnsrw.core.widget.UserRatesEnum
+import com.bekmnsrw.core.widget.dialog.AniLibAnimeStatusDialog
 import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.impl.presentation.container.AnimeBottomSheet
 import com.bekmnsrw.feature.favorites.impl.presentation.container.TabAnimeList
@@ -43,7 +46,7 @@ import kotlinx.coroutines.launch
 
 internal class WatchingScreen : Screen {
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<WatchingScreenModel>()
@@ -51,12 +54,18 @@ internal class WatchingScreen : Screen {
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
         val watchingAnimePaged = screenModel.watching.collectAsLazyPagingItems()
 
+        val pullRefreshState = rememberPullRefreshState(
+            refreshing = watchingAnimePaged.loadState.refresh == LoadState.Loading,
+            onRefresh = { watchingAnimePaged.refresh() }
+        )
+
         val modalBottomSheetState = rememberModalBottomSheetState()
         val snackbarHostState = remember { SnackbarHostState() }
 
         with(screenModel) {
             WatchingScreenContent(
                 watchingAnimePaged = watchingAnimePaged,
+                pullRefreshState = pullRefreshState,
                 snackbarHostState = snackbarHostState,
                 modalBottomSheetState = modalBottomSheetState,
                 shouldShowModalBottomSheet = screenState.shouldShowBottomSheet,
@@ -111,7 +120,7 @@ private fun WatchingScreenActions(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 private fun WatchingScreenContent(
     watchingAnimePaged: LazyPagingItems<UserRates>,
@@ -125,13 +134,15 @@ private fun WatchingScreenContent(
     onItemClick: (Int) -> Unit,
     onLongClick: (Int) -> Unit,
     onChangeCategoryClick: () -> Unit,
-    onRadioButtonClick: (String, Int?) -> Unit
+    onRadioButtonClick: (String, Int?) -> Unit,
+    pullRefreshState: PullRefreshState,
 ) {
     TabAnimeList(
+        pullRefreshState = pullRefreshState,
         userRatesPaged = watchingAnimePaged,
         status = UserRatesEnum.WATCHING.key,
         onItemClick = onItemClick,
-        isLoading = watchingAnimePaged.loadState.refresh == LoadState.Loading,
+        refreshing = watchingAnimePaged.loadState.refresh == LoadState.Loading,
         onLongClick = onLongClick
     )
 

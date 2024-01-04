@@ -2,6 +2,9 @@ package com.bekmnsrw.feature.favorites.impl.presentation.planned
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarDuration
@@ -43,7 +46,7 @@ import kotlinx.coroutines.launch
 
 internal class PlannedScreen : Screen {
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<PlannedScreenModel>()
@@ -51,11 +54,17 @@ internal class PlannedScreen : Screen {
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
         val plannedAnimePaged = screenModel.planned.collectAsLazyPagingItems()
 
+        val pullRefreshState = rememberPullRefreshState(
+            refreshing = plannedAnimePaged.loadState.refresh == LoadState.Loading,
+            onRefresh = { plannedAnimePaged.refresh() }
+        )
+
         val modalBottomSheetState = rememberModalBottomSheetState()
         val snackbarHostState = remember { SnackbarHostState() }
 
         with(screenModel) {
             PlannedToWatchScreenContent(
+                pullRefreshState = pullRefreshState,
                 plannedAnimePaged = plannedAnimePaged,
                 snackbarHostState = snackbarHostState,
                 modalBottomSheetState = modalBottomSheetState,
@@ -111,9 +120,10 @@ private fun PlannedScreenActions(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 private fun PlannedToWatchScreenContent(
+    pullRefreshState: PullRefreshState,
     plannedAnimePaged: LazyPagingItems<UserRates>,
     snackbarHostState: SnackbarHostState,
     modalBottomSheetState: SheetState,
@@ -128,11 +138,12 @@ private fun PlannedToWatchScreenContent(
     onRadioButtonClick: (String, Int?) -> Unit
 ) {
     TabAnimeList(
+        pullRefreshState = pullRefreshState,
         userRatesPaged = plannedAnimePaged,
         status = UserRatesEnum.PLANNED.key,
         onItemClick = onItemClick,
-        isLoading = plannedAnimePaged.loadState.refresh == LoadState.Loading,
-        onLongClick = onLongClick
+        onLongClick = onLongClick,
+        refreshing = plannedAnimePaged.loadState.refresh == LoadState.Loading
     )
 
     if (shouldShowModalBottomSheet) {

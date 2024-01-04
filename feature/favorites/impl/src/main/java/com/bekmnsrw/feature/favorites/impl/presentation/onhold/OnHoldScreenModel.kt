@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.net.ssl.HttpsURLConnection
@@ -97,7 +96,7 @@ internal class OnHoldScreenModel(
             .flowOn(Dispatchers.IO)
             .collect { id ->
                 userId.intValue = id ?: 0
-                favoritesRepository.getPlannedPaged(userId.intValue, UserRatesEnum.ON_HOLD.key)
+                favoritesRepository.getAnimePagedByStatus(userId.intValue, UserRatesEnum.ON_HOLD.key)
                     .flowOn(Dispatchers.IO)
                     .cachedIn(screenModelScope)
                     .collect { data -> _onHold.value = data }

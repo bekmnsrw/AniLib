@@ -15,7 +15,7 @@ internal interface FavoritesApi {
     /* Move adding and removing from favourites here */
 
     @GET(value = "users/{id}/anime_rates")
-    suspend fun getPlannedPaged(
+    suspend fun getAnimePagedByStatus(
         @Path("id") id: Int,
         @Query("page") page: Int,
         @Query("limit") limit: Int,
