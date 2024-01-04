@@ -1,5 +1,6 @@
 package com.bekmnsrw.feature.home.impl.presentation.details
 
+import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,9 +54,6 @@ internal class DetailsScreenModel(
     private val isAuthenticatedUseCase: IsAuthenticatedUseCase
 ) : ScreenModel {
 
-    private val userId by lazy { mutableIntStateOf(0) }
-    private val isAuthenticated by lazy { mutableStateOf<Boolean?>(null) }
-
     private companion object {
         const val WAS_ADDED_TO_FAVORITES = "was added to favorites"
         const val WAS_REMOVED_FROM_FAVORITES = "was removed from favorites"
@@ -65,6 +63,9 @@ internal class DetailsScreenModel(
         const val WAS_REMOVED_FROM_MY_LIST = "Removed from your list"
     }
 
+    private val userId by lazy { mutableIntStateOf(0) }
+    val isAuthenticated by lazy { mutableStateOf<Boolean?>(null) }
+
     @Immutable
     internal data class DetailsScreenState(
         val isLoading: Boolean = false,
@@ -73,7 +74,8 @@ internal class DetailsScreenModel(
         val shouldShowBottomSheet: Boolean = false,
         val isDescriptionExpanded: Boolean = false,
         val similarAnimeList: PersistentList<Anime> = persistentListOf(),
-        val shouldShowDialog: Boolean = false
+        val shouldShowStatusDialog: Boolean = false,
+        val shouldShowAuthDialog: Boolean = false
     )
 
     @Immutable
@@ -87,13 +89,16 @@ internal class DetailsScreenModel(
         data object OnDescriptionClick : DetailsScreenEvent
         data class OnSimilarAnimeCardClick(val id: Int) : DetailsScreenEvent
         data object OnAnimeStatusClick : DetailsScreenEvent
-        data object OnDialogDismissRequest : DetailsScreenEvent
+        data object OnStatusDialogDismissRequest : DetailsScreenEvent
+        data object OnAuthDialogDismissRequest : DetailsScreenEvent
         data class OnRadioButtonClick(val status: String, val id: Int?) : DetailsScreenEvent
+        data object OnAuthDialogConfirmButtonClick : DetailsScreenEvent
     }
 
     @Immutable
     internal sealed interface DetailsScreenAction {
         data object NavigateBack : DetailsScreenAction
+        data object NavigateAuthScreen : DetailsScreenAction
         data class ShowSnackbar(val message: String) : DetailsScreenAction
         data class NavigateDetailsScreen(val id: Int) : DetailsScreenAction
     }
@@ -115,79 +120,89 @@ internal class DetailsScreenModel(
             OnDescriptionClick -> onDescriptionClick()
             is OnSimilarAnimeCardClick -> onSimilarAnimeCardClick(id = event.id)
             is OnAnimeStatusClick -> onAnimeStatusClick()
-            OnDialogDismissRequest -> onDialogDismissRequest()
+            OnStatusDialogDismissRequest -> onDialogDismissRequest()
             is OnRadioButtonClick -> onRadioButtonClick(event.status, event.id)
+            OnAuthDialogDismissRequest -> onAuthDialogDismissRequest()
+            OnAuthDialogConfirmButtonClick -> onAuthDialogConfirmButtonClick()
         }
     }
 
     init {
+        getUserId()
+        isAuthenticated()
         eventHandler(OnInit)
     }
 
-    private suspend fun getUserId() = getUserIdUseCase()
-        .flowOn(Dispatchers.IO)
-        .collect { userId.intValue = it ?: 0 }
-
-    private suspend fun isAuthenticated() = isAuthenticatedUseCase()
-        .flowOn(Dispatchers.IO)
-        .collect { isAuthenticated.value = it }
-
-    private suspend fun getAnime() = getAnimeUseCase(id = animeId)
-        .flowOn(Dispatchers.IO)
-//        .onStart {
-//            _screenState.emit(
-//                _screenState.value.copy(
-//                    isLoading = true
-//                )
-//            )
-//        }
-//        .onCompletion {
-//            _screenState.emit(
-//                _screenState.value.copy(
-//                    isLoading = false
-//                )
-//            )
-//        }
-        .collect {
-            _screenState.emit(
-                _screenState.value.copy(
-                    animeDetails = it,
-                    isFavoured = it.favoured
-                )
+    private fun onAuthDialogConfirmButtonClick() = screenModelScope.launch {
+        _screenAction.emit(NavigateAuthScreen)
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowAuthDialog = false
             )
-        }
+        )
+    }
 
-    private suspend fun getSimilarAnime() = getSimilarAnimeListUseCase(
-        id = animeId,
-        limit = REQUEST_LIMIT
-    )
-        .flowOn(Dispatchers.IO)
-        .collect {
-            _screenState.emit(
-                _screenState.value.copy(
-                    similarAnimeList = it.toPersistentList()
-                )
+    private fun onAuthDialogDismissRequest() = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                shouldShowAuthDialog = false
             )
-        }
+        )
+    }
+
+    private fun getUserId() = screenModelScope.launch {
+        getUserIdUseCase()
+            .flowOn(Dispatchers.IO)
+            .collect {
+                userId.intValue = it ?: 0
+                Log.e("DetailsSM", "userId: $it")
+            }
+    }
+
+    private fun isAuthenticated() = screenModelScope.launch {
+        isAuthenticatedUseCase()
+            .flowOn(Dispatchers.IO)
+            .collect {
+                isAuthenticated.value = it
+                Log.e("DetailsSM", "isAuthenticated: $it")
+            }
+    }
 
     private fun onInit() = screenModelScope.launch {
-        getUserId()
-        isAuthenticated()
+        getAnimeUseCase(id = animeId)
+            .flowOn(Dispatchers.IO)
+            .onStart {
+                _screenState.emit(
+                    _screenState.value.copy(
+                        isLoading = true
+                    )
+                )
+            }
+            .onCompletion {
+                _screenState.emit(
+                    _screenState.value.copy(
+                        isLoading = false
+                    )
+                )
+            }
+            .collect {
+                _screenState.emit(
+                    _screenState.value.copy(
+                        animeDetails = it,
+                        isFavoured = it.favoured
+                    )
+                )
+            }
 
-        _screenState.emit(
-            _screenState.value.copy(
-                isLoading = true
-            )
-        )
-
-        getAnime()
-        getSimilarAnime()
-
-        _screenState.emit(
-            _screenState.value.copy(
-                isLoading = false
-            )
-        )
+        getSimilarAnimeListUseCase(id = animeId, limit = REQUEST_LIMIT)
+            .flowOn(Dispatchers.IO)
+            .collect {
+                _screenState.emit(
+                    _screenState.value.copy(
+                        similarAnimeList = it.toPersistentList()
+                    )
+                )
+            }
     }
 
     private fun checkIfAnimeIsNotFavoured() = screenModelScope.launch {
@@ -207,51 +222,49 @@ internal class DetailsScreenModel(
     }
 
     private fun onFavouredClick() = screenModelScope.launch {
-        if (isAuthenticated.value == true) {
-            val isFavoured = _screenState.value.isFavoured
-            val name = _screenState.value.animeDetails?.name
+        val isFavoured = _screenState.value.isFavoured
+        val name = _screenState.value.animeDetails?.name
 
-            when (isFavoured) {
-                true -> removeFromFavoritesUseCase(type = TYPE, id = animeId)
-                    .flowOn(Dispatchers.IO)
-                    .collect { response ->
-                        when (response.success) {
-                            true -> {
-                                _screenState.emit(
-                                    _screenState.value.copy(
-                                        isFavoured = false
-                                    )
+        when (isFavoured) {
+            true -> removeFromFavoritesUseCase(type = TYPE, id = animeId)
+                .flowOn(Dispatchers.IO)
+                .collect { response ->
+                    when (response.success) {
+                        true -> {
+                            _screenState.emit(
+                                _screenState.value.copy(
+                                    isFavoured = false
                                 )
-                                _screenAction.emit(
-                                    ShowSnackbar(
-                                        message = "'$name' $WAS_REMOVED_FROM_FAVORITES"
-                                    )
-                                )
-                            }
-
-                            false -> _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
-                        }
-                    }
-
-                false -> addToFavoritesUseCase(type = TYPE, id = animeId)
-                    .flowOn(Dispatchers.IO)
-                    .collect { response ->
-                        when (response.success) {
-                            true -> {
-                                _screenState.emit(
-                                    _screenState.value.copy(
-                                        isFavoured = true
-                                    )
-                                )
+                            )
+                            _screenAction.emit(
                                 ShowSnackbar(
-                                    message = "'$name' $WAS_ADDED_TO_FAVORITES"
+                                    message = "'$name' $WAS_REMOVED_FROM_FAVORITES"
                                 )
-                            }
-
-                            false -> _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
+                            )
                         }
+
+                        false -> _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
                     }
-            }
+                }
+
+            false -> addToFavoritesUseCase(type = TYPE, id = animeId)
+                .flowOn(Dispatchers.IO)
+                .collect { response ->
+                    when (response.success) {
+                        true -> {
+                            _screenState.emit(
+                                _screenState.value.copy(
+                                    isFavoured = true
+                                )
+                            )
+                            ShowSnackbar(
+                                message = "'$name' $WAS_ADDED_TO_FAVORITES"
+                            )
+                        }
+
+                        false -> _screenAction.emit(ShowSnackbar(message = ERROR_MESSAGE))
+                    }
+                }
         }
     }
 
@@ -290,17 +303,25 @@ internal class DetailsScreenModel(
     }
 
     private fun onAnimeStatusClick() = screenModelScope.launch {
-        _screenState.emit(
-            _screenState.value.copy(
-                shouldShowDialog = true
+        if (isAuthenticated.value == true) {
+            _screenState.emit(
+                _screenState.value.copy(
+                    shouldShowStatusDialog = true
+                )
             )
-        )
+        } else {
+            _screenState.emit(
+                _screenState.value.copy(
+                    shouldShowAuthDialog = true
+                )
+            )
+        }
     }
 
     private fun onDialogDismissRequest() = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
-                shouldShowDialog = false
+                shouldShowStatusDialog = false
             )
         )
     }
@@ -358,6 +379,7 @@ internal class DetailsScreenModel(
                             )
                         )
                     }
+
                     else -> _screenAction.emit(
                         ShowSnackbar(message = ERROR_MESSAGE)
                     )
@@ -393,7 +415,7 @@ internal class DetailsScreenModel(
     private fun onRadioButtonClick(status: String, id: Int?) = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
-                shouldShowDialog = false
+                shouldShowStatusDialog = false
             )
         )
 
@@ -403,6 +425,7 @@ internal class DetailsScreenModel(
                 targetId = animeId,
                 status = status
             )
+
             else -> when (status) {
                 UserRatesEnum.NOT_IN_MY_LIST.key -> deleteUserRates(id = id)
                 else -> updateAnimeStatus(id = id, status = status)

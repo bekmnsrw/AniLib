@@ -1,4 +1,4 @@
-package com.bekmnsrw.core.widget
+package com.bekmnsrw.core.widget.button
 
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton

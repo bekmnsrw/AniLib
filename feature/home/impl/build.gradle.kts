@@ -42,9 +42,9 @@ dependencies {
 
     implementation(libs.koin)
     implementation(libs.koin.compose)
-//    implementation(libs.voyager.tab)
-//    implementation(libs.voyager.transitions)
-//    implementation(libs.voyager.koin)
+    implementation(libs.voyager.tab)
+    implementation(libs.voyager.transitions)
+    implementation(libs.voyager.koin)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.androidx.lifecycle.compose)
 

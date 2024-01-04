@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        println("onNewIntent")
+        Log.e("MainActivity", "onNewIntent")
         val authCode = intent?.data?.getQueryParameter(AuthConstant.RESPONSE_TYPE)
         if (authCode != null) {
             authScreenModel.getAccessToken(authCode = authCode)

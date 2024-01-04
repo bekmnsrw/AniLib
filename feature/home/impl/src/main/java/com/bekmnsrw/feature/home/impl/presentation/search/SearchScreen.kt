@@ -43,8 +43,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.core.widget.AniLibAlertDialog
-import com.bekmnsrw.core.widget.AniLibIconButton
+import com.bekmnsrw.core.widget.dialog.AniLibAlertDialog
+import com.bekmnsrw.core.widget.button.AniLibIconButton
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.SearchRequest

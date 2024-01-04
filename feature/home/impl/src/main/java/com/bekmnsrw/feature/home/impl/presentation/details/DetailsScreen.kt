@@ -60,17 +60,19 @@ import com.bekmnsrw.core.designsystem.theme.LocalBackgroundTheme
 import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.core.utils.HandleScreenLifecycle
 import com.bekmnsrw.core.utils.convertStringToDateTime
+import com.bekmnsrw.core.utils.formatStatusString
 import com.bekmnsrw.core.widget.AniLibAgeRatingBadge
+import com.bekmnsrw.core.widget.dialog.AniLibAnimeStatusDialog
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
-import com.bekmnsrw.core.widget.AniLibAnimeStatusDialog
 import com.bekmnsrw.core.widget.AniLibExpandableTextWithTextButton
-import com.bekmnsrw.core.widget.AniLibHorizontalList
+import com.bekmnsrw.core.widget.list.AniLibHorizontalList
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.core.widget.AniLibModalBottomSheet
 import com.bekmnsrw.core.widget.AniLibRateWidget
 import com.bekmnsrw.core.widget.AniLibSnackbar
 import com.bekmnsrw.core.widget.AniLibStatusWidget
 import com.bekmnsrw.core.widget.UserRatesEnum
+import com.bekmnsrw.core.widget.dialog.AniLibAuthDialog
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
 import com.bekmnsrw.feature.home.api.model.Genre
@@ -80,20 +82,9 @@ import com.bekmnsrw.feature.home.impl.AnimeStatusEnum.RELEASED
 import com.bekmnsrw.feature.home.impl.HomeConstants.ANIME_ID_KOIN_PROPERTY
 import com.bekmnsrw.feature.home.impl.R
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.NavigateBack
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.NavigateDetailsScreen
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.ShowSnackbar
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenAction.*
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnAnimeStatusClick
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnArrowBackClick
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnDescriptionClick
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnDialogDismissRequest
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnFavouredClick
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnInfoIconClick
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnModalBottomSheetDismiss
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnRadioButtonClick
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnSimilarAnimeCardClick
-import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.OnStart
+import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenEvent.*
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreenModel.DetailsScreenState
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.launch
@@ -119,6 +110,7 @@ internal data class DetailsScreen(val id: Int) : Screen {
             AniLibCircularProgressBar(shouldShow = true)
         } else {
             DetailsScreenContent(
+                isAuthenticated = screenModel.isAuthenticated.value,
                 screenState = screenState,
                 eventHandler = screenModel::eventHandler,
                 animeId = id,
@@ -139,6 +131,7 @@ internal data class DetailsScreen(val id: Int) : Screen {
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun DetailsScreenContent(
+    isAuthenticated: Boolean?,
     screenState: DetailsScreenState,
     eventHandler: (DetailsScreenEvent) -> Unit,
     animeId: Int,
@@ -152,7 +145,8 @@ private fun DetailsScreenContent(
                     StickyHeader(
                         eventHandler = eventHandler,
                         animeId = animeId,
-                        isFavoured = screenState.isFavoured
+                        isFavoured = screenState.isFavoured,
+                        isAuthenticated = isAuthenticated
                     )
                 }
                 item {
@@ -186,17 +180,25 @@ private fun DetailsScreenContent(
                 }
             }
 
-            if (screenState.shouldShowDialog) {
+            if (screenState.shouldShowStatusDialog) {
                 screenState.animeDetails?.let {
                     AniLibAnimeStatusDialog(
                         id = it.userRates?.id,
                         currentStatus = it.userRates?.status ?: UserRatesEnum.NOT_IN_MY_LIST.key,
-                        onDismissRequest = { eventHandler(OnDialogDismissRequest) },
+                        onDismissRequest = { eventHandler(OnStatusDialogDismissRequest) },
                         onRadioButtonClick = { status, id ->
                             eventHandler(OnRadioButtonClick(status = status, id = id))
                         }
                     )
                 }
+            }
+
+            if (screenState.shouldShowAuthDialog) {
+                AniLibAuthDialog(
+                    onDismissRequest = { eventHandler(OnAuthDialogDismissRequest) },
+                    onConfirmButtonClick = { eventHandler(OnAuthDialogConfirmButtonClick) },
+                    onDismissButtonClick = { eventHandler(OnAuthDialogDismissRequest) }
+                )
             }
         }
     }
@@ -269,6 +271,13 @@ private fun DetailsScreenActions(
                 )
                 navigator.push(item = detailsScreen)
             }
+
+            NavigateAuthScreen -> {
+                val authScreen = ScreenRegistry.get(
+                    provider = SharedScreen.AuthScreen
+                )
+                navigator.push(item = authScreen)
+            }
         }
     }
 }
@@ -277,7 +286,8 @@ private fun DetailsScreenActions(
 private fun StickyHeader(
     eventHandler: (DetailsScreenEvent) -> Unit,
     animeId: Int,
-    isFavoured: Boolean
+    isFavoured: Boolean,
+    isAuthenticated: Boolean?
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -294,13 +304,15 @@ private fun StickyHeader(
             imageVector = AniLibIcons.ArrowBack,
             onClick = { eventHandler(OnArrowBackClick) }
         )
-        StickyHeaderItem(
-            imageVector = when (isFavoured) {
-                true -> AniLibIcons.FavoritesFilled
-                false -> AniLibIcons.FavoritesOutlined
-            },
-            onClick = { eventHandler(OnFavouredClick(animeId = animeId)) }
-        )
+        if (isAuthenticated == true) {
+            StickyHeaderItem(
+                imageVector = when (isFavoured) {
+                    true -> AniLibIcons.FavoritesFilled
+                    false -> AniLibIcons.FavoritesOutlined
+                },
+                onClick = { eventHandler(OnFavouredClick(animeId = animeId)) }
+            )
+        }
     }
 }
 
@@ -398,13 +410,10 @@ private fun AnimeStatus(
     Spacer(modifier = Modifier.padding(vertical = 8.dp))
     Card(onClick = { onClick(userRates?.status ?: UserRatesEnum.NOT_IN_MY_LIST.key) }) {
         Row(modifier = Modifier.padding(8.dp)) {
-            println(userRates?.status)
             Text(
                 text = when (userRates) {
                     null -> stringResource(id = R.string.add_to_my_list)
-                    else -> userRates.status
-                        ?.replace(oldValue = "_", newValue = " ")
-                        ?.replaceFirstChar { it.uppercase() } ?: ""
+                    else -> "${formatStatusString(userRates.status)}"
                 }
             )
             Icon(

@@ -1,4 +1,4 @@
-package com.bekmnsrw.core.widget
+package com.bekmnsrw.core.widget.topbar
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon

@@ -22,8 +22,8 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
-import com.bekmnsrw.core.widget.AniLibHorizontalList
-import com.bekmnsrw.core.widget.AniLibTopBarWithSearch
+import com.bekmnsrw.core.widget.list.AniLibHorizontalList
+import com.bekmnsrw.core.widget.topbar.AniLibTopBarWithSearch
 import com.bekmnsrw.feature.home.impl.AnimeStatusEnum.ANONS
 import com.bekmnsrw.feature.home.impl.AnimeStatusEnum.ONGOING
 import com.bekmnsrw.feature.home.impl.AnimeStatusEnum.RELEASED

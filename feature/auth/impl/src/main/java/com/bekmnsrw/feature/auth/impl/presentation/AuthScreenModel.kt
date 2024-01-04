@@ -1,5 +1,6 @@
 package com.bekmnsrw.feature.auth.impl.presentation
 
+import android.util.Log
 import androidx.compose.runtime.Immutable
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -89,6 +90,6 @@ class AuthScreenModel(
     private suspend fun saveTokens(accessToken: AccessToken) = screenModelScope.launch {
         saveLocalAccessTokenUseCase(accessToken = accessToken.accessToken)
         saveLocalRefreshTokenUseCase(refreshToken = accessToken.refreshToken)
-        println("Access token was saved!")
+        Log.e("AuthSM", "Access token was saved!")
     }
 }

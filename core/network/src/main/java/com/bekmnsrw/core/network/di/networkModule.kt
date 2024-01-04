@@ -10,6 +10,7 @@ import com.bekmnsrw.core.network.qualifier.Qualifiers.BEARER_INTERCEPTOR
 import com.bekmnsrw.core.network.qualifier.Qualifiers.LOGGING_INTERCEPTOR
 import com.bekmnsrw.feature.auth.api.usecase.local.GetLocalAccessTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.GetLocalRefreshTokenUseCase
+import com.bekmnsrw.feature.auth.api.usecase.local.IsAuthenticatedUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveLocalAccessTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.SaveLocalRefreshTokenUseCase
 import com.bekmnsrw.feature.auth.api.usecase.remote.RefreshAccessTokenUseCase
@@ -73,7 +74,8 @@ val networkModule = module {
             getLocalRefreshTokenUseCase = get(),
             refreshAccessTokenUseCase = get(),
             saveLocalRefreshTokenUseCase = get(),
-            saveLocalAccessTokenUseCase = get()
+            saveLocalAccessTokenUseCase = get(),
+            isAuthenticatedUseCase = get()
         )
     }
 
@@ -130,12 +132,14 @@ private fun provideAuthenticator(
     getLocalRefreshTokenUseCase: GetLocalRefreshTokenUseCase,
     refreshAccessTokenUseCase: RefreshAccessTokenUseCase,
     saveLocalRefreshTokenUseCase: SaveLocalRefreshTokenUseCase,
-    saveLocalAccessTokenUseCase: SaveLocalAccessTokenUseCase
+    saveLocalAccessTokenUseCase: SaveLocalAccessTokenUseCase,
+    isAuthenticatedUseCase: IsAuthenticatedUseCase
 ): Authenticator = AuthAuthenticator(
     getLocalRefreshTokenUseCase = getLocalRefreshTokenUseCase,
     refreshAccessTokenUseCase = refreshAccessTokenUseCase,
     saveLocalRefreshTokenUseCase = saveLocalRefreshTokenUseCase,
-    saveLocalAccessTokenUseCase = saveLocalAccessTokenUseCase
+    saveLocalAccessTokenUseCase = saveLocalAccessTokenUseCase,
+    isAuthenticatedUseCase = isAuthenticatedUseCase
 )
 
 private val json = Json { ignoreUnknownKeys = true }

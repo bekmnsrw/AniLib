@@ -1,4 +1,4 @@
-package com.bekmnsrw.core.widget
+package com.bekmnsrw.core.widget.list
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +26,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
+import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.feature.home.api.model.Anime
 
 @Composable

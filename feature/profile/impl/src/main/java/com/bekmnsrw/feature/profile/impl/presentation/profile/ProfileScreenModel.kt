@@ -1,5 +1,6 @@
 package com.bekmnsrw.feature.profile.impl.presentation.profile
 
+import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.mutableIntStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
@@ -157,7 +158,7 @@ internal class ProfileScreenModel(
 
         val isAuthenticated = isAuthenticated()
 
-        println("ProfileSM (isAuthenticated): $isAuthenticated")
+        Log.e("ProfileSM", "isAuthenticated: $isAuthenticated")
 
         _screenState.emit(
             _screenState.value.copy(

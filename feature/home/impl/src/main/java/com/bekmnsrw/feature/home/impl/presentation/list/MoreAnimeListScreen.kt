@@ -20,8 +20,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.AniLibDropDownMenu
-import com.bekmnsrw.core.widget.AniLibTopBarWithNavIconFilterAndSearch
-import com.bekmnsrw.core.widget.AniLibVerticalList
+import com.bekmnsrw.core.widget.topbar.AniLibTopBarWithNavIconFilterAndSearch
+import com.bekmnsrw.core.widget.list.AniLibVerticalList
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.impl.HomeConstants.STATUS_KOIN_PROPERTY
 import com.bekmnsrw.feature.home.impl.presentation.details.DetailsScreen

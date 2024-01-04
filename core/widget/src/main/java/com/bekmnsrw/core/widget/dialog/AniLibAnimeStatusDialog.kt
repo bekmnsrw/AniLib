@@ -1,4 +1,4 @@
-package com.bekmnsrw.core.widget
+package com.bekmnsrw.core.widget.dialog
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +21,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
+import com.bekmnsrw.core.widget.R
+import com.bekmnsrw.core.widget.UserRatesEnum
 import kotlinx.collections.immutable.persistentListOf
 
 private val statuses = persistentListOf(

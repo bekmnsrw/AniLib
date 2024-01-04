@@ -1,4 +1,4 @@
-package com.bekmnsrw.core.widget
+package com.bekmnsrw.core.widget.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
+import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.feature.home.api.model.Anime
 import kotlinx.collections.immutable.PersistentList
 

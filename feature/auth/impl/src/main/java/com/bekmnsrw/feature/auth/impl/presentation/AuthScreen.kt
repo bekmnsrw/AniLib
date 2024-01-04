@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,6 +26,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.navigation.SharedScreen
+import com.bekmnsrw.feature.auth.impl.R
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.NavigateProfileScreen
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAction.OpenChromeCustomTabs
@@ -55,12 +57,12 @@ private fun AuthScreenContent(eventHandler: (AuthScreenEvent) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Still not with us?",
+                text = stringResource(id = R.string.auth_title),
                 textAlign = TextAlign.Center,
                 style = AniLibTypography.titleMedium
             )
             Text(
-                text = "Please, authenticate to get access to full app's functionality!",
+                text = stringResource(id = R.string.auth_description),
                 textAlign = TextAlign.Center,
                 style = AniLibTypography.bodyMedium
             )

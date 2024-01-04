@@ -24,7 +24,7 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.core.widget.AniLibAnimeStatusDialog
+import com.bekmnsrw.core.widget.dialog.AniLibAnimeStatusDialog
 import com.bekmnsrw.core.widget.AniLibSnackbar
 import com.bekmnsrw.core.widget.UserRatesEnum
 import com.bekmnsrw.feature.favorites.api.model.UserRates
