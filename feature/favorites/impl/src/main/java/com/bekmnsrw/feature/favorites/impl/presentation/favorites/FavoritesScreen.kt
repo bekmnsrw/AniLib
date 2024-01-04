@@ -1,5 +1,8 @@
 package com.bekmnsrw.feature.favorites.impl.presentation.favorites
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,46 +48,64 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.core.utils.HandleScreenLifecycle
-import com.bekmnsrw.core.widget.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.AniLibImage
+import com.bekmnsrw.core.widget.indicator.AniLibPullRefreshIndicator
 import com.bekmnsrw.feature.favorites.api.model.FavoriteAnime
 import com.bekmnsrw.feature.favorites.impl.R
 import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenAction
 import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenAction.NavigateDetails
 import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenEvent
-import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenEvent.*
+import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenEvent.OnIconFavoriteClick
+import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenEvent.OnItemClick
+import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenEvent.OnRefresh
 import kotlinx.coroutines.launch
 
 internal class FavoritesScreen : Screen {
 
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<FavoritesScreenModel>()
         val screenState by screenModel.screenState.collectAsStateWithLifecycle()
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
 
+        val pullRefreshState = rememberPullRefreshState(
+            refreshing = screenState.refreshing,
+            onRefresh = { screenModel.eventHandler(OnRefresh) }
+        )
+
         val snackbarHostState = remember { SnackbarHostState() }
 
-        if (screenState.isLoading) {
-            AniLibCircularProgressBar(shouldShow = true)
-        } else {
-            if (screenState.favorites.isEmpty()) {
-                EmptyListText()
-            } else {
-                FavoritesScreenContent(
-                    favoritesAnime = screenState.favorites,
-                    eventHandler = screenModel::eventHandler
-                )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pullRefresh(pullRefreshState)
+        ) {
+            AnimatedVisibility(
+                visible = !screenState.refreshing,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                if (screenState.favorites.isEmpty()) {
+                    EmptyListText()
+                } else {
+                    FavoritesScreenContent(
+                        favoritesAnime = screenState.favorites,
+                        eventHandler = screenModel::eventHandler
+                    )
+                }
             }
+            AniLibPullRefreshIndicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                refreshing = screenState.refreshing,
+                pullRefreshState = pullRefreshState
+            )
         }
 
         FavoritesScreenActions(
             screenAction = screenAction,
             snackbarHostState = snackbarHostState
         )
-
-        HandleScreenLifecycle(onStart = { screenModel.eventHandler(OnStart) })
     }
 }
 

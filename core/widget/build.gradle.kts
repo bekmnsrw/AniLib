@@ -35,9 +35,9 @@ dependencies {
 
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.kotlinx.datetime)
-
     implementation(libs.paging.core)
     implementation(libs.paging.compose)
+    implementation(libs.androidx.compose.material)
 
     testImplementation(libs.junit)
 

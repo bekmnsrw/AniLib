@@ -21,7 +21,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.navigation.SharedScreen
-import com.bekmnsrw.core.widget.AniLibCircularProgressBar
+import com.bekmnsrw.core.widget.indicator.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.button.AniLibIconButton
 import com.bekmnsrw.core.widget.AniLibSnackbar
 import com.bekmnsrw.feature.profile.impl.presentation.settings.SettingsScreenModel.SettingsScreenAction

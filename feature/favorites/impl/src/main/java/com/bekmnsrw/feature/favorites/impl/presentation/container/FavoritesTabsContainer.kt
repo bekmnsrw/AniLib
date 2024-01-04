@@ -24,7 +24,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRowDefaults
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.PullRefreshState
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material3.Card
@@ -62,6 +61,7 @@ import com.bekmnsrw.core.utils.formatStatusString
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.core.widget.AniLibModalBottomSheet
 import com.bekmnsrw.core.widget.UserRatesEnum
+import com.bekmnsrw.core.widget.indicator.AniLibPullRefreshIndicator
 import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.impl.R
 import com.bekmnsrw.feature.favorites.impl.presentation.TabItem
@@ -234,12 +234,10 @@ fun TabAnimeList(
                 }
             }
         }
-        PullRefreshIndicator(
-            refreshing = refreshing,
-            state = pullRefreshState,
+        AniLibPullRefreshIndicator(
             modifier = Modifier.align(Alignment.TopCenter),
-            backgroundColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.background
+            refreshing = refreshing,
+            pullRefreshState = pullRefreshState
         )
     }
 }

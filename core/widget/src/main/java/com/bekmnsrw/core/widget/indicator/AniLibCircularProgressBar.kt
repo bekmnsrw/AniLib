@@ -1,4 +1,4 @@
-package com.bekmnsrw.core.widget
+package com.bekmnsrw.core.widget.indicator
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn

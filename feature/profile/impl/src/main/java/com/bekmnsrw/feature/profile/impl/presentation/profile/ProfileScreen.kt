@@ -50,7 +50,7 @@ import com.bekmnsrw.core.designsystem.theme.LightDefaultColorScheme
 import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.core.utils.convertStringToDateTime
 import com.bekmnsrw.core.utils.formatStatusString
-import com.bekmnsrw.core.widget.AniLibCircularProgressBar
+import com.bekmnsrw.core.widget.indicator.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.button.AniLibIconButton
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.core.widget.UserRatesEnum

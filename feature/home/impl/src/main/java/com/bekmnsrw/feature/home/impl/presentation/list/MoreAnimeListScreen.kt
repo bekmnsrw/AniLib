@@ -18,7 +18,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.bekmnsrw.core.widget.AniLibCircularProgressBar
+import com.bekmnsrw.core.widget.indicator.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.AniLibDropDownMenu
 import com.bekmnsrw.core.widget.topbar.AniLibTopBarWithNavIconFilterAndSearch
 import com.bekmnsrw.core.widget.list.AniLibVerticalList

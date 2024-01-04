@@ -63,7 +63,7 @@ import com.bekmnsrw.core.utils.convertStringToDateTime
 import com.bekmnsrw.core.utils.formatStatusString
 import com.bekmnsrw.core.widget.AniLibAgeRatingBadge
 import com.bekmnsrw.core.widget.dialog.AniLibAnimeStatusDialog
-import com.bekmnsrw.core.widget.AniLibCircularProgressBar
+import com.bekmnsrw.core.widget.indicator.AniLibCircularProgressBar
 import com.bekmnsrw.core.widget.AniLibExpandableTextWithTextButton
 import com.bekmnsrw.core.widget.list.AniLibHorizontalList
 import com.bekmnsrw.core.widget.AniLibImage

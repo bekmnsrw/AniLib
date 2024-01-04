@@ -46,14 +46,14 @@ internal class FavoritesScreenModel(
 
     @Immutable
     internal data class FavoritesScreenState(
-        val isLoading: Boolean = false,
+        val refreshing: Boolean = false,
         val favorites: PersistentList<FavoriteAnime> = persistentListOf()
     )
 
     @Immutable
     internal sealed interface FavoritesScreenEvent {
         data object OnInit : FavoritesScreenEvent
-        data object OnStart : FavoritesScreenEvent
+        data object OnRefresh : FavoritesScreenEvent
         data class OnItemClick(val id: Int) : FavoritesScreenEvent
         data class OnIconFavoriteClick(val id: Int) : FavoritesScreenEvent
         data class OnCardPress(val id: Int) : FavoritesScreenEvent
@@ -72,16 +72,30 @@ internal class FavoritesScreenModel(
     fun eventHandler(event: FavoritesScreenEvent) {
         when (event) {
             OnInit -> onInit()
-            OnStart -> onStart()
+            OnRefresh -> onRefresh()
             is OnItemClick -> onItemClick(event.id)
             is OnCardPress -> onCardPress(event.id)
             is OnIconFavoriteClick -> onIconFavoriteClick(event.id)
         }
     }
 
-    private fun onStart() = screenModelScope.launch {
+    private fun onRefresh() = screenModelScope.launch {
         getUserFavoritesUseCase(userId.intValue)
             .flowOn(Dispatchers.IO)
+            .onStart {
+                _screenState.emit(
+                    _screenState.value.copy(
+                        refreshing = true
+                    )
+                )
+            }
+            .onCompletion {
+                _screenState.emit(
+                    _screenState.value.copy(
+                        refreshing = false
+                    )
+                )
+            }
             .collect {
                 if (!_screenState.value.favorites.containsAll(it)) {
                     _screenState.emit(
@@ -103,14 +117,14 @@ internal class FavoritesScreenModel(
                     .onStart {
                         _screenState.emit(
                             _screenState.value.copy(
-                                isLoading = true
+                                refreshing = true
                             )
                         )
                     }
                     .onCompletion {
                         _screenState.emit(
                             _screenState.value.copy(
-                                isLoading = false
+                                refreshing = false
                             )
                         )
                     }
