@@ -1,8 +1,12 @@
 package com.bekmnsrw.feature.profile.impl.presentation.profile
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,6 +19,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,10 +57,10 @@ import com.bekmnsrw.core.designsystem.theme.LightDefaultColorScheme
 import com.bekmnsrw.core.navigation.SharedScreen
 import com.bekmnsrw.core.utils.convertStringToDateTime
 import com.bekmnsrw.core.utils.formatStatusString
-import com.bekmnsrw.core.widget.indicator.AniLibCircularProgressBar
-import com.bekmnsrw.core.widget.button.AniLibIconButton
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.core.widget.UserRatesEnum
+import com.bekmnsrw.core.widget.button.AniLibIconButton
+import com.bekmnsrw.core.widget.indicator.AniLibPullRefreshIndicator
 import com.bekmnsrw.feature.profile.api.model.AnimeRates
 import com.bekmnsrw.feature.profile.api.model.WhoAmI
 import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenAction
@@ -63,6 +70,7 @@ import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel
 import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenAction.NavigateSettingsScreen
 import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenEvent.OnItemClick
 import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenEvent.OnMoreClick
+import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenEvent.OnRefresh
 import com.bekmnsrw.feature.profile.impl.presentation.profile.ProfileScreenModel.ProfileScreenEvent.OnSettingsIconClick
 import com.bekmnsrw.feature.profile.impl.presentation.settings.SettingsScreen
 import com.bekmnsrw.profile.impl.R
@@ -75,22 +83,41 @@ import kotlinx.collections.immutable.PersistentMap
 
 internal class ProfileScreen : Screen {
 
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
         val screenModel = getScreenModel<ProfileScreenModel>()
         val screenState by screenModel.screenState.collectAsStateWithLifecycle()
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
 
-        if (screenState.isLoading) {
-            AniLibCircularProgressBar(shouldShow = true)
-        } else {
-            ProfileScreenContent(
-                whoAmI = screenState.profile,
-                userAnimeRates = screenState.userAnimeRates,
-                userAnimeStatuses = screenState.userAnimeStatuses,
-                onSettingsIconClick = { screenModel.eventHandler(OnSettingsIconClick) },
-                onItemClick = { screenModel.eventHandler(OnItemClick(id = it)) },
-                onMoreClick = { screenModel.eventHandler(OnMoreClick) }
+        val pullRefreshState = rememberPullRefreshState(
+            refreshing = screenState.refreshing,
+            onRefresh = { screenModel.eventHandler(OnRefresh) }
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pullRefresh(pullRefreshState)
+        ) {
+            AnimatedVisibility(
+                visible = !screenState.refreshing,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                ProfileScreenContent(
+                    whoAmI = screenState.profile,
+                    userAnimeRates = screenState.userAnimeRates,
+                    userAnimeStatuses = screenState.userAnimeStatuses,
+                    onSettingsIconClick = { screenModel.eventHandler(OnSettingsIconClick) },
+                    onItemClick = { screenModel.eventHandler(OnItemClick(id = it)) },
+                    onMoreClick = { screenModel.eventHandler(OnMoreClick) }
+                )
+            }
+            AniLibPullRefreshIndicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                refreshing = screenState.refreshing,
+                pullRefreshState = pullRefreshState
             )
         }
 

@@ -46,7 +46,7 @@ internal class ProfileScreenModel(
     internal data class ProfileScreenState(
         val isAuthenticated: Boolean? = null,
         val profile: WhoAmI? = null,
-        val isLoading: Boolean = false,
+        val refreshing: Boolean = false,
         val userAnimeRates: PersistentList<AnimeRates> = persistentListOf(),
         val userAnimeStatuses: PersistentMap<String, Int> = persistentMapOf()
     )
@@ -62,6 +62,7 @@ internal class ProfileScreenModel(
     @Immutable
     internal sealed interface ProfileScreenEvent {
         data object OnInit : ProfileScreenEvent
+        data object OnRefresh : ProfileScreenEvent
         data class OnItemClick(val id: Int) : ProfileScreenEvent
         data object OnMoreClick : ProfileScreenEvent
         data object OnSettingsIconClick : ProfileScreenEvent
@@ -83,7 +84,24 @@ internal class ProfileScreenModel(
             is OnItemClick -> onItemClick(event.id)
             OnMoreClick -> onMoreClick()
             OnSettingsIconClick -> onSettingsIconClick()
+            OnRefresh -> onRefresh()
         }
+    }
+
+    private fun onRefresh() = screenModelScope.launch {
+        _screenState.emit(
+            _screenState.value.copy(
+                refreshing = true
+            )
+        )
+
+        getUserAnimeStatuses()
+
+        _screenState.emit(
+            _screenState.value.copy(
+                refreshing = false
+            )
+        )
     }
 
     private suspend fun getProfile() = getProfileUseCase()
@@ -152,7 +170,7 @@ internal class ProfileScreenModel(
     private fun onInit() = screenModelScope.launch {
         _screenState.emit(
             _screenState.value.copy(
-                isLoading = true
+                refreshing = true
             )
         )
 
@@ -177,7 +195,7 @@ internal class ProfileScreenModel(
 
         _screenState.emit(
             _screenState.value.copy(
-                isLoading = false
+                refreshing = false
             )
         )
     }
