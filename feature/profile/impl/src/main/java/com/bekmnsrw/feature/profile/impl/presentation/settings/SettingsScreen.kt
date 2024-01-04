@@ -70,7 +70,7 @@ private fun SettingsScreenActions(
 
             NavigateAuthScreen -> {
                 val authScreen = ScreenRegistry.get(
-                    provider = SharedScreen.AuthScreen
+                    provider = SharedScreen.AuthScreen(source = "Profile")
                 )
                 navigator.replaceAll(item = authScreen)
             }

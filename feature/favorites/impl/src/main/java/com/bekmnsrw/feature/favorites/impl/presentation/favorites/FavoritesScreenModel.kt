@@ -7,8 +7,13 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
 import com.bekmnsrw.feature.favorites.api.model.FavoriteAnime
 import com.bekmnsrw.feature.favorites.api.usecase.GetUserFavoritesUseCase
-import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenAction.*
-import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenEvent.*
+import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenAction.NavigateDetails
+import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenAction.ShowSnackbar
+import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenEvent.OnCardPress
+import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenEvent.OnIconFavoriteClick
+import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenEvent.OnInit
+import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenEvent.OnItemClick
+import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel.FavoritesScreenEvent.OnRefresh
 import com.bekmnsrw.feature.home.api.usecase.RemoveFromFavoritesUseCase
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -111,30 +116,32 @@ internal class FavoritesScreenModel(
         getUserIdUseCase()
             .flowOn(Dispatchers.IO)
             .collect { id ->
-                userId.intValue = id ?: 0
-                getUserFavoritesUseCase(userId.intValue)
-                    .flowOn(Dispatchers.IO)
-                    .onStart {
-                        _screenState.emit(
-                            _screenState.value.copy(
-                                refreshing = true
+                if (id != null) {
+                    userId.intValue = id
+                    getUserFavoritesUseCase(id)
+                        .flowOn(Dispatchers.IO)
+                        .onStart {
+                            _screenState.emit(
+                                _screenState.value.copy(
+                                    refreshing = true
+                                )
                             )
-                        )
-                    }
-                    .onCompletion {
-                        _screenState.emit(
-                            _screenState.value.copy(
-                                refreshing = false
+                        }
+                        .onCompletion {
+                            _screenState.emit(
+                                _screenState.value.copy(
+                                    refreshing = false
+                                )
                             )
-                        )
-                    }
-                    .collect {
-                        _screenState.emit(
-                            _screenState.value.copy(
-                                favorites = it.toPersistentList()
+                        }
+                        .collect {
+                            _screenState.emit(
+                                _screenState.value.copy(
+                                    favorites = it.toPersistentList()
+                                )
                             )
-                        )
-                    }
+                        }
+                }
             }
     }
 

@@ -281,7 +281,7 @@ private fun DetailsScreenActions(
 
             NavigateAuthScreen -> {
                 val authScreen = ScreenRegistry.get(
-                    provider = SharedScreen.AuthScreen
+                    provider = SharedScreen.AuthScreen(source = "Home")
                 )
                 navigator.push(item = authScreen)
             }

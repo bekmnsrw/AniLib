@@ -57,6 +57,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bekmnsrw.core.designsystem.icon.AniLibIcons
 import com.bekmnsrw.core.designsystem.theme.AniLibTypography
 import com.bekmnsrw.core.navigation.SharedScreen
+import com.bekmnsrw.core.utils.HandleScreenLifecycle
 import com.bekmnsrw.core.utils.formatStatusString
 import com.bekmnsrw.core.widget.AniLibImage
 import com.bekmnsrw.core.widget.AniLibModalBottomSheet
@@ -65,8 +66,10 @@ import com.bekmnsrw.core.widget.indicator.AniLibPullRefreshIndicator
 import com.bekmnsrw.feature.favorites.api.model.UserRates
 import com.bekmnsrw.feature.favorites.impl.R
 import com.bekmnsrw.feature.favorites.impl.presentation.TabItem
-import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabScreenModel.FavoritesTabScreenAction
-import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabScreenModel.FavoritesTabScreenAction.NavigateAuthScreen
+import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabsContainerScreenModel.FavoritesTabsContainerScreenAction
+import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabsContainerScreenModel.FavoritesTabsContainerScreenAction.NavigateAuthScreen
+import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabsContainerScreenModel.FavoritesTabsContainerScreenAction.NavigateFavoritesScreen
+import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabsContainerScreenModel.FavoritesTabsContainerScreenEvent.OnStart
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -92,22 +95,35 @@ internal class FavoritesTabsContainer : Screen {
     @OptIn(ExperimentalPagerApi::class)
     @Composable
     override fun Content() {
-        val screenModel = getScreenModel<FavoritesTabScreenModel>()
+        val screenModel = getScreenModel<FavoritesTabsContainerScreenModel>()
+        val screenState by screenModel.screenState.collectAsStateWithLifecycle()
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
 
         val pagerState = rememberPagerState()
 
-        FavoritesScreenContent(
-            tabs = tabs,
-            pagerState = pagerState
-        )
+        AnimatedVisibility(
+            visible = !screenState.isLoading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            FavoritesScreenContent(
+                tabs = tabs,
+                pagerState = pagerState
+            )
+        }
 
         FavoritesScreenActions(screenAction = screenAction)
+
+        HandleScreenLifecycle(
+            onStart = {
+                screenModel.eventHandler(OnStart)
+            }
+        )
     }
 }
 
 @Composable
-private fun FavoritesScreenActions(screenAction: FavoritesTabScreenAction?) {
+private fun FavoritesScreenActions(screenAction: FavoritesTabsContainerScreenAction?) {
     val navigator = LocalNavigator.currentOrThrow
 
     LaunchedEffect(screenAction) {
@@ -116,10 +132,12 @@ private fun FavoritesScreenActions(screenAction: FavoritesTabScreenAction?) {
 
             NavigateAuthScreen -> {
                 val authScreen = ScreenRegistry.get(
-                    provider = SharedScreen.AuthScreen
+                    provider = SharedScreen.AuthScreen(source = "Favorites")
                 )
                 navigator.replaceAll(authScreen)
             }
+
+            NavigateFavoritesScreen -> navigator.popUntilRoot()
         }
     }
 }

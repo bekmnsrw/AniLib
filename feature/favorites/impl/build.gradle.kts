@@ -29,8 +29,10 @@ android {
 dependencies {
 
     implementation(project(":feature:favorites:api"))
+
     implementation(project(":feature:home:api"))
     implementation(project(":feature:auth:api"))
+    implementation(project(":feature:profile:api"))
 
     implementation(project(":core:widget"))
     implementation(project(":core:db"))

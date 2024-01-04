@@ -3,13 +3,14 @@ package com.bekmnsrw.feature.favorites.impl.di
 import com.bekmnsrw.core.network.qualifier.Qualifiers
 import com.bekmnsrw.feature.auth.api.usecase.local.GetUserIdUseCase
 import com.bekmnsrw.feature.auth.api.usecase.local.IsAuthenticatedUseCase
+import com.bekmnsrw.feature.auth.api.usecase.local.SaveUserIdUseCase
 import com.bekmnsrw.feature.favorites.api.repository.FavoritesRepository
 import com.bekmnsrw.feature.favorites.api.usecase.GetUserFavoritesUseCase
 import com.bekmnsrw.feature.favorites.api.usecase.UpdateAnimeStatusUseCase
 import com.bekmnsrw.feature.favorites.impl.data.FavoritesApi
 import com.bekmnsrw.feature.favorites.impl.data.FavoritesRepositoryImpl
 import com.bekmnsrw.feature.favorites.impl.presentation.completed.CompletedScreenModel
-import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabScreenModel
+import com.bekmnsrw.feature.favorites.impl.presentation.container.FavoritesTabsContainerScreenModel
 import com.bekmnsrw.feature.favorites.impl.presentation.dropped.DroppedScreenModel
 import com.bekmnsrw.feature.favorites.impl.presentation.favorites.FavoritesScreenModel
 import com.bekmnsrw.feature.favorites.impl.presentation.onhold.OnHoldScreenModel
@@ -19,6 +20,7 @@ import com.bekmnsrw.feature.favorites.impl.usecase.GetUserFavoritesUseCaseImpl
 import com.bekmnsrw.feature.favorites.impl.usecase.UpdateAnimeStatusUseCaseImpl
 import com.bekmnsrw.feature.home.api.usecase.DeleteUserRatesUseCase
 import com.bekmnsrw.feature.home.api.usecase.RemoveFromFavoritesUseCase
+import com.bekmnsrw.feature.profile.api.usecase.GetProfileUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -89,7 +91,7 @@ val favoritesModule = module {
         )
     }
 
-    factory<FavoritesScreenModel> {
+    single<FavoritesScreenModel> {
         provideFavoritesScreenModel(
             getUserFavoritesUseCase = get(),
             removeFromFavoritesUseCase = get(),
@@ -97,15 +99,23 @@ val favoritesModule = module {
         )
     }
 
-    factory<FavoritesTabScreenModel> {
-        provideFavoritesTabScreenModel(isAuthenticatedUseCase = get())
+    single<FavoritesTabsContainerScreenModel> {
+        provideFavoritesTabsContainerScreenModel(
+            isAuthenticatedUseCase = get(),
+            getProfileUseCase = get(),
+            saveUserIdUseCase = get()
+        )
     }
 }
 
-private fun provideFavoritesTabScreenModel(
-    isAuthenticatedUseCase: IsAuthenticatedUseCase
-): FavoritesTabScreenModel = FavoritesTabScreenModel(
-    isAuthenticatedUseCase = isAuthenticatedUseCase
+private fun provideFavoritesTabsContainerScreenModel(
+    isAuthenticatedUseCase: IsAuthenticatedUseCase,
+    getProfileUseCase: GetProfileUseCase,
+    saveUserIdUseCase: SaveUserIdUseCase
+): FavoritesTabsContainerScreenModel = FavoritesTabsContainerScreenModel(
+    isAuthenticatedUseCase = isAuthenticatedUseCase,
+    getProfileUseCase = getProfileUseCase,
+    saveUserIdUseCase = saveUserIdUseCase
 )
 
 private fun provideFavoritesApi(

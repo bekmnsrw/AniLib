@@ -27,7 +27,6 @@ dependencies {
     api(libs.firebase.perf)
 
     implementation(libs.paging.core)
-
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

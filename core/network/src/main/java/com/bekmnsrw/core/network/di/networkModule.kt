@@ -27,8 +27,8 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 
-private const val API_BASE_URL = "https://shikimori.one/api/" // Move to BuildConfig
-private const val AUTH_BASE_URL = "https://shikimori.one/oauth/" // Move to BuildConfig
+private const val API_BASE_URL = "https://shikimori.one/api/"
+private const val AUTH_BASE_URL = "https://shikimori.one/oauth/"
 private const val CONNECTION_TIMEOUT = 30L
 private const val CONTENT_TYPE = "application/json"
 

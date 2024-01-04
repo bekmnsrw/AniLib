@@ -25,12 +25,10 @@ dependencies {
     api(libs.firebase.analytics)
     api(libs.firebase.crashlytics)
     api(libs.firebase.perf)
-
     api(libs.datastore.preferences)
 
     implementation(libs.koin)
     implementation(libs.koin.compose)
-
     implementation(libs.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

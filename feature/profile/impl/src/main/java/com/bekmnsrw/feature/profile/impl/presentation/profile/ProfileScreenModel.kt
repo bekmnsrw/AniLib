@@ -114,6 +114,8 @@ internal class ProfileScreenModel(
             )
             saveUserIdUseCase(id = it.id)
             userId.intValue = it.id
+            getUserAnimeRates()
+            getUserAnimeStatuses()
         }
 
     private suspend fun isAuthenticated() = isAuthenticatedUseCase()
@@ -187,8 +189,8 @@ internal class ProfileScreenModel(
         when (isAuthenticated) {
             true -> {
                 getProfile()
-                getUserAnimeRates()
-                getUserAnimeStatuses()
+//                getUserAnimeRates()
+//                getUserAnimeStatuses()
             }
             else -> _screenAction.emit(NavigateAuthScreen)
         }

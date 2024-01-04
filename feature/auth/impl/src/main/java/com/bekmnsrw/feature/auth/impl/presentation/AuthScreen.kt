@@ -33,15 +33,19 @@ import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenAct
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent
 import com.bekmnsrw.feature.auth.impl.presentation.AuthScreenModel.AuthScreenEvent.OnAuthenticateButtonClicked
 
-internal class AuthScreen : Screen {
+internal data class AuthScreen(val source: String) : Screen {
 
     @Composable
     override fun Content() {
+        println(source)
         val screenModel = getScreenModel<AuthScreenModel>()
         val screenAction by screenModel.screenAction.collectAsStateWithLifecycle(initialValue = null)
 
         AuthScreenContent(eventHandler = screenModel::eventHandler)
-        AuthScreenActions(screenAction = screenAction)
+        AuthScreenActions(
+            screenAction = screenAction,
+            source = source
+        )
     }
 }
 
@@ -75,7 +79,10 @@ private fun AuthScreenContent(eventHandler: (AuthScreenEvent) -> Unit) {
 }
 
 @Composable
-private fun AuthScreenActions(screenAction: AuthScreenAction?, ) {
+private fun AuthScreenActions(
+    screenAction: AuthScreenAction?,
+    source: String
+) {
     val context = LocalContext.current
     val navigator = LocalNavigator.currentOrThrow
 
@@ -84,10 +91,26 @@ private fun AuthScreenActions(screenAction: AuthScreenAction?, ) {
             null -> Unit
 
             NavigateProfileScreen -> {
-                val profileScreen = ScreenRegistry.get(
-                    provider = SharedScreen.ProfileScreen
-                )
-                navigator.replaceAll(item = profileScreen)
+                when (source) {
+                    "Favorites" -> {
+                        val favoritesScreen = ScreenRegistry.get(
+                            provider = SharedScreen.FavoritesScreen
+                        )
+                        navigator.replaceAll(favoritesScreen)
+                    }
+                    "Profile" -> {
+                        val profileScreen = ScreenRegistry.get(
+                            provider = SharedScreen.ProfileScreen
+                        )
+                        navigator.replaceAll(profileScreen)
+                    }
+                    "Home" -> {
+                        val homeScreen = ScreenRegistry.get(
+                            provider = SharedScreen.HomeScreen
+                        )
+                        navigator.replaceAll(homeScreen)
+                    }
+                }
             }
 
             is OpenChromeCustomTabs -> CustomTabsIntent.Builder()

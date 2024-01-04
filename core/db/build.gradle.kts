@@ -22,12 +22,11 @@ android {
 dependencies {
 
     api(libs.room)
-    ksp(libs.room.ksp)
     api(libs.room.ktx)
+    ksp(libs.room.ksp)
 
     implementation(libs.koin)
     implementation(libs.koin.compose)
-
     implementation(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.junit)
