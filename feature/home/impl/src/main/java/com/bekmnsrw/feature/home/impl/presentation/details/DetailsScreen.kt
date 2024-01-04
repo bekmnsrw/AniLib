@@ -150,17 +150,15 @@ private fun DetailsScreenContent(
                     )
                 }
                 item {
-                    with(screenState) {
-                        AnimeDetailsInfo(
-                            animeDetails = animeDetails,
-                            onIconClick = { eventHandler(OnInfoIconClick) },
-                            isDescriptionExpanded = isDescriptionExpanded,
-                            onDescriptionButtonClick = { eventHandler(OnDescriptionClick) },
-                            similarAnimeList = similarAnimeList,
-                            onSimilarAnimeCardClick = { eventHandler(OnSimilarAnimeCardClick(id = it)) },
-                            onAnimeStatusClick = { eventHandler(OnAnimeStatusClick) }
-                        )
-                    }
+                    AnimeDetailsInfo(
+                        animeDetails = screenState.animeDetails,
+                        isDescriptionExpanded = screenState.isDescriptionExpanded,
+                        similarAnimeList = screenState.similarAnimeList,
+                        onIconClick = { eventHandler(OnInfoIconClick) },
+                        onDescriptionButtonClick = { eventHandler(OnDescriptionClick) },
+                        onSimilarAnimeCardClick = { eventHandler(OnSimilarAnimeCardClick(id = it)) },
+                        onAnimeStatusClick = { eventHandler(OnAnimeStatusClick) }
+                    )
                 }
             }
 
@@ -174,9 +172,7 @@ private fun DetailsScreenContent(
                     sheetState = modalBottomSheetState,
                     onDismissRequest = { eventHandler(OnModalBottomSheetDismiss) }
                 ) {
-                    screenState.animeDetails?.let { animeDetails ->
-                        ModalBottomSheetContent(anime = animeDetails)
-                    }
+                    screenState.animeDetails?.let { ModalBottomSheetContent(anime = it) }
                 }
             }
 
@@ -227,19 +223,30 @@ private fun ModalBottomSheetContent(anime: AnimeDetails) {
 @Composable
 private fun ModalBottomSheetItem(
     title: String,
-    supportingTextList: List<String>
+    supportingTextList: List<String?>
 ) {
-    Text(
-        text = title,
-        style = AniLibTypography.titleMedium
-    )
-    supportingTextList.forEach { supportingText ->
+    if (supportingTextList.isNotEmpty()) {
         Text(
-            text = supportingText,
-            style = AniLibTypography.bodyMedium
+            text = title,
+            style = AniLibTypography.titleMedium
         )
+        supportingTextList.forEach { supportingText ->
+            Text(
+                text = when (supportingText) {
+                    null -> when (title) {
+                        stringResource(id = R.string.japanese_name) -> stringResource(id = R.string.no_japanese_name)
+                        stringResource(id = R.string.synonyms) -> stringResource(id = R.string.no_synonym)
+                        stringResource(id = R.string.russian_name) -> stringResource(id = R.string.no_russian_name)
+                        else -> ""
+                    }
+
+                    else -> supportingText
+                },
+                style = AniLibTypography.bodyMedium
+            )
+        }
+        Divider(modifier = Modifier.padding(vertical = 8.dp))
     }
-    Divider(modifier = Modifier.padding(vertical = 8.dp))
 }
 
 @Composable
@@ -359,7 +366,7 @@ private fun AnimeDetailsInfo(
         ) {
             AnimeName(
                 originalName = anime.name,
-                russianName = anime.russian,
+                russianName = anime.russian ?: "",
                 ageRating = anime.rating,
                 onIconClick = onIconClick
             )
@@ -537,7 +544,7 @@ private fun AnimeInfo(anime: AnimeDetails) {
             ONGOING.status, RELEASED.status -> {
                 AnimeInfoItem(
                     key = stringResource(id = R.string.aired_on),
-                    value = airedOn
+                    value = airedOn ?: ""
                 )
                 if (status == RELEASED.status && releasedOn?.isNotEmpty() == true) {
                     AnimeInfoItem(
@@ -597,20 +604,22 @@ private fun AnimeInfoItem(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AnimeGenre(genres: List<Genre>) {
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-    ) {
-        genres.forEach { genre ->
-            AnimeGenreItem(
-                genre = genre.name,
-                onClick = {}
-            )
+    if (genres.isNotEmpty()) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
+            genres.forEach { genre ->
+                AnimeGenreItem(
+                    genre = genre.name,
+                    onClick = {}
+                )
+            }
         }
+        Divider(modifier = Modifier.padding(vertical = 8.dp))
     }
-    Divider(modifier = Modifier.padding(vertical = 8.dp))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

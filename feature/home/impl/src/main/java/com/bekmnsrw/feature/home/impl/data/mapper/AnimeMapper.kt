@@ -1,4 +1,4 @@
-package com.bekmnsrw.feature.home.impl.data
+package com.bekmnsrw.feature.home.impl.data.mapper
 
 import com.bekmnsrw.feature.home.api.model.Anime
 import com.bekmnsrw.feature.home.api.model.AnimeDetails
@@ -59,26 +59,22 @@ internal fun AnimeDetailsResponse.toAnimeDetails(): AnimeDetails = AnimeDetails(
     statusesStats = ratesStatusesStats.toRatesStatusesStatList(),
     releasedOn = releasedOn,
     russian = russian,
-    score = score,
+    score = if (score == "0.0") "?" else score,
     status = status,
     synonyms = synonyms + english,
     totalScoresStats = getTotalScoresStats(ratesScoresStats),
     totalStatusesStats = getTotalStatusesStats(ratesStatusesStats),
     rating = rating,
-    userRates = userRate?.toUserRate(),
-//    videos = videos.toVideoList()
-//    screenshots = screenshots.toScreenshotList(),
-//    threadId = threadId,
-//    topicId = topicId,
+    userRates = userRate?.toUserRate()
 )
 
 internal fun getTotalScoresStats(
-    ratesScoresStatsResponse: List<RatesScoresStatResponse>
-) = ratesScoresStatsResponse.sumOf { it.value }
+    ratesScoresStatsResponse: List<RatesScoresStatResponse?>
+) = ratesScoresStatsResponse.sumOf { it?.value ?: 0 }
 
 internal fun getTotalStatusesStats(
-    ratesStatusesStatResponse: List<RatesStatusesStatResponse>
-) = ratesStatusesStatResponse.sumOf { it.value }
+    ratesStatusesStatResponse: List<RatesStatusesStatResponse?>
+) = ratesStatusesStatResponse.sumOf { it?.value ?: 0 }
 
 internal fun GenreResponse.toGenre(): Genre = Genre(
     entryType = entryType,
@@ -88,23 +84,26 @@ internal fun GenreResponse.toGenre(): Genre = Genre(
     russian = russian
 )
 
-internal fun List<GenreResponse>.toGenreList(): List<Genre> = this.map { it.toGenre() }
+internal fun List<GenreResponse>.toGenreList(): List<Genre> = this.map {
+    it.toGenre()
+}
 
-internal fun RatesScoresStatResponse.toRatesScoresStat(): RatesScoresStat = RatesScoresStat(
-    name = name,
-    value = value
+internal fun RatesScoresStatResponse?.toRatesScoresStat(): RatesScoresStat = RatesScoresStat(
+    name = this?.name ?: 0,
+    value = this?.value ?: 0
 )
 
-internal fun List<RatesScoresStatResponse>.toRatesScoreStatList(): List<RatesScoresStat> = this.map {
+internal fun List<RatesScoresStatResponse?>.toRatesScoreStatList(): List<RatesScoresStat> = this.map {
     it.toRatesScoresStat()
 }
 
-internal fun RatesStatusesStatResponse.toRatesStatusesStat(): RatesStatusesStat = RatesStatusesStat(
-    name = name,
-    value = value
-)
+internal fun RatesStatusesStatResponse?.toRatesStatusesStat(): RatesStatusesStat =
+    RatesStatusesStat(
+        name = this?.name ?: "",
+        value = this?.value ?: 0
+    )
 
-internal fun List<RatesStatusesStatResponse>.toRatesStatusesStatList(): List<RatesStatusesStat> = this.map {
+internal fun List<RatesStatusesStatResponse?>.toRatesStatusesStatList(): List<RatesStatusesStat> = this.map {
     it.toRatesStatusesStat()
 }
 
@@ -122,10 +121,11 @@ internal fun UserRatesResponse.toUserRate(): UserRates = UserRates(
     volumes = volumes
 )
 
-internal fun FavoritesActionResultResponse.toFavoritesActionResult(): FavoritesActionResult = FavoritesActionResult(
-    success = success,
-    notice = notice
-)
+internal fun FavoritesActionResultResponse.toFavoritesActionResult(): FavoritesActionResult =
+    FavoritesActionResult(
+        success = success,
+        notice = notice
+    )
 
 internal fun CreateUserRatesResponse.toUserRates(): UserRates = UserRates(
     chapters = chapters,

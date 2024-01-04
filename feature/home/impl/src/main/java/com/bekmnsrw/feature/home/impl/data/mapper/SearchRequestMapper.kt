@@ -1,4 +1,4 @@
-package com.bekmnsrw.feature.home.impl.data
+package com.bekmnsrw.feature.home.impl.data.mapper
 
 import com.bekmnsrw.core.db.entity.SearchRequestEntity
 import com.bekmnsrw.feature.home.api.model.SearchRequest

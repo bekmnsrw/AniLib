@@ -25,4 +25,8 @@
     <string name="search_history">Search history</string>
     <string name="clear_history">Clear history</string>
     <string name="confirm_deletion">Do you really want to delete this history item?</string>
+
+    <string name="no_russian_name">No Russian name provided</string>
+    <string name="no_japanese_name">No Japanese name provided</string>
+    <string name="no_synonym">No synonym name provided</string>
 </resources>

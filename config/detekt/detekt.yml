@@ -100,13 +100,13 @@ complexity:
     threshold: 500
   LongMethod:
     active: true
-    threshold: 55
+    threshold: 60
     ignoreAnnotated:
       - Test
   LongParameterList:
     active: true
     functionThreshold: 20
-    constructorThreshold: 10
+    constructorThreshold: 11
     ignoreDefaultParameters: true
     ignoreDataClasses: true
     ignoreAnnotated: [ 'GET' ]

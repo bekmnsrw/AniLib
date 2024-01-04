@@ -12,6 +12,12 @@ import com.bekmnsrw.feature.home.api.repository.HomeRepository
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.HomeApi
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.request.CreateUserRatesBody
 import com.bekmnsrw.feature.home.impl.data.datasource.remote.request.CreateUserRatesRequest
+import com.bekmnsrw.feature.home.impl.data.mapper.toAnimeDetails
+import com.bekmnsrw.feature.home.impl.data.mapper.toAnimeList
+import com.bekmnsrw.feature.home.impl.data.mapper.toFavoritesActionResult
+import com.bekmnsrw.feature.home.impl.data.mapper.toSearchRequestEntity
+import com.bekmnsrw.feature.home.impl.data.mapper.toSearchRequestList
+import com.bekmnsrw.feature.home.impl.data.mapper.toUserRates
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
